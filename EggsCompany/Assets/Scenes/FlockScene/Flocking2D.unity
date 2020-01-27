@@ -151,7 +151,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   flockAgentPrefab: {fileID: 6162560535634229781, guid: a999021c8fad854469a68969b6b64923,
     type: 3}
-  flockBehaviour: {fileID: 11400000, guid: 44a6a620bda7b5c43848f413afe96971, type: 2}
+  flockBehaviour: {fileID: 11400000, guid: a616260a51872cf41b1d091dd6cac350, type: 2}
   flockStartingSize: 100
   driveFactor: 10
   maximumSpeed: 5

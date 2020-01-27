@@ -11,10 +11,10 @@ public class Tile : MonoBehaviour
     private Tile[] neighbors = new Tile[4];
 
     private IWallType[] walls = new IWallType[4];
-    public IWallType nWall = EWallType.Empty;
-    public IWallType eWall = EWallType.Empty;
-    public IWallType sWall = EWallType.Empty;
-    public IWallType wWall = EWallType.Empty;
+    //public IWallType nWall = EWallType.Empty;
+    //public IWallType eWall = EWallType.Empty;
+    //public IWallType sWall = EWallType.Empty;
+    //public IWallType wWall = EWallType.Empty;
 
     // Start is called before the first frame update
     void Start()
@@ -24,10 +24,10 @@ public class Tile : MonoBehaviour
 
 
 
-        walls[(int)EDirection.North] = nWall;
-        walls[(int)EDirection.East] = eWall;
-        walls[(int)EDirection.South] = sWall;
-        walls[(int)EDirection.West] = wWall;
+        //walls[(int)EDirection.North] = nWall;
+        //walls[(int)EDirection.East] = eWall;
+        //walls[(int)EDirection.South] = sWall;
+        //walls[(int)EDirection.West] = wWall;
 
 
     }
