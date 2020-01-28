@@ -2,14 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TerrainBasicFloor : MonoBehaviour, ITerrainType
+public class WallTypeEmpty : MonoBehaviour, IWallType
 {
-    public ETerrainType terrainName = ETerrainType.Empty;
+
+    public EWallName wallName = EWallName.Empty;
     private int moveCost = 0;
     public int coverValue = 0;
     public bool blocksSight = false;
 
-    ETerrainType ITerrainType.terrainName { get => terrainName; }
+    EWallName IWallType.wallName { get => wallName; }
     int ITerrainType.moveCost { get => moveCost; }
     int ITerrainType.coverValue { get => coverValue; }
     bool ITerrainType.blocksSight { get => blocksSight; }

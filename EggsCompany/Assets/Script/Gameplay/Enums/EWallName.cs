@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum EWallType
+public enum EWallName
 {
     Empty,
     HalfWall

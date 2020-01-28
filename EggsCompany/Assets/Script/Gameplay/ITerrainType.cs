@@ -4,10 +4,6 @@ using UnityEngine;
 
 public interface ITerrainType
 {
-    ETerrainType terrainName
-    {
-        get;
-    }
     int moveCost
     {
         get;
@@ -22,7 +18,4 @@ public interface ITerrainType
     {
         get;
     }
-
-
-
 }

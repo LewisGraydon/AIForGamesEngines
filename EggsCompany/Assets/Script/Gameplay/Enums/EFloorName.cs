@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum ETerrainType
+public enum EFloorName
 {
     Empty,
     Plain
