@@ -29,10 +29,7 @@ public class Flock : MonoBehaviour
     float avoidanceRadiusSquared;
     public float getAvoidanceRadiusSquared
     {
-        get
-        {
-            return avoidanceRadiusSquared;
-        }
+        get { return avoidanceRadiusSquared; }
     }
 
     // Start is called before the first frame update
@@ -63,9 +60,6 @@ public class Flock : MonoBehaviour
         foreach(FlockAgent flockAgent in flockAgents)
         {
             List<Transform> neighbours = GetNearbyObjects(flockAgent);
-
-            // For demonstration purposes.
-            //flockAgent.GetComponentInChildren<SpriteRenderer>().color = Color.Lerp(Color.white, Color.red, neighbours.Count / 6.0f);
 
             Vector2 movement = flockBehaviour.CalculateMovement(flockAgent, neighbours, this);
             movement *= driveFactor;
