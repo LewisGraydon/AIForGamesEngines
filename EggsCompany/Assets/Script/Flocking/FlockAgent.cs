@@ -9,19 +9,13 @@ public class FlockAgent : MonoBehaviour
     Flock agentFlock;
     public Flock GetAgentFlock
     {
-        get
-        {
-            return agentFlock;
-        }
+        get { return agentFlock; }
     }
 
     Collider2D flockAgentCollider;
     public Collider2D GetAgentCollider
     {
-        get
-        {
-            return flockAgentCollider;
-        }
+        get { return flockAgentCollider; }
     }
 
     // Start is called before the first frame update
