@@ -8,7 +8,7 @@ public class SteeredCohesion : FilteredFlockBehaviour
     Vector2 currentVelocity;
     public float flockAgentSmoothTime = 0.5f;
 
-    public override Vector2 CalculateMovement(FlockAgent flockAgent, List<Transform> neighbours, Flock flock)
+    public override Vector2 CalculateMovement(FlockAgent flockAgent, List<Transform> neighbours, Flock flock, GameObject objToFollow = null)
     {
         // If there is no neighbours, return no adjustment.
         if (neighbours.Count == 0)

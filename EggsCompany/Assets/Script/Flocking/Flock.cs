@@ -6,6 +6,7 @@ public class Flock : MonoBehaviour
 {
     public FlockAgent flockAgentPrefab;
     public FlockBehaviour flockBehaviour;
+    public GameObject objectToFollow;
     List<FlockAgent> flockAgents = new List<FlockAgent>();  
 
     [Range(10, 500)]
@@ -61,7 +62,7 @@ public class Flock : MonoBehaviour
         {
             List<Transform> neighbours = GetNearbyObjects(flockAgent);
 
-            Vector2 movement = flockBehaviour.CalculateMovement(flockAgent, neighbours, this);
+            Vector2 movement = flockBehaviour.CalculateMovement(flockAgent, neighbours, this, objectToFollow);
             movement *= driveFactor;
 
             if (movement.sqrMagnitude > maximumSpeedSquared)

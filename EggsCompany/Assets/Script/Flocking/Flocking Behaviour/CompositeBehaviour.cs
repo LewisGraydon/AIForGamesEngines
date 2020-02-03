@@ -8,7 +8,7 @@ public class CompositeBehaviour : FlockBehaviour
     public FlockBehaviour[] flockBehaviours;
     public float[] weights;
 
-    public override Vector2 CalculateMovement(FlockAgent flockAgent, List<Transform> neighbours, Flock flock)
+    public override Vector2 CalculateMovement(FlockAgent flockAgent, List<Transform> neighbours, Flock flock, GameObject objToFollow = null)
     {
         // Handle the two arrays not being the same size.
         if (weights.Length != flockBehaviours.Length)
@@ -21,7 +21,7 @@ public class CompositeBehaviour : FlockBehaviour
 
         for(int i = 0; i < flockBehaviours.Length; i++)
         {
-            Vector2 partialMovement = flockBehaviours[i].CalculateMovement(flockAgent, neighbours, flock) * weights[i];
+            Vector2 partialMovement = flockBehaviours[i].CalculateMovement(flockAgent, neighbours, flock, objToFollow) * weights[i];
 
             if(partialMovement != Vector2.zero)
             {
