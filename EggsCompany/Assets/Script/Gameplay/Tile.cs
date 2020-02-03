@@ -6,12 +6,11 @@ public class Tile : MonoBehaviour
 {
     //Currently working on the assumption that we are hand designing the levels
     //GameObject is placeholder for egg or terrainBlocker object
-    private GameObject occupier;
+    private GameObject occupier = null;
     public ITerrainType terrainType;
-    private Tile[] neighbors = new Tile[4];
+    private List<Tile> neighbors = new List<Tile>(4);
 
-    private IWallType[] walls = new IWallType[4];
-
+    private IWallType[] walls;
     public IWallType nWall;
     public IWallType eWall;
     public IWallType sWall;
@@ -20,10 +19,16 @@ public class Tile : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        walls[(int)EDirection.North] = nWall;
-        walls[(int)EDirection.East] = eWall;
-        walls[(int)EDirection.South] = sWall;
-        walls[(int)EDirection.West] = wWall;
+        //neighbors = new List<Tile>(4);
+        //neighbors.Add(this.gameObject.AddComponent(typeof(Tile)) as Tile);
+        //neighbors.Add(this.gameObject.AddComponent(typeof(Tile)) as Tile);
+        //neighbors.Add(this.gameObject.AddComponent(typeof(Tile)) as Tile);
+        //neighbors.Add(this.gameObject.AddComponent(typeof(Tile)) as Tile);
+
+        //walls[(int)EDirection.North] = nWall;
+        //walls[(int)EDirection.East] = eWall;
+        //walls[(int)EDirection.South] = sWall;
+        //walls[(int)EDirection.West] = wWall;
     }
 
     // Update is called once per frame
@@ -32,9 +37,11 @@ public class Tile : MonoBehaviour
         
     }
 
-    public void AssignNeighbor(EDirection direction, Tile nieghborTile)
+    public void AssignNeighbor(EDirection direction, Tile neighborTile)
     {
-        neighbors[(int)direction] = nieghborTile;
+
+        neighbors.Insert((int)direction, neighborTile);
+        //neighbors[(int)direction] = nieghborTile;
     }
 
     public int CalcMoveCost(EDirection direction)
