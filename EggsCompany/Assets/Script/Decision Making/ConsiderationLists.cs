@@ -15,12 +15,10 @@ public static class ConsiderationLists
 
     public static List<Consideration> moveConsiderationList = new List<Consideration>()
     {
-        new HitChanceConsideration(),
+        new HitChanceDifferenceConsideration(),
         new FlankingConsideration(),
         new SelfCoverConsideration(),
-        new EnemyCoverConsideration(),
         new SelfVisibilityConsideration(),
-        new EnemyVisibilityConsideration(),
         new ProximityToAllyConsideration()
     };
 }
@@ -141,11 +139,20 @@ public class ReloadConsideration : Consideration
 
 #region Move Consideration classes
 
-public class HitChanceConsideration : Consideration
+public class HitChanceDifferenceConsideration : Consideration
 {
     public override float ConsiderTile(CharacterBase self, Tile tileToConsider)
     {
         base.ConsiderTile(self, tileToConsider);
+        /*
+         * pipCost
+         * foreach seen player;
+         * random value for accuracy
+         *
+         * estimatedHitChance = isAccurate ? hitChanceFrom(tileToConsider) : randomNumber(1,100);
+         * 
+         * if estimatedHitChance > hitChanceFrom(self.currentTile) then + else - 
+        */
         return 0.0f;
     }
 }
@@ -155,6 +162,18 @@ public class FlankingConsideration : Consideration
     public override float ConsiderTile(CharacterBase self, Tile tileToConsider)
     {
         base.ConsiderTile(self, tileToConsider);
+        /*
+         * 
+         * pipCost
+         * foreach seen player
+         * 
+         * if(tileToConsider.isFlanking(player)) then almost guarantee this choice
+         * 
+         * if(player.tile.isFlanking(tileToConsider) then remove some equity
+         * 
+         * 
+        */
+
         return 0.0f;
     }
 }
@@ -164,15 +183,13 @@ public class SelfCoverConsideration : Consideration
     public override float ConsiderTile(CharacterBase self, Tile tileToConsider)
     {
         base.ConsiderTile(self, tileToConsider);
-        return 0.0f;
-    }
-}
-
-public class EnemyCoverConsideration : Consideration
-{
-    public override float ConsiderTile(CharacterBase self, Tile tileToConsider)
-    {
-        base.ConsiderTile(self, tileToConsider);
+        /*
+         * pipCost
+         * foreach player
+         * 
+         * is tileToConsider.providingCoverFrom(player);
+         * 
+        */
         return 0.0f;
     }
 }
@@ -182,15 +199,14 @@ public class SelfVisibilityConsideration : Consideration
     public override float ConsiderTile(CharacterBase self, Tile tileToConsider)
     {
         base.ConsiderTile(self, tileToConsider);
-        return 0.0f;
-    }
-}
-
-public class EnemyVisibilityConsideration : Consideration
-{
-    public override float ConsiderTile(CharacterBase self, Tile tileToConsider)
-    {
-        base.ConsiderTile(self, tileToConsider);
+        /* foreach player
+         * 
+         * if tileToConsider.visibleFromTile
+         *  if cowardly/random thing
+         *      +
+         * else
+         *  -
+        */  
         return 0.0f;
     }
 }
@@ -200,6 +216,14 @@ public class ProximityToAllyConsideration : Consideration
     public override float ConsiderTile(CharacterBase self, Tile tileToConsider)
     {
         base.ConsiderTile(self, tileToConsider);
+        /*
+         * search within two squares for occupied by enemy of tileToConsider then (unless melee type enemy) -
+         *  
+         *  else 
+         *  
+         *  +
+         * 
+        */
         return 0.0f;
     }
 }
