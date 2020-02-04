@@ -6,8 +6,8 @@ public class Tile : MonoBehaviour
 {
     //Currently working on the assumption that we are hand designing the levels
     //GameObject is placeholder for egg or terrainBlocker object
-    private GameObject occupier = null;
-    public ITerrainType terrainType;
+    public GameObject occupier = null;
+    public FloorType terrainType;
     private List<Tile> neighbors = new List<Tile>(4);
 
     private IWallType[] walls;
