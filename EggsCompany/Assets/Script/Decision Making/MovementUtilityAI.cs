@@ -8,13 +8,13 @@ public class MovementUtilityAI : MonoBehaviour
     // needs to take into account, self cover, if flanking enemy, pip cost, shouldBeShootingPosition 
 
     // so... Clamp(0, 1, AverageOf((1 - pipCost) + (isFlanking) + (isInCover) + (isShootingPosition)))
-    public void ConsiderTiles(Tile[] tiles)
+    public void ConsiderTiles(CharacterBase unitConsideringTiles, Tile[] tiles)
     {
         int bestTileIndex = 0;
         float bestTileFloat = 0.0f;
         for (int i = 0; i < tiles.Length; i++)
         {
-            float tileConsidered = Consider(tiles[0]);
+            float tileConsidered = Consider(unitConsideringTiles, tiles[i]);
             if (tileConsidered >= bestTileFloat)
             {
                 bestTileIndex = i;
@@ -23,8 +23,13 @@ public class MovementUtilityAI : MonoBehaviour
         }
     }
 
-    public float Consider(Tile tile)
+    public float Consider(CharacterBase unitConsideringTile, Tile tile)
     {
-        return 0.0f;
+        float tileValue = 0.0f;
+        foreach(Consideration c in ActionConsiderations.considerationList)
+        {
+            tileValue += c.ConsiderTile(unitConsideringTile, tile);
+        }
+        return tileValue;
     }
 }
