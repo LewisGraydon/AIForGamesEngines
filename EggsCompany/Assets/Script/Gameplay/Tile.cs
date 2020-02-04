@@ -10,25 +10,20 @@ public class Tile : MonoBehaviour
     public FloorType terrainType;
     private List<Tile> neighbors = new List<Tile>(4);
 
-    private IWallType[] walls;
-    public IWallType nWall;
-    public IWallType eWall;
-    public IWallType sWall;
-    public IWallType wWall;
+    private List<WallType> walls = new List<WallType>(4);
+    public WallType nWall;
+    public WallType eWall;
+    public WallType sWall;
+    public WallType wWall;
 
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
-        //neighbors = new List<Tile>(4);
-        //neighbors.Add(this.gameObject.AddComponent(typeof(Tile)) as Tile);
-        //neighbors.Add(this.gameObject.AddComponent(typeof(Tile)) as Tile);
-        //neighbors.Add(this.gameObject.AddComponent(typeof(Tile)) as Tile);
-        //neighbors.Add(this.gameObject.AddComponent(typeof(Tile)) as Tile);
-
-        //walls[(int)EDirection.North] = nWall;
-        //walls[(int)EDirection.East] = eWall;
-        //walls[(int)EDirection.South] = sWall;
-        //walls[(int)EDirection.West] = wWall;
+        //Order here is important to align with direction
+        walls.Add(nWall);
+        walls.Add(eWall);
+        walls.Add(sWall);
+        walls.Add(wWall);
     }
 
     // Update is called once per frame
@@ -39,9 +34,17 @@ public class Tile : MonoBehaviour
 
     public void AssignNeighbor(EDirection direction, Tile neighborTile)
     {
-
         neighbors.Insert((int)direction, neighborTile);
         //neighbors[(int)direction] = nieghborTile;
+    }
+
+    //Adds empty count for list
+    public void NeighborListFill()
+    {
+        for(int i = 0; i < 4; i++)
+        {
+            neighbors.Add(null);
+        }
     }
 
     public int CalcMoveCost(EDirection direction)

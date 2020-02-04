@@ -14,15 +14,24 @@ public class TileGrid : MonoBehaviour
     {
         tilesList = new List<Tile>(gridX * gridY);
 
-        for(int i = 0; i < tilesList.Capacity; i++)
+        var temparray = FindObjectsOfType<Tile>();
+
+        foreach (var tile in temparray)
         {
-            Tile tempTile = this.gameObject.AddComponent(typeof(Tile)) as Tile;
-            tilesList.Add(tempTile);
+            tilesList.Add(tile);
         }
+
+        //for(int i = 0; i < tilesList.Capacity; i++)
+        //{
+        //    Tile tempTile = this.gameObject.AddComponent(typeof(Tile)) as Tile;
+        //    tilesList.Add(tempTile);
+        //}
 
         for(int i = 0; i < tilesList.Count; i++)
         {
-            
+
+            tilesList[i].NeighborListFill();
+
             if (i - gridX >= 0) {
                 tilesList[i].AssignNeighbor(EDirection.North, tilesList[i - gridX]);
             }
