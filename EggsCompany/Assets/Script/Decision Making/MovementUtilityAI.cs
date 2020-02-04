@@ -26,7 +26,7 @@ public class MovementUtilityAI : MonoBehaviour
     public float Consider(CharacterBase unitConsideringTile, Tile tile)
     {
         float tileValue = 0.0f;
-        foreach(Consideration c in ActionConsiderations.considerationList)
+        foreach(Consideration c in ConsiderationLists.moveConsiderationList)
         {
             tileValue += c.ConsiderTile(unitConsideringTile, tile);
         }
