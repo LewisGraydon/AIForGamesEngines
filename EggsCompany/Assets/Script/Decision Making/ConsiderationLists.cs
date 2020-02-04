@@ -31,6 +31,20 @@ public static class ConsiderationLists
 public abstract class Consideration
 {
     public Consideration() { }
+    public int numberOfChecksWithinConsideration = 0;
+    private float _tileValue = 0.0f;
+    public float tileValue
+    {
+        get
+        {
+            return _tileValue;
+        }
+        set
+        {
+            numberOfChecksWithinConsideration++;
+            _tileValue = value;
+        }
+    }
     virtual public float ConsiderTile(CharacterBase self, Tile tileToConsider)
     {
         return -999.999f;
@@ -43,7 +57,18 @@ public class MoveConsideration : Consideration
 {
     public override float ConsiderTile(CharacterBase self, Tile tileToConsider)
     {
-        return 0.0f;
+        tileValue += self.remainingPips > 1 ? 1.0f : 0.0f;
+        float enemiesInSightValue = 0.0f;
+        foreach (CharacterBase c in self.enemiesInSight)
+        {
+            enemiesInSightValue += self.isInCover(c) ? 0.0f : (1.0f / self.enemiesInSight.Count);
+        }
+        tileValue += enemiesInSightValue;
+        
+
+
+
+        return tileValue / numberOfChecksWithinConsideration;
     }
 }
 
