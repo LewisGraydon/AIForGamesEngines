@@ -232,12 +232,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3ebf586c138cea44eabfc5c556e484b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  flockAgentPrefab: {fileID: 1611654851110700946, guid: 3f4dcd6537db08e41a9d2954564d6c98,
+  flockAgentPrefab: {fileID: 1837334223137101202, guid: c717f817a496cf247a92b830b355a407,
     type: 3}
+  objToFollow: {fileID: 1971502858}
   flockStartingSize: 50
   alignmentWeight: 0.5
   cohesionWeight: 0.7
   separationWeight: 0.8
+  stayInRadiusWeight: 1
 --- !u!4 &501704527
 Transform:
   m_ObjectHideFlags: 0
@@ -412,3 +414,9 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 935530a7c79ede0469272ca20fa29dcf, type: 3}
+--- !u!1 &1971502858 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7452111876130889107, guid: 935530a7c79ede0469272ca20fa29dcf,
+    type: 3}
+  m_PrefabInstance: {fileID: 1449510227}
+  m_PrefabAsset: {fileID: 0}

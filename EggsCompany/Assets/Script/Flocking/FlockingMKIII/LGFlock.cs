@@ -5,6 +5,7 @@ using UnityEngine;
 public class LGFlock : MonoBehaviour
 {
     public LGFlockingAgent flockAgentPrefab;
+    public GameObject objToFollow;
     private List<LGFlockingAgent> flockAgents = new List<LGFlockingAgent>();
 
     [Range(5, 50)]
@@ -19,6 +20,9 @@ public class LGFlock : MonoBehaviour
 
     [Range(0.0f, 10.0f)]
     public float separationWeight = 0.8f;
+
+    [Range(0.0f, 10.0f)]
+    public float stayInRadiusWeight = 1.0f;
 
     // Start is called before the first frame update
     void Start()
