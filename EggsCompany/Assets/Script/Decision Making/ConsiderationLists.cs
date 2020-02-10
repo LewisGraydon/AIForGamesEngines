@@ -28,10 +28,7 @@ public static class ConsiderationLists
 // 2. add to the relevant considerationList within the above ActionConsiderations class as the others have been.
 public abstract class Consideration
 {
-    public Consideration()
-    {
-
-    }
+    public Consideration(){}
     public int numberOfChecksWithinConsideration = 0;
     private float _tileValue = 0.0f;
     public float tileValue
@@ -84,7 +81,7 @@ public class OverwatchConsideration : Consideration
 
         // if the agent is in good cover from the enemies then + for this action
 
-        // if the enemies are not in full cover then + for this action
+        // if the enemies are not in full cover then + for this action as expect them to move
         return 0.0f;
     }
 }
@@ -94,9 +91,9 @@ public class DefendConsideration : Consideration
     public override float ConsiderTile(CharacterBase self, Tile tileToConsider)
     {
         base.ConsiderTile(self, tileToConsider);
-        // if distance is > 1/2 sight range then + 
+        // if distance is > 3/4 sight range then + 
 
-        // if agent's level of cover is not full then +
+        // if agent's level of cover is full then +
 
         // if the enemys cover is full then +
         return 0.0f;
@@ -173,7 +170,6 @@ public class FlankingConsideration : Consideration
          * 
          * 
         */
-
         return 0.0f;
     }
 }
@@ -206,7 +202,7 @@ public class SelfVisibilityConsideration : Consideration
          *      +
          * else
          *  -
-        */  
+        */
         return 0.0f;
     }
 }

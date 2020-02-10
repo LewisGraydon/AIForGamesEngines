@@ -30,6 +30,6 @@ public class MovementUtilityAI : MonoBehaviour
         {
             tileValue += c.ConsiderTile(unitConsideringTile, tile);
         }
-        return tileValue;
+        return (tileValue / ConsiderationLists.moveConsiderationList.Count);
     }
 }
