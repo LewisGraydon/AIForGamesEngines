@@ -26,4 +26,12 @@ public class CharacterBase : MonoBehaviour
     {
         return false;
     }
+
+    public float sightDistance = 0.0f;
+
+    public Tile occupiedTile;
+
+    public int remainingShots;
+
+    public int maxShots;
 }
