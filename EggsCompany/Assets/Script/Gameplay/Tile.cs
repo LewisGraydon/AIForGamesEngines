@@ -8,7 +8,7 @@ public class Tile : MonoBehaviour
     //GameObject is placeholder for egg or terrainBlocker object
     public GameObject occupier = null;
     public FloorType terrainType;
-    private List<Tile> neighbors = new List<Tile>(4);
+    private List<Tile> _neighbors = new List<Tile>(4);
 
     private List<WallType> walls = new List<WallType>(4);
     public WallType nWall;
@@ -34,7 +34,7 @@ public class Tile : MonoBehaviour
 
     public void AssignNeighbor(EDirection direction, Tile neighborTile)
     {
-        neighbors.Insert((int)direction, neighborTile);
+        _neighbors.Insert((int)direction, neighborTile);
         //neighbors[(int)direction] = nieghborTile;
     }
 
@@ -43,7 +43,7 @@ public class Tile : MonoBehaviour
     {
         for(int i = 0; i < 4; i++)
         {
-            neighbors.Add(null);
+            _neighbors.Add(null);
         }
     }
 

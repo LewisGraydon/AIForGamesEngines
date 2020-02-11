@@ -7,18 +7,18 @@ public class TileGrid : MonoBehaviour
     public int gridX;
     public int gridY;
 
-    private List<Tile> tilesList;
+    private List<Tile> _tilesList;
 
     // Start is called before the first frame update
     void Start()
     {
-        tilesList = new List<Tile>(gridX * gridY);
+        _tilesList = new List<Tile>(gridX * gridY);
 
         var temparray = FindObjectsOfType<Tile>();
 
         foreach (var tile in temparray)
         {
-            tilesList.Add(tile);
+            _tilesList.Add(tile);
         }
 
         //for(int i = 0; i < tilesList.Capacity; i++)
@@ -27,49 +27,49 @@ public class TileGrid : MonoBehaviour
         //    tilesList.Add(tempTile);
         //}
 
-        for(int i = 0; i < tilesList.Count; i++)
+        for(int i = 0; i < _tilesList.Count; i++)
         {
 
-            tilesList[i].NeighborListFill();
+            _tilesList[i].NeighborListFill();
 
             if (i - gridX >= 0) {
-                tilesList[i].AssignNeighbor(EDirection.North, tilesList[i - gridX]);
+                _tilesList[i].AssignNeighbor(EDirection.North, _tilesList[i - gridX]);
             }
             else
             {
-                tilesList[i].AssignNeighbor(EDirection.North, null);
+                _tilesList[i].AssignNeighbor(EDirection.North, null);
             }
 
-            if(i + 1 < tilesList.Count)
+            if(i + 1 < _tilesList.Count)
             {
-                tilesList[i].AssignNeighbor(EDirection.East, tilesList[i + 1]);
+                _tilesList[i].AssignNeighbor(EDirection.East, _tilesList[i + 1]);
             }
             else
             {
-                tilesList[i].AssignNeighbor(EDirection.East, null);
+                _tilesList[i].AssignNeighbor(EDirection.East, null);
             }
 
-            if(i + gridX < tilesList.Count)
+            if(i + gridX < _tilesList.Count)
             {
-                tilesList[i].AssignNeighbor(EDirection.South, tilesList[i + gridX]);
+                _tilesList[i].AssignNeighbor(EDirection.South, _tilesList[i + gridX]);
             }
             else
             {
-                tilesList[i].AssignNeighbor(EDirection.South, null);
+                _tilesList[i].AssignNeighbor(EDirection.South, null);
 
             }
 
             if (i - 1 >= 0)
             {
-                tilesList[i].AssignNeighbor(EDirection.West, tilesList[i - 1]);
+                _tilesList[i].AssignNeighbor(EDirection.West, _tilesList[i - 1]);
             }
             else
             {
-                tilesList[i].AssignNeighbor(EDirection.West, null);
+                _tilesList[i].AssignNeighbor(EDirection.West, null);
             }
         }
 
-        foreach (var tile in tilesList)
+        foreach (var tile in _tilesList)
         {
             Debug.Log(tile);
         }
