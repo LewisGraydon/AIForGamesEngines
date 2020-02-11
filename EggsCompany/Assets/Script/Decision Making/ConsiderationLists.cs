@@ -310,14 +310,35 @@ public class HitChanceDifferenceConsideration : Consideration
          * 
          * if estimatedHitChance > hitChanceFrom(self.currentTile) then + else - 
         */
-        
-        return 0.0f;
+
+        //TODO GET PIP COST FROM PATHFINDING
+        bool accuracyOfPrediction = Random.Range(0, 1) == 1;
+        float totalHitChanceDifference = 0.0f;
+        foreach(CharacterBase enemy in self.enemiesInSight)
+        {
+            int estimatedHitChance = accuracyOfPrediction ? tileToConsider.chanceToHit(enemy.occupiedTile) : Random.Range(0, 100);
+            if (estimatedHitChance > self.occupiedTile.chanceToHit(enemy.occupiedTile))
+            {
+                totalHitChanceDifference += ((int)Weighting.High / self.enemiesInSight.Count);
+            }
+            else if (estimatedHitChance == 100)
+            {
+                totalHitChanceDifference += ((int)Weighting.guarantee / self.enemiesInSight.Count);
+            }
+            else
+            {
+                totalHitChanceDifference -= ((int)Weighting.Medium / self.enemiesInSight.Count);
+            }
+        }
+        tileValue += totalHitChanceDifference;
+
+        return tileValue;
     }
 }
 
 public class FlankingConsideration : Consideration
 {
-    public override float ConsiderTile(CharacterBase self, Tile tileToConsider)
+    public override float ConsiderTile(CharacterBase self, Tile tileToConsider) //UNSURE IF  THIS IS NEEDED AS THE HITCHANCE SHOULD BE JUMPED BY THIS
     {
         base.ConsiderTile(self, tileToConsider);
         /*
@@ -331,6 +352,14 @@ public class FlankingConsideration : Consideration
          * 
          * 
         */
+
+        //TODO GET PIP COST FROM PATHFINDING
+
+        foreach (CharacterBase enemy in self.enemiesInSight)
+        {
+
+        }
+
         return 0.0f;
     }
 }
@@ -347,6 +376,44 @@ public class SelfCoverConsideration : Consideration
          * is tileToConsider.providingCoverFrom(player);
          * 
         */
+        float AgentInCoverTotalValue = 0.0f;
+        float enemiesInCoverTotalValue = 0.0f;
+        foreach (CharacterBase enemy in self.enemiesInSight)
+        {
+            //TODO: calculate direction from enemy to self.
+            // if the agent is in good cover from the enemies then + for this action
+            switch (tileToConsider.ProvidesCoverInDirection(Vector3.forward)) //switch on amount of cover self is in from enemies;
+            {
+                case coverValue.None:
+                    AgentInCoverTotalValue -= (int)Weighting.High / self.enemiesInSight.Count;
+                    break;
+                case coverValue.Half:
+                    AgentInCoverTotalValue += (int)Weighting.Medium / self.enemiesInSight.Count;
+                    break;
+                case coverValue.Full:
+                    AgentInCoverTotalValue += (int)Weighting.Low / self.enemiesInSight.Count;
+                    break;
+                default:
+                    Debug.LogError("issue with cover Value returned");
+                    break;
+            }
+
+            // if the enemies are not in full cover then + for this action as expect them to move
+            switch (enemy.occupiedTile.ProvidesCoverInDirection(Vector3.back))
+            {
+                case coverValue.None:
+                    enemiesInCoverTotalValue += (int)Weighting.High / self.enemiesInSight.Count;
+                    break;
+                case coverValue.Half:
+                    enemiesInCoverTotalValue += (int)Weighting.Medium / self.enemiesInSight.Count;
+                    break;
+                case coverValue.Full:
+                    enemiesInCoverTotalValue -= (int)Weighting.Low / self.enemiesInSight.Count;
+                    break;
+                default:
+                    break;
+            }
+        }
         return 0.0f;
     }
 }
@@ -364,7 +431,15 @@ public class SelfVisibilityConsideration : Consideration
          * else
          *  -
         */
-        return 0.0f;
+        float totalSightValue = 0.0f;
+        bool predicitonAccuracy = Random.Range(0, 1) == 1;
+        foreach (CharacterBase enemy in self.enemiesInSight)
+        {
+            bool willBeVisibleInNewTile = predicitonAccuracy ? tileToConsider.isVisibleFromTile(enemy.occupiedTile) : Random.Range(0, 1) == 0;
+            totalSightValue += willBeVisibleInNewTile ? -((int)Weighting.Medium / self.enemiesInSight.Count) : ((int)Weighting.Medium / self.enemiesInSight.Count));
+        }
+        
+        return totalSightValue;
     }
 }
 
@@ -381,6 +456,10 @@ public class ProximityToAllyConsideration : Consideration
          *  +
          * 
         */
+        for (int i = 1; i < 3; i++)
+        {
+            //TODO: understand Grid and have code check all 9 surrounding for allys
+        }
         return 0.0f;
     }
 }

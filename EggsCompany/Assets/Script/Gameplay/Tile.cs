@@ -72,5 +72,10 @@ public class Tile : MonoBehaviour
         return 0;
     }
 
+    public bool isVisibleFromTile(Tile other)
+    {
+        return true;
+    }
+
 
 }
