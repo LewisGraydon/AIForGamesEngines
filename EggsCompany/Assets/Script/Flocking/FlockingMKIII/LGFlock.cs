@@ -27,6 +27,7 @@ public class LGFlock : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        // Instanciate a number of flocking agents equal to the value of the variable flockStartingSize.
         for (int i = 0; i < flockStartingSize; i++)
         {
             LGFlockingAgent newFlockAgent = Instantiate(flockAgentPrefab, Random.insideUnitSphere * flockStartingSize * flockAgentDensity,

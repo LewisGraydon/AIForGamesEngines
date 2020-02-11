@@ -28,6 +28,7 @@ public class LGFlockingAgent : MonoBehaviour
     {
         SetVelocity(agentVelocity + FlockingBehaviour());
 
+        // Clamp the agentVelocity so that it will never exceed the maxAgentVelocity squared variable.
         if (agentVelocity.sqrMagnitude > maxAgentVelocitySquared)
         {
             SetVelocity(agentVelocity.normalized * maxAgentVelocity);
@@ -40,6 +41,20 @@ public class LGFlockingAgent : MonoBehaviour
     {
         agentFlock = flock;
     }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        // On detecting a collision, we will calculate the vector from the position of the object we have collided with and the current position of this object.
+        // We will then add that to the current velocity of this agent to find the resultant velocity of the collision.
+        Vector3 vectorBetweenCollisionAndThis = transform.position - collision.gameObject.transform.position;
+        agentVelocity += vectorBetweenCollisionAndThis;
+    }
+
+    private void OnCollisionStay(Collision collision)
+    {
+        OnCollisionEnter(collision);
+    }
+
 
     public LGFlock AgentFlock
     {
@@ -68,16 +83,18 @@ public class LGFlockingAgent : MonoBehaviour
 
         foreach(LGFlockingAgent fa in AgentFlock.FlockAgents)
         {
-            // Ensure we aren't checking against self
+            // Ensure we aren't checking against self.
             if(name != fa.name)
             {
-
+                // Calculate the magnitude of the vector from the other agent to this agent.
                 float distance = (fa.transform.position - transform.position).sqrMagnitude;
                 float neighbourRadius = 5f;
                 float neighbourRadiusSquared = neighbourRadius * neighbourRadius;
+
+                // If the distance magnitude is greater than 0 and it is less than the square neighbour radius that is affected, we want to modify the core flocking behaviour vectors.
                 if(distance > 0 && distance < neighbourRadiusSquared)
                 {
-                    // We
+                    // Since the alignment, cohesion and separation vectors follow the same logic for the most part, they can be modified in the same section.
                     alignmentVector += fa.transform.forward;
                     cohesionVector += fa.transform.position;
                     separationVector += fa.transform.position - transform.position;
@@ -151,17 +168,75 @@ public class LGFlockingAgent : MonoBehaviour
         transform.position = Vector3.Lerp(transform.position, transform.position + velocity, Time.deltaTime);
     }
 
-    private void OnCollisionEnter(Collision collision)
+    // TO DO
+    void Seek(GameObject target)
     {
-        // On detecting a collision, we will calculate the vector from the position of the object we have collided with and the current position of this object.
-        // We will then add that to the current velocity of this agent to find the resultant velocity of the collision.
-        Vector3 vectorBetweenCollisionAndThis = transform.position - collision.gameObject.transform.position;
-        agentVelocity += vectorBetweenCollisionAndThis;
+        // If the target agent moves then the character (current agent) will changes its velocity vector, trying to reach the target at its new location.
+        // It involves desired velocity and steering. 
+        // Desired velocity helps it to guide towards the target. 
+        // The steering is obtained by subtracting desired velocity by current velocity.
+        // Steering is added to the velocity to move the agent towards the target.
+
+        Vector3 targetVector = target.transform.position - transform.position;
+        MoveAgent(targetVector);
     }
 
-    private void OnCollisionStay(Collision collision)
+    void Flee(GameObject target)
     {
-        OnCollisionEnter(collision);
+        // Flee also uses desired velocity and steering. But it uses it to move away from the target.
+
+        // The question being, is the movement in a random direction or is it set?
     }
 
+    void Arrival(GameObject target)
+    {
+        // Arrival has two phases:
+        //      First it will work similar to seek behavior
+        //      When it is closer to the target then it will slow down until it stops at the target.
+    }
+
+    void Wander(GameObject target)
+    {
+        // Used when characters in games need to move randomly in the game world.
+        // The easiest way of implementing Wander behavior is to implement seek behavior with randomly spawning target.
+        // Another way is to add small displacement which will lead towards changing the current route.
+    }
+
+    void Pursuit(GameObject target)
+    {
+        // Pursuit is process of following a target aiming to catch it.
+        // While pursuing the target, the agent to predict the targets future movement.
+
+        // I assume this would be seek but with some kind of factor on the target such as if the target is moving in a vector, this will aim for 2x that vector in the same time step?
+    }
+
+    void Evade(GameObject target)
+    {
+        // Evade is the exact opposite behavior of pursuit.
+        // Instead of seeking the target’s future position, it will flee that position.
+    }
+
+    void CollisionAvoidance(GameObject target)
+    {
+        // It is used to dodge or avoid the obstacles in the path.
+        // It will basically check for the closest obstacle and will change the route accordingly.
+        // It is simple collision detection not a path finding algorithm.
+    }
+
+    void LeaderFollowing(GameObject leader)
+    {
+        // It is a combination of three steering behaviors:
+        //      Arrive: Move towards leader and slow down.
+        //      Evade: If character is in leaders way then it should move away.
+        //      Separation: To avoid crowding while following the leader.
+
+
+    }
+
+    void Queue(GameObject target)
+    {
+        // Moving all the agent in line formation or in queue.
+        // At first, the character should find out if there is someone ahead of them.
+        // It should stop if someone is ahead.
+    }
 }
