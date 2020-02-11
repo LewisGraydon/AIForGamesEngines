@@ -29,5 +29,13 @@ public class MovementScript : MonoBehaviour
         {
             gameObject.transform.position += new Vector3(0.0f, -1.0f, 0.0f);
         }
+        if (Input.GetKeyDown(KeyCode.PageUp))
+        {
+            gameObject.transform.position += new Vector3(0.0f, 0.0f, 1.0f);
+        }
+        if (Input.GetKeyDown(KeyCode.PageDown))
+        {
+            gameObject.transform.position += new Vector3(0.0f, 0.0f, -1.0f);
+        }
     }
 }
