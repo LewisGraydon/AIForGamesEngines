@@ -436,7 +436,7 @@ public class SelfVisibilityConsideration : Consideration
         foreach (CharacterBase enemy in self.enemiesInSight)
         {
             bool willBeVisibleInNewTile = predicitonAccuracy ? tileToConsider.isVisibleFromTile(enemy.occupiedTile) : Random.Range(0, 1) == 0;
-            totalSightValue += willBeVisibleInNewTile ? -((int)Weighting.Medium / self.enemiesInSight.Count) : ((int)Weighting.Medium / self.enemiesInSight.Count));
+            totalSightValue += willBeVisibleInNewTile ? -((int)Weighting.Medium / self.enemiesInSight.Count) : ((int)Weighting.Medium / self.enemiesInSight.Count);
         }
         
         return totalSightValue;
