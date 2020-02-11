@@ -7,7 +7,7 @@ public class LGFlockingAgent : MonoBehaviour
     private Vector3 agentVelocity = new Vector3();
     private float maxAgentVelocity = 5.0f;
     private float maxAgentVelocitySquared;
-    private float maxAgentDistanceFromCenter = 3.0f;
+    private float maxAgentDistanceFromCenter = 1.0f;
     private GameObject objectToFollow;
     Vector3 centre = new Vector3();
 
@@ -34,45 +34,6 @@ public class LGFlockingAgent : MonoBehaviour
         }
 
         MoveAgent(agentVelocity);
-
-        // Reposition agent
-        //This may not be entirely necessary if I can get the stayInRadius stuff working, though the Mathf.Lerp first statement and Time.delta time may not be correct for this.
-        //Vector3 pos = transform.position;
-        //if (pos.x >= objectToFollow.transform.position.x + maxAgentDistanceFromCenter)
-        //{
-        //    pos.x = Mathf.Lerp(transform.position.x, objectToFollow.transform.position.x + maxAgentDistanceFromCenter - 0.5f, Time.deltaTime);
-        //    SetVelocity(agentVelocity * -1);
-        //}
-        //else if (pos.x <= objectToFollow.transform.position.x - maxAgentDistanceFromCenter)
-        //{
-        //    pos.x = Mathf.Lerp(transform.position.x, objectToFollow.transform.position.x - maxAgentDistanceFromCenter + 0.5f, Time.deltaTime);
-        //    SetVelocity(agentVelocity * -1);
-        //}
-
-        //if (pos.y >= objectToFollow.transform.position.y + maxAgentDistanceFromCenter)
-        //{
-        //    pos.y = Mathf.Lerp(transform.position.y, objectToFollow.transform.position.y + maxAgentDistanceFromCenter - 0.5f, Time.deltaTime);
-        //    SetVelocity(agentVelocity * -1);
-        //}
-        //else if (pos.y <= objectToFollow.transform.position.y - maxAgentDistanceFromCenter)
-        //{
-        //    pos.y = Mathf.Lerp(transform.position.y, objectToFollow.transform.position.y - maxAgentDistanceFromCenter + 0.5f, Time.deltaTime);
-        //    SetVelocity(agentVelocity * -1);
-        //}
-
-        //if (pos.z >= objectToFollow.transform.position.z + maxAgentDistanceFromCenter)
-        //{
-        //    pos.z = Mathf.Lerp(transform.position.z, objectToFollow.transform.position.z + maxAgentDistanceFromCenter - 0.5f, Time.deltaTime);
-        //    SetVelocity(agentVelocity * -1);
-        //}
-        //else if (pos.z <= objectToFollow.transform.position.z - maxAgentDistanceFromCenter)
-        //{
-        //    pos.z = Mathf.Lerp(transform.position.z, objectToFollow.transform.position.z - maxAgentDistanceFromCenter + 0.5f, Time.deltaTime);
-        //    SetVelocity(agentVelocity * -1);
-        //}
-
-        //transform.forward = agentVelocity.normalized;
-        //transform.position = Vector3.Lerp(transform.position, pos, Time.deltaTime);
     }
 
     public void Initialize(LGFlock flock)
@@ -97,6 +58,7 @@ public class LGFlockingAgent : MonoBehaviour
 
     private Vector3 FlockingBehaviour()
     {
+        // Create the behaviour vectors and initialise them to be empty.
         Vector3 alignmentVector = new Vector3();
         Vector3 cohesionVector = new Vector3();
         Vector3 separationVector = new Vector3();
@@ -106,22 +68,27 @@ public class LGFlockingAgent : MonoBehaviour
 
         foreach(LGFlockingAgent fa in AgentFlock.FlockAgents)
         {
+            // Ensure we aren't checking against self
             if(name != fa.name)
             {
+
                 float distance = (fa.transform.position - transform.position).sqrMagnitude;
                 float neighbourRadius = 5f;
                 float neighbourRadiusSquared = neighbourRadius * neighbourRadius;
                 if(distance > 0 && distance < neighbourRadiusSquared)
                 {
+                    // We
                     alignmentVector += fa.transform.forward;
                     cohesionVector += fa.transform.position;
                     separationVector += fa.transform.position - transform.position;
 
+                    // Increment the count variable, this is used to keep track of the number of 
                     count++;
                 }
             }
         }
 
+        // To avoid a nasty division by 0, if count is zero then there are no agents in the flock so no flocking behaviour will need to be done. Instead we return a zero vector.
         if(count == 0)
         {
             return Vector3.zero;
@@ -137,8 +104,10 @@ public class LGFlockingAgent : MonoBehaviour
 
         separationVector *= -1;
 
-        //Maybe?
-        stayInRadiusVector = StayInRadius(5);
+        // Calculate the amount we need to move the agent by to get it back within the radius specified.
+        stayInRadiusVector = StayInRadius(maxAgentDistanceFromCenter);
+
+        // Calculate the average amount we need to move the agent by.
         stayInRadiusVector /= count;
 
         // Calculate the resultant vector of all the flocking behaviours multiplied by their respective weights.
@@ -150,25 +119,49 @@ public class LGFlockingAgent : MonoBehaviour
 
     Vector3 StayInRadius(float radius)
     {
-       if(centre != objectToFollow.transform.position)
-       {
+        // If the object we are wanting to stay in a radius of has moved, we will set the centre to be its new position.
+        if(centre != objectToFollow.transform.position)
+        {
             centre = objectToFollow.transform.position;
-       }
+        }
 
+        // Calculate the distance we are from the centre.
         Vector3 centreOffset = centre - transform.position;
+
+        // Calculate whether the agent is within the radius we want it to stay in.
         float t = centreOffset.magnitude / radius;
 
+        // If the agent is within the radius then return no modification.
         if(t < 0.9)
-        {
+        {    
             return Vector3.zero;
         }
 
+        // Return the modification we want to make to the agent.
         return centreOffset * t * t;
     }
 
     void MoveAgent(Vector3 velocity)
     {
+        // Sets the rotation of the agent to be the normalised vector of the direction it is moving in.
         transform.forward = velocity.normalized;
+
+        // When we want to actually move the agent to the next positon, we will linearly interpolate between the current position,
+        // and the future position (which will be the current position added to amount we are moving by) over the a time step of Time.deltaTime.
         transform.position = Vector3.Lerp(transform.position, transform.position + velocity, Time.deltaTime);
     }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        // On detecting a collision, we will calculate the vector from the position of the object we have collided with and the current position of this object.
+        // We will then add that to the current velocity of this agent to find the resultant velocity of the collision.
+        Vector3 vectorBetweenCollisionAndThis = transform.position - collision.gameObject.transform.position;
+        agentVelocity += vectorBetweenCollisionAndThis;
+    }
+
+    private void OnCollisionStay(Collision collision)
+    {
+        OnCollisionEnter(collision);
+    }
+
 }
