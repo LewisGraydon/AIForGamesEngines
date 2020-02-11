@@ -12,7 +12,7 @@ public class PathfindingAgent : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
+        //Set/Find Agent's environement
         _tileGrid = FindObjectOfType<TileGrid>();
     }
 
@@ -22,34 +22,77 @@ public class PathfindingAgent : MonoBehaviour
         
     }
 
-    //A basic implementation of a breadth first search algorithm.
-    //Wip
-    void BreadthFirstBasic(Tile startTile, Tile targetTile)
+    //A generic implementation of a breadth first search algorithm.
+    //Anything that inherits from INodeSearchable should be able to use this.
+    //example: Tile inherits from INodeSearchable. If you were to replace the word "node" with "tile"
+    //you should see how this works.
+    INodeSearchable BreadthFirstBasic(INodeSearchable startNode, INodeSearchable targetNode)
     {
-        Queue<Tile> tileQueue = new Queue<Tile>();
-        tileQueue.Enqueue(startTile);
+        Queue<INodeSearchable> nodeQueue = new Queue<INodeSearchable>();
+        nodeQueue.Enqueue(startNode);
 
-        Tile currentTile = new Tile();
+        INodeSearchable currentNode;
 
-        while(tileQueue.Count > 0)
+        while(nodeQueue.Count > 0)
         {
-            currentTile = tileQueue.Dequeue();
+            currentNode = nodeQueue.Dequeue();
 
-            if (currentTile == targetTile)
+            if (currentNode == targetNode)
             {
-                //Return Found Tile
+                return currentNode;
             }
             else
             {
-                //Marked tile as searched
-                //
+                currentNode.searched = true;
+                foreach (var child in currentNode.children)
+                {
+                    if (!child.searched && !nodeQueue.Contains(child))
+                    {
+                        child.parent = currentNode;
+                        nodeQueue.Enqueue(child);
+                    }
+                }
             }
             
-
-
         }
+        //Queue empty, target not found: return null as a fail state
+        return null;
 
     }
+
+    //List<INodeSearchable> BreadthFirstOccupied(INodeSearchable startNode, INodeSearchable targetNode, int maxRange)
+    //{
+    //    Queue<INodeSearchable> nodeQueue = new Queue<INodeSearchable>();
+    //    nodeQueue.Enqueue(startNode);
+
+    //    INodeSearchable currentNode;
+
+    //    while (nodeQueue.Count > 0)
+    //    {
+    //        currentNode = nodeQueue.Dequeue();
+
+    //        if (currentNode)
+    //        {
+    //            return currentNode;
+    //        }
+    //        else
+    //        {
+    //            currentNode.searched = true;
+    //            foreach (var child in currentNode.children)
+    //            {
+    //                if (!child.searched && !nodeQueue.Contains(child))
+    //                {
+    //                    child.parent = currentNode;
+    //                    nodeQueue.Enqueue(child);
+    //                }
+    //            }
+    //        }
+
+    //    }
+    //    //Queue empty, target not found: return null as a fail state
+    //    return null;
+
+    //}
 
     //@Desc: A function that finds all tiles a unit can move to with the next move action.
     //@Param - moveRange : The maximum tile distance the given unit can move with a single movement pip.

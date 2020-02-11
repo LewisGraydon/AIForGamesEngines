@@ -24,6 +24,8 @@ public class Tile : MonoBehaviour
     public WallType sWall;
     public WallType wWall;
 
+
+
     // Start is called before the first frame update
     void Awake()
     {
