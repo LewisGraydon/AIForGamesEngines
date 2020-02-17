@@ -10,7 +10,7 @@ public enum coverValue
     Full
 }
 
-public class Tile : MonoBehaviour
+public class Tile : MonoBehaviour, INodeSearchable
 {
     //Currently working on the assumption that we are hand designing the levels
     //GameObject is placeholder for egg or terrainBlocker object
@@ -24,7 +24,11 @@ public class Tile : MonoBehaviour
     public WallType sWall;
     public WallType wWall;
 
+    public bool searched { get => searched; set => searched = value; }
+    public INodeSearchable parent { get => parent; set => parent = value; }
+    public List<INodeSearchable> children { get => children; set => children = value; }
 
+    
 
     // Start is called before the first frame update
     void Awake()
@@ -34,6 +38,8 @@ public class Tile : MonoBehaviour
         walls.Add(eWall);
         walls.Add(sWall);
         walls.Add(wWall);
+        
+        //parent = GetComponentInParent<Transform>();
     }
 
     // Update is called once per frame

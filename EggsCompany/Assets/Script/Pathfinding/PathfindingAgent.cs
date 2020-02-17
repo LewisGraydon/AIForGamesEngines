@@ -28,7 +28,7 @@ public class PathfindingAgent : MonoBehaviour
     //you should see how this works.
     INodeSearchable BreadthFirstBasic(INodeSearchable startNode, INodeSearchable targetNode)
     {
-        Queue<INodeSearchable> nodeQueue = new Queue<INodeSearchable>();
+        Queue<INodeSearchable> nodeQueue = new Queue<INodeSearchable>(); 
         nodeQueue.Enqueue(startNode);
 
         INodeSearchable currentNode;
@@ -60,39 +60,90 @@ public class PathfindingAgent : MonoBehaviour
 
     }
 
-    //List<INodeSearchable> BreadthFirstOccupied(INodeSearchable startNode, INodeSearchable targetNode, int maxRange)
-    //{
-    //    Queue<INodeSearchable> nodeQueue = new Queue<INodeSearchable>();
-    //    nodeQueue.Enqueue(startNode);
+    //An implementation of a best first search which uses a single heuristic.
+    //Currently unfinished. The current implementation is very greedy, and if anything were
+    //to block its path the search would fail.
+    //A priority queue with a self-balancing binary tree would be better optimization.
+    //For now, a list that sorts after an inser will work for a quick/dirty implementaion.
+    //That is the next current step.
+    INodeSearchable BestFirst(INodeSearchable startNode, INodeSearchable targetNode, EHeuristic heuristic)
+    {
+        Queue<INodeSearchable> nodeQueue = new Queue<INodeSearchable>();
+        nodeQueue.Enqueue(startNode);
 
-    //    INodeSearchable currentNode;
+        
 
-    //    while (nodeQueue.Count > 0)
-    //    {
-    //        currentNode = nodeQueue.Dequeue();
+        INodeSearchable currentNode;
+        INodeSearchable bestNode = null;
+        float bestDistance = 0;
 
-    //        if (currentNode)
-    //        {
-    //            return currentNode;
-    //        }
-    //        else
-    //        {
-    //            currentNode.searched = true;
-    //            foreach (var child in currentNode.children)
-    //            {
-    //                if (!child.searched && !nodeQueue.Contains(child))
-    //                {
-    //                    child.parent = currentNode;
-    //                    nodeQueue.Enqueue(child);
-    //                }
-    //            }
-    //        }
+        while (nodeQueue.Count > 0)
+        {
+            currentNode = nodeQueue.Dequeue();
 
-    //    }
-    //    //Queue empty, target not found: return null as a fail state
-    //    return null;
+            if (currentNode == targetNode)
+            {
+                return currentNode;
+            }
+            else
+            {
+                currentNode.searched = true;
 
-    //}
+                foreach (var child in currentNode.children)
+                {
+                    if (!child.searched && !nodeQueue.Contains(child))
+                    {
+                        child.parent = currentNode;
+
+                        switch (heuristic)
+                        {
+                            case EHeuristic.Distance:
+                                //Checking what the node is: We could attach an enum to the interface which allows us
+                                //to know what it is. Maybe? Could be bad coding practice; do research when possible.
+                                //Add error checking.
+                                Tile targetTile = targetNode as Tile;
+                                Tile childTile = child as Tile;
+
+                                float childMagnitude = childTile.transform.position.magnitude;
+                                float targetMagnitude = targetTile.transform.position.magnitude;
+                                float distance = targetMagnitude - childMagnitude;
+
+                                if(distance < bestDistance || bestDistance == 0)
+                                {
+                                    bestNode = child;
+                                    bestDistance = distance;
+                                }
+
+                                break;
+                            case EHeuristic.Manhattan:
+                                throw new System.NotImplementedException("Manhattan Style Distance Calculation not yet implemented.");
+                                break;
+                            default:
+                                bestNode = null;
+                                Debug.LogError("No heuristic provided for Pathfinding Agent func BestFirst search with start: "
+                                    + startNode + " and target: " + targetNode);
+                                break;
+                        }                     
+                    }
+                }
+
+                if(bestNode != null)
+                {
+                    nodeQueue.Enqueue(bestNode);
+                    bestNode = null;
+                }
+
+            }
+
+        }
+        //Queue empty, target not found: return null as a fail state
+        return null;
+
+    }
+
+
+    //For path part of pathfinding
+
 
     //@Desc: A function that finds all tiles a unit can move to with the next move action.
     //@Param - moveRange : The maximum tile distance the given unit can move with a single movement pip.
