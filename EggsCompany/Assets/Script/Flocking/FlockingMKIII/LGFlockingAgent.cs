@@ -34,7 +34,10 @@ public class LGFlockingAgent : MonoBehaviour
             SetVelocity(agentVelocity.normalized * maxAgentVelocity);
         }
 
-        MoveAgent(agentVelocity);
+        //MoveAgent(agentVelocity, Time.deltaTime);
+        //Seek(target.transform.position);
+        //Arrival(target.transform.position, Time.deltaTime);
+        Flee(target.transform.position);
     }
 
     public void Initialize(LGFlock flock)
@@ -71,7 +74,7 @@ public class LGFlockingAgent : MonoBehaviour
         agentVelocity = Vector3.ClampMagnitude(newVelocity, maxAgentVelocity);
     }
 
-    private Vector3 FlockingBehaviour()
+    private Vector3 FlockingBehaviour(bool alignment = true, bool cohesion = true, bool separation = true, bool stayInRadius = true)
     {
         // Create the behaviour vectors and initialise them to be empty.
         Vector3 alignmentVector = new Vector3();
@@ -95,9 +98,14 @@ public class LGFlockingAgent : MonoBehaviour
                 if(distance > 0 && distance < neighbourRadiusSquared)
                 {
                     // Since the alignment, cohesion and separation vectors follow the same logic for the most part, they can be modified in the same section.
-                    alignmentVector += fa.transform.forward;
-                    cohesionVector += fa.transform.position;
-                    separationVector += fa.transform.position - transform.position;
+                    if(alignment)
+                        alignmentVector += fa.transform.forward;
+
+                    if(cohesion)
+                        cohesionVector += fa.transform.position;
+
+                    if(separation)
+                        separationVector += fa.transform.position - transform.position;
 
                     // Increment the count variable, this is used to keep track of the number of 
                     count++;
@@ -122,7 +130,8 @@ public class LGFlockingAgent : MonoBehaviour
         separationVector *= -1;
 
         // Calculate the amount we need to move the agent by to get it back within the radius specified.
-        stayInRadiusVector = StayInRadius(maxAgentDistanceFromCenter);
+        if(separation)
+            stayInRadiusVector = StayInRadius(maxAgentDistanceFromCenter);
 
         // Calculate the average amount we need to move the agent by.
         stayInRadiusVector /= count;
@@ -158,18 +167,18 @@ public class LGFlockingAgent : MonoBehaviour
         return centreOffset * t * t;
     }
 
-    void MoveAgent(Vector3 velocity)
+    void MoveAgent(Vector3 velocity, float timeStep)
     {
         // Sets the rotation of the agent to be the normalised vector of the direction it is moving in.
         transform.forward = velocity.normalized;
 
         // When we want to actually move the agent to the next positon, we will linearly interpolate between the current position,
         // and the future position (which will be the current position added to amount we are moving by) over the a time step of Time.deltaTime.
-        transform.position = Vector3.Lerp(transform.position, transform.position + velocity, Time.deltaTime);
+        transform.position = Vector3.Lerp(transform.position, transform.position + velocity, timeStep);
     }
 
     // TO DO
-    void Seek(GameObject target)
+    void Seek(Vector3 targetPosition)
     {
         // If the target agent moves then the character (current agent) will changes its velocity vector, trying to reach the target at its new location.
         // It involves desired velocity and steering. 
@@ -177,29 +186,46 @@ public class LGFlockingAgent : MonoBehaviour
         // The steering is obtained by subtracting desired velocity by current velocity.
         // Steering is added to the velocity to move the agent towards the target.
 
-        Vector3 targetVector = target.transform.position - transform.position;
-        MoveAgent(targetVector);
+        //SEEK NO LERP, ARRIVAL LERP
+
+        Vector3 targetVector = targetPosition - transform.position;
+        transform.forward = targetVector.normalized;
+        transform.position += targetVector * Time.deltaTime;
     }
 
-    void Flee(GameObject target)
+    void Flee(Vector3 targetPosition)
     {
         // Flee also uses desired velocity and steering. But it uses it to move away from the target.
 
         // The question being, is the movement in a random direction or is it set?
+        Vector3 targetVector = transform.position - targetPosition;
+        transform.forward = targetVector.normalized;
+        transform.position += targetVector * Time.deltaTime;
     }
 
-    void Arrival(GameObject target)
+    void Arrival(Vector3 targetPosition, float timeStep)
     {
         // Arrival has two phases:
         //      First it will work similar to seek behavior
         //      When it is closer to the target then it will slow down until it stops at the target.
+
+        Vector3 targetVector = targetPosition - transform.position;
+        MoveAgent(targetVector, timeStep);
     }
 
-    void Wander(GameObject target)
+    void Wander(Vector3 targetPosition)
     {
         // Used when characters in games need to move randomly in the game world.
         // The easiest way of implementing Wander behavior is to implement seek behavior with randomly spawning target.
         // Another way is to add small displacement which will lead towards changing the current route.
+
+        // target just needs to be a position in this case
+        Vector3 randomPosition = new Vector3();
+        randomPosition.x = Random.Range(transform.position.x - 10, transform.position.x + 10);
+        randomPosition.y = Random.Range(transform.position.y - 10, transform.position.y + 10);
+        randomPosition.z = Random.Range(transform.position.z - 10, transform.position.z + 10);
+
+        Seek(targetPosition);
     }
 
     void Pursuit(GameObject target)
@@ -207,20 +233,32 @@ public class LGFlockingAgent : MonoBehaviour
         // Pursuit is process of following a target aiming to catch it.
         // While pursuing the target, the agent to predict the targets future movement.
 
-        // I assume this would be seek but with some kind of factor on the target such as if the target is moving in a vector, this will aim for 2x that vector in the same time step?
+        Vector3 direction = (target.transform.position + target.GetComponent<Rigidbody>().velocity) - transform.position;
+        transform.forward = direction.normalized;
+        transform.position += direction * Time.deltaTime;
+
+        // May be an idea to use this for overwatch ability (as in whilst someone is moving attack) though otherwise this may just be theorycrafting.
     }
 
     void Evade(GameObject target)
     {
         // Evade is the exact opposite behavior of pursuit.
         // Instead of seeking the target’s future position, it will flee that position.
+
+        Vector3 direction = transform.position - (target.transform.position + target.GetComponent<Rigidbody>().velocity);
+        transform.forward = direction.normalized;
+        transform.position += direction * Time.deltaTime;
+
+        // If an attack misses i.e. a ranged weapon attack the flock can flee from the projectile and then reconvene on the hive.
     }
 
-    void CollisionAvoidance(GameObject target)
+    void CollisionAvoidance(Vector3 targetPosition)
     {
         // It is used to dodge or avoid the obstacles in the path.
         // It will basically check for the closest obstacle and will change the route accordingly.
         // It is simple collision detection not a path finding algorithm.
+
+        // I believe this is done in OnCollisionEnter(Collision collision) and therefore can be omitted. 
     }
 
     void LeaderFollowing(GameObject leader)
@@ -230,7 +268,9 @@ public class LGFlockingAgent : MonoBehaviour
         //      Evade: If character is in leaders way then it should move away.
         //      Separation: To avoid crowding while following the leader.
 
-
+        Arrival(leader.transform.position, Time.deltaTime);
+        Evade(leader);
+        FlockingBehaviour(false, false, true, false);
     }
 
     void Queue(GameObject target)
@@ -238,5 +278,14 @@ public class LGFlockingAgent : MonoBehaviour
         // Moving all the agent in line formation or in queue.
         // At first, the character should find out if there is someone ahead of them.
         // It should stop if someone is ahead.
+
+        //  If nobody ahead
+        //  {
+        //      Do thing
+        //  }
+        //  Else
+        //  {
+        //      stop
+        //  }
     }
 }
