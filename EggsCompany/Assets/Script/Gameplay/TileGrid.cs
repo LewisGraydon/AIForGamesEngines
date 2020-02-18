@@ -7,7 +7,12 @@ public class TileGrid : MonoBehaviour
     public int gridX;
     public int gridY;
 
-    private List<Tile> _tilesList;
+    private List<Tile> _tilesList { get => _tilesList; set => _tilesList = value; }
+
+    public List<Tile> GetGridTileList()
+    {
+        return _tilesList;
+    }
 
     // Start is called before the first frame update
     void Start()

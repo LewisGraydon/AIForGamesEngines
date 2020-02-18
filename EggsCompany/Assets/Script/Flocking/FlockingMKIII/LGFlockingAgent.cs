@@ -11,6 +11,9 @@ public class LGFlockingAgent : MonoBehaviour
     private GameObject objectToFollow;
     Vector3 centre = new Vector3();
 
+    private bool movingToDestination = false;
+    Vector3 randomPosition = new Vector3(-1,-1,-1);
+
     LGFlock agentFlock;
     SphereCollider agentCollider;
 
@@ -33,11 +36,13 @@ public class LGFlockingAgent : MonoBehaviour
         {
             SetVelocity(agentVelocity.normalized * maxAgentVelocity);
         }
+        MoveAgent(agentVelocity);
 
-        //MoveAgent(agentVelocity, Time.deltaTime);
-        //Seek(target.transform.position);
-        //Arrival(target.transform.position, Time.deltaTime);
-        Flee(target.transform.position);
+        //  Testing out the behaviours individually:
+        //      Seek(objectToFollow.transform.position);
+        //      Arrival(objectToFollow.transform.position);
+        //      Flee(objectToFollow.transform.position);
+        //      Wander(3);
     }
 
     public void Initialize(LGFlock flock)
@@ -167,17 +172,17 @@ public class LGFlockingAgent : MonoBehaviour
         return centreOffset * t * t;
     }
 
-    void MoveAgent(Vector3 velocity, float timeStep)
+    void MoveAgent(Vector3 velocity)
     {
         // Sets the rotation of the agent to be the normalised vector of the direction it is moving in.
         transform.forward = velocity.normalized;
 
         // When we want to actually move the agent to the next positon, we will linearly interpolate between the current position,
         // and the future position (which will be the current position added to amount we are moving by) over the a time step of Time.deltaTime.
-        transform.position = Vector3.Lerp(transform.position, transform.position + velocity, timeStep);
+        transform.position = Vector3.Lerp(transform.position, transform.position + velocity, Time.deltaTime);
     }
 
-    // TO DO
+    // Done
     void Seek(Vector3 targetPosition)
     {
         // If the target agent moves then the character (current agent) will changes its velocity vector, trying to reach the target at its new location.
@@ -186,81 +191,125 @@ public class LGFlockingAgent : MonoBehaviour
         // The steering is obtained by subtracting desired velocity by current velocity.
         // Steering is added to the velocity to move the agent towards the target.
 
-        //SEEK NO LERP, ARRIVAL LERP
-
         Vector3 targetVector = targetPosition - transform.position;
+
+        if (targetVector == Vector3.zero)
+        {
+            return;
+        }
+
         transform.forward = targetVector.normalized;
         transform.position += targetVector * Time.deltaTime;
     }
 
+    // Done.
     void Flee(Vector3 targetPosition)
     {
         // Flee also uses desired velocity and steering. But it uses it to move away from the target.
 
         // The question being, is the movement in a random direction or is it set?
         Vector3 targetVector = transform.position - targetPosition;
+
+        if (targetVector == Vector3.zero)
+        {
+            return;
+        }
+
         transform.forward = targetVector.normalized;
         transform.position += targetVector * Time.deltaTime;
     }
 
-    void Arrival(Vector3 targetPosition, float timeStep)
+    // Done.
+    void Arrival(Vector3 targetPosition)
     {
         // Arrival has two phases:
         //      First it will work similar to seek behavior
         //      When it is closer to the target then it will slow down until it stops at the target.
 
         Vector3 targetVector = targetPosition - transform.position;
-        MoveAgent(targetVector, timeStep);
+
+        if (targetVector == Vector3.zero)
+        {
+            return;
+        }
+
+        MoveAgent(targetVector);
     }
 
-    void Wander(Vector3 targetPosition)
+    // Done.
+    void Wander(float wanderRadius)
     {
         // Used when characters in games need to move randomly in the game world.
         // The easiest way of implementing Wander behavior is to implement seek behavior with randomly spawning target.
         // Another way is to add small displacement which will lead towards changing the current route.
 
         // target just needs to be a position in this case
-        Vector3 randomPosition = new Vector3();
-        randomPosition.x = Random.Range(transform.position.x - 10, transform.position.x + 10);
-        randomPosition.y = Random.Range(transform.position.y - 10, transform.position.y + 10);
-        randomPosition.z = Random.Range(transform.position.z - 10, transform.position.z + 10);
 
-        Seek(targetPosition);
+        if (!movingToDestination)
+        {
+            randomPosition.x = Random.Range(transform.position.x - wanderRadius, transform.position.x + wanderRadius);
+            randomPosition.y = Random.Range(transform.position.y - wanderRadius, transform.position.y + wanderRadius);
+            randomPosition.z = Random.Range(transform.position.z - wanderRadius, transform.position.z + wanderRadius);
+
+            movingToDestination = true;
+        }
+
+        if ((randomPosition - transform.position).magnitude <= 0.1f)
+        {
+            movingToDestination = false;
+            return;
+        }
+     
+        Seek(randomPosition);
     }
 
+    // Done.
     void Pursuit(GameObject target)
     {
         // Pursuit is process of following a target aiming to catch it.
         // While pursuing the target, the agent to predict the targets future movement.
 
-        Vector3 direction = (target.transform.position + target.GetComponent<Rigidbody>().velocity) - transform.position;
-        transform.forward = direction.normalized;
-        transform.position += direction * Time.deltaTime;
+        Vector3 targetVector = (target.transform.position + target.GetComponent<Rigidbody>().velocity) - transform.position;
+
+        if (targetVector == Vector3.zero)
+        {
+            return;
+        }
+
+        transform.forward = targetVector.normalized;
+        transform.position += targetVector * Time.deltaTime;
 
         // May be an idea to use this for overwatch ability (as in whilst someone is moving attack) though otherwise this may just be theorycrafting.
     }
 
+    // Done.
     void Evade(GameObject target)
     {
         // Evade is the exact opposite behavior of pursuit.
         // Instead of seeking the target’s future position, it will flee that position.
 
-        Vector3 direction = transform.position - (target.transform.position + target.GetComponent<Rigidbody>().velocity);
-        transform.forward = direction.normalized;
-        transform.position += direction * Time.deltaTime;
+        Vector3 targetVector = transform.position - (target.transform.position + target.GetComponent<Rigidbody>().velocity);
+
+        if (targetVector == Vector3.zero)
+        {
+            return;
+        }
+
+        transform.forward = targetVector.normalized;
+        transform.position += targetVector * Time.deltaTime;
 
         // If an attack misses i.e. a ranged weapon attack the flock can flee from the projectile and then reconvene on the hive.
     }
 
+    // Handled in OnCollisionEnter(Collision collision) and therefore can be omitted.
     void CollisionAvoidance(Vector3 targetPosition)
     {
         // It is used to dodge or avoid the obstacles in the path.
         // It will basically check for the closest obstacle and will change the route accordingly.
         // It is simple collision detection not a path finding algorithm.
-
-        // I believe this is done in OnCollisionEnter(Collision collision) and therefore can be omitted. 
     }
 
+    // Done, I believe.
     void LeaderFollowing(GameObject leader)
     {
         // It is a combination of three steering behaviors:
@@ -268,7 +317,7 @@ public class LGFlockingAgent : MonoBehaviour
         //      Evade: If character is in leaders way then it should move away.
         //      Separation: To avoid crowding while following the leader.
 
-        Arrival(leader.transform.position, Time.deltaTime);
+        Arrival(leader.transform.position);
         Evade(leader);
         FlockingBehaviour(false, false, true, false);
     }
