@@ -28,6 +28,7 @@ public class Tile : MonoBehaviour, INodeSearchable
     public WallType wWall;
 
     public bool searched { get => searched; set => searched = value; }
+    public int? Cost { get => Cost; set => Cost = value; }
     public INodeSearchable parent { get => parent; set => parent = value; }
     public List<INodeSearchable> children { get => children; set => children = value; }
 

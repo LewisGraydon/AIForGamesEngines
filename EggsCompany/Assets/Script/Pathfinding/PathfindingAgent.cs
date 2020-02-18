@@ -74,8 +74,8 @@ public class PathfindingAgent : MonoBehaviour
         nodeList.Add(startNode);
 
         INodeSearchable currentNode;
-        INodeSearchable bestNode = null;
-        float bestDistance = 0;
+        //INodeSearchable bestNode = null;
+        //float bestDistance = 0;
 
         while (nodeList.Count > 0)
         {
@@ -124,7 +124,7 @@ public class PathfindingAgent : MonoBehaviour
                                 throw new System.NotImplementedException("Manhattan Style Distance Calculation not yet implemented.");
                                 break;
                             default:
-                                bestNode = null;
+                                //bestNode = null;
                                 Debug.LogError("No heuristic provided for Pathfinding Agent func BestFirst search with start: "
                                     + startNode + " and target: " + targetNode);
                                 break;
@@ -146,6 +146,50 @@ public class PathfindingAgent : MonoBehaviour
         //Queue empty, target not found: return null as a fail state
         return null;
 
+    }
+
+
+
+    INodeSearchable DijkstraSearch(INodeSearchable startNode, INodeSearchable targetNode)
+    {
+
+        INodeSearchable currentNode;
+        currentNode = startNode;
+
+        //Is there a way to assign a child list directly? Would save several operations here
+        List<INodeSearchable> searchSet = new List<INodeSearchable>();
+        List<Tile> tempSet = _tileGrid.GetGridTileList();
+        foreach (var tile in tempSet)
+        {
+            tile.Cost = null;
+            searchSet.Add(tile);
+        }
+        searchSet.Remove(currentNode);
+        searchSet.Insert(0, currentNode);
+
+        while (searchSet.Count > 0)
+        {
+
+            currentNode = searchSet[0];
+            searchSet.RemoveAt(0);
+            searchSet.TrimExcess();
+
+            if (currentNode == targetNode)
+            {
+                return targetNode;
+            }
+        }
+
+        //Next Steps:
+        //Find Children of current node in set
+        //Assign cost to arrive at child node to child in searchSet if cost is less than currently defined cost (or if null)
+        //Assign current node as being the parent of the child if assigning cost
+        //Visiting the target tile marks us done
+        //Refactor: List sort and use lowest cost (allows us to null check for unreachable tiles)
+
+
+
+        return null;
     }
 
 

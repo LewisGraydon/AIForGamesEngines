@@ -11,6 +11,12 @@ public interface INodeSearchable
         set;
     }
 
+    int? Cost
+    {
+        get;
+        set;
+    }
+
     INodeSearchable parent
     {
         get;
