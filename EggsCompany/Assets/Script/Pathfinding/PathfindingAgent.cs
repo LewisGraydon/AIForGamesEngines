@@ -68,18 +68,20 @@ public class PathfindingAgent : MonoBehaviour
     //That is the next current step.
     INodeSearchable BestFirst(INodeSearchable startNode, INodeSearchable targetNode, EHeuristic heuristic)
     {
-        Queue<INodeSearchable> nodeQueue = new Queue<INodeSearchable>();
-        nodeQueue.Enqueue(startNode);
-
-        
+        //Queue<INodeSearchable> nodeQueue = new Queue<INodeSearchable>();
+        //nodeQueue.Enqueue(startNode);
+        List<INodeSearchable> nodeList = new List<INodeSearchable>();
+        nodeList.Add(startNode);
 
         INodeSearchable currentNode;
         INodeSearchable bestNode = null;
         float bestDistance = 0;
 
-        while (nodeQueue.Count > 0)
+        while (nodeList.Count > 0)
         {
-            currentNode = nodeQueue.Dequeue();
+            //currentNode = nodeQueue.Dequeue();
+            currentNode = nodeList[0];
+            nodeList.RemoveAt(0);
 
             if (currentNode == targetNode)
             {
@@ -91,7 +93,7 @@ public class PathfindingAgent : MonoBehaviour
 
                 foreach (var child in currentNode.children)
                 {
-                    if (!child.searched && !nodeQueue.Contains(child))
+                    if (!child.searched && !nodeList.Contains(child))
                     {
                         child.parent = currentNode;
 
@@ -106,14 +108,17 @@ public class PathfindingAgent : MonoBehaviour
 
                                 float childMagnitude = childTile.transform.position.magnitude;
                                 float targetMagnitude = targetTile.transform.position.magnitude;
-                                float distance = targetMagnitude - childMagnitude;
+                                childTile.distanceToTarget = targetMagnitude - childMagnitude;
 
-                                if(distance < bestDistance || bestDistance == 0)
-                                {
-                                    bestNode = child;
-                                    bestDistance = distance;
-                                }
+                                //if(distance < bestDistance || bestDistance == 0)
+                                //{
+                                //    bestNode = child;
+                                //    bestDistance = distance;
+                                //}
 
+                                nodeList.Add(childTile);
+                                TileDistanceComparison testcompare = new TileDistanceComparison();
+                                nodeList.Sort(testcompare);
                                 break;
                             case EHeuristic.Manhattan:
                                 throw new System.NotImplementedException("Manhattan Style Distance Calculation not yet implemented.");
@@ -127,11 +132,13 @@ public class PathfindingAgent : MonoBehaviour
                     }
                 }
 
-                if(bestNode != null)
-                {
-                    nodeQueue.Enqueue(bestNode);
-                    bestNode = null;
-                }
+
+
+                //if(bestNode != null)
+                //{
+                //    nodeQueue.Enqueue(bestNode);
+                //    bestNode = null;
+                //}
 
             }
 
