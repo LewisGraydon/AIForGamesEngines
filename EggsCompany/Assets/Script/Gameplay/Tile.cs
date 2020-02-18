@@ -14,9 +14,16 @@ public class Tile : MonoBehaviour, INodeSearchable
 {
     //Currently working on the assumption that we are hand designing the levels
     //GameObject is placeholder for egg or terrainBlocker object
-    public GameObject occupier = null;
+    public ETileOccupier occupier = ETileOccupier.None;
     public FloorType terrainType;
     private List<Tile> _neighbors = new List<Tile>(4);
+    public List<Tile> neighbors
+    {
+        get
+        {
+            return _neighbors;
+        }
+    }
 
     private List<WallType> walls = new List<WallType>(4);
     public WallType nWall;

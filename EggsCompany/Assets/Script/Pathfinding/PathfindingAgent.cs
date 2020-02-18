@@ -53,11 +53,49 @@ public class PathfindingAgent : MonoBehaviour
                     }
                 }
             }
-            
+   
         }
         //Queue empty, target not found: return null as a fail state
         return null;
 
+    }
+
+    public static int BreadthFirstAllySearch(INodeSearchable startNode)
+    {
+        int numberOfAllys = 0;
+        Queue<INodeSearchable> nodeQueue = new Queue<INodeSearchable>();
+        nodeQueue.Enqueue(startNode);
+
+        INodeSearchable currentNode;
+
+        while (nodeQueue.Count > 0)
+        {
+            currentNode = nodeQueue.Dequeue();
+
+            if ((currentNode as Tile).occupier == ETileOccupier.EnemyCharacter)
+            {
+                numberOfAllys++;
+            }
+            else
+            {
+                currentNode.searched = true;
+                if(currentNode.parent == startNode || currentNode == startNode)
+                {
+                    foreach (var child in currentNode.children)
+                    {
+                        if (!child.searched && !nodeQueue.Contains(child))
+                        {
+                            child.parent = currentNode;
+                            nodeQueue.Enqueue(child);
+                        }
+                    }
+                }
+
+            }
+
+        }
+        //Queue empty, target not found: return null as a fail state
+        return numberOfAllys;
     }
 
     //An implementation of a best first search which uses a single heuristic.

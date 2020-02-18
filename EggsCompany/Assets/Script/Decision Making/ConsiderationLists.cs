@@ -1,6 +1,8 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public static class ConsiderationLists
 {
@@ -354,13 +356,17 @@ public class FlankingConsideration : Consideration
         */
 
         //TODO GET PIP COST FROM PATHFINDING
-
+        float playersFlankedTotalValue = 0.0f;
         foreach (CharacterBase enemy in self.enemiesInSight)
         {
-
+            if(self.occupiedTile.transform.position.x == enemy.transform.position.x ||
+                self.occupiedTile.transform.position.y == enemy.transform.position.y)
+            {
+                playersFlankedTotalValue += ((int)Weighting.High / self.enemiesInSight.Count);
+            }
         }
-
-        return 0.0f;
+        tileValue += playersFlankedTotalValue;
+        return tileValue;
     }
 }
 
@@ -449,18 +455,20 @@ public class ProximityToAllyConsideration : Consideration
     {
         base.ConsiderTile(self, tileToConsider);
         /*
-         * search within two squares for occupied by enemy of tileToConsider then (unless melee type enemy) -
-         *  
-         *  else 
-         *  
-         *  +
-         * 
+            * search within two squares for occupied by enemy of tileToConsider then (unless melee type enemy) -
+            *  
+            *  else 
+            *  
+            *  +
+            * 
         */
-        for (int i = 1; i < 3; i++)
-        {
-            //TODO: understand Grid and have code check all 9 surrounding for allys
-        }
-        return 0.0f;
+        return -(int)Weighting.Medium * PathfindingAgent.BreadthFirstAllySearch((INodeSearchable)self.occupiedTile);
+
+        //foreach (EDirection dir in Enum.GetValues(typeof(EDirection)))
+        //{
+
+        //}
+        //foreach(Tile tile in self.occupiedTile)
     }
 }
 #endregion
