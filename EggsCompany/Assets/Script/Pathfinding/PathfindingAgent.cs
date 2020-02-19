@@ -99,10 +99,8 @@ public class PathfindingAgent : MonoBehaviour
     }
 
     //An implementation of a best first search which uses a single heuristic.
-    //Currently unfinished. The current implementation is very greedy, and if anything were
-    //to block its path the search would fail.
     //A priority queue with a self-balancing binary tree would be better optimization.
-    //For now, a list that sorts after an inser will work for a quick/dirty implementaion.
+    //For now, a list that sorts after an insert will work for a quick/dirty implementaion.
     //That is the next current step.
     INodeSearchable BestFirst(INodeSearchable startNode, INodeSearchable targetNode, EHeuristic heuristic)
     {
@@ -140,7 +138,7 @@ public class PathfindingAgent : MonoBehaviour
                             case EHeuristic.Distance:
                                 //Checking what the node is: We could attach an enum to the interface which allows us
                                 //to know what it is. Maybe? Could be bad coding practice; do research when possible.
-                                //Add error checking.
+                                //Add error checking. eg: expected object tile got object {x}
                                 Tile targetTile = targetNode as Tile;
                                 Tile childTile = child as Tile;
 
@@ -187,27 +185,26 @@ public class PathfindingAgent : MonoBehaviour
     }
 
 
-
-    INodeSearchable DijkstraSearch(INodeSearchable startNode, INodeSearchable targetNode)
+    //A Dijkstra Search implementation focused on finding the most efficent way to move to a target tile given the environemental cost to get there.
+    INodeSearchable DijkstraSearch(INodeSearchable startNode, INodeSearchable targetNode, List<INodeSearchable> searchSet)
     {
 
         INodeSearchable currentNode;
         currentNode = startNode;
 
         //Is there a way to assign a child list directly? Would save several operations here
-        List<INodeSearchable> searchSet = new List<INodeSearchable>();
-        List<Tile> tempSet = _tileGrid.GetGridTileList();
-        foreach (var tile in tempSet)
+
+        foreach (var node in searchSet)
         {
-            tile.Cost = null;
-            searchSet.Add(tile);
+            node.Cost = null;
         }
+        //Ensures we don't check our starting node twice, and that our starting node is at the front of our "queue"
         searchSet.Remove(currentNode);
         searchSet.Insert(0, currentNode);
+        currentNode.Cost = 0;
 
         while (searchSet.Count > 0)
         {
-
             currentNode = searchSet[0];
             searchSet.RemoveAt(0);
             searchSet.TrimExcess();
@@ -216,16 +213,40 @@ public class PathfindingAgent : MonoBehaviour
             {
                 return targetNode;
             }
+            else if (currentNode.Cost == null)
+            {
+                //Remaining nodes are assumed unreachable, no path to target, return null as a fail state
+                return null;
+            }
+            else
+            {
+                foreach (var child in currentNode.children)
+                {
+                    //calculate cost to reach child (temp value used for psudocode)
+
+                    int? calculatedCost = currentNode.Cost /* + CalculateCostToReachChild() */;
+                    //Assign that cost to child if: child cost value is null OR < calced cost
+                    //If assigning cost: make parent current node
+                    if(calculatedCost < child.Cost || child.Cost == null)
+                    {
+                        child.Cost = calculatedCost;
+                        child.parent = currentNode;
+                    }
+
+
+
+                }
+
+            }
+
+            //CREATE COMPARER FOR SORT SEE NOTES BELLOW.
+            searchSet.Sort();
+
         }
 
         //Next Steps:
-        //Find Children of current node in set
-        //Assign cost to arrive at child node to child in searchSet if cost is less than currently defined cost (or if null)
-        //Assign current node as being the parent of the child if assigning cost
-        //Visiting the target tile marks us done
-        //Refactor: List sort and use lowest cost (allows us to null check for unreachable tiles)
-
-
+        //Calculate cost for reaching child
+        //Create comparer for nodesearchable for cost, let null cost be "greater than" other values to shove them to the back of the list druing a sort.
 
         return null;
     }

@@ -72,6 +72,9 @@ public class TileGrid : MonoBehaviour
             {
                 _tilesList[i].AssignNeighbor(EDirection.West, null);
             }
+
+            _tilesList[i].CopyNeighborsToChildren();
+
         }
 
         foreach (var tile in _tilesList)

@@ -50,7 +50,7 @@ public class Tile : MonoBehaviour, INodeSearchable
         walls.Add(eWall);
         walls.Add(sWall);
         walls.Add(wWall);
-        
+
         //parent = GetComponentInParent<Transform>();
     }
 
@@ -62,11 +62,23 @@ public class Tile : MonoBehaviour, INodeSearchable
 
     public void AssignNeighbor(EDirection direction, Tile neighborTile)
     {
-        _neighbors.Insert((int)direction, neighborTile);
+        _neighbors[(int)direction] = neighborTile;
+        
         //neighbors[(int)direction] = nieghborTile;
     }
 
-    //Adds empty count for list
+    //Can't directly copy to List of Interface. Manual copying over.
+    public void CopyNeighborsToChildren()
+    {
+        foreach (var tile in _neighbors)
+        {
+            children.Add(tile);
+        }
+    }
+
+    //Adds empty count for list.
+    //This is called from tilegrid to avoid array bounds exception on _neighbors when setting up the grid
+    //Awake does not appear to run in time/during TileGrid start. Use constructor?
     public void NeighborListFill()
     {
         for(int i = 0; i < 4; i++)
