@@ -186,13 +186,11 @@ public class PathfindingAgent : MonoBehaviour
 
 
     //A Dijkstra Search implementation focused on finding the most efficent way to move to a target tile given the environemental cost to get there.
-    INodeSearchable DijkstraSearch(INodeSearchable startNode, INodeSearchable targetNode, List<INodeSearchable> searchSet)
+    INodeSearchable DijkstraSearch(INodeSearchable startNode, INodeSearchable targetNode, List<INodeSearchable> searchSet, ECostType costType)
     {
 
         INodeSearchable currentNode;
         currentNode = startNode;
-
-        //Is there a way to assign a child list directly? Would save several operations here
 
         foreach (var node in searchSet)
         {
@@ -222,35 +220,93 @@ public class PathfindingAgent : MonoBehaviour
             {
                 foreach (var child in currentNode.children)
                 {
-                    //calculate cost to reach child (temp value used for psudocode)
+                    int? calculatedCost = currentNode.Cost;
 
-                    int? calculatedCost = currentNode.Cost /* + CalculateCostToReachChild() */;
-                    //Assign that cost to child if: child cost value is null OR < calced cost
-                    //If assigning cost: make parent current node
+                    switch (costType)
+                    {
+                        case ECostType.Movement:
+
+                            calculatedCost += CalculateMoveCostToReachChildTile(currentNode, child);
+
+                            break;
+                        default:
+                            break;
+                    }
+
                     if(calculatedCost < child.Cost || child.Cost == null)
                     {
                         child.Cost = calculatedCost;
                         child.parent = currentNode;
                     }
 
-
-
                 }
 
             }
 
-            //CREATE COMPARER FOR SORT SEE NOTES BELLOW.
-            searchSet.Sort();
+            IComparer<INodeSearchable> nullback = new SortNullToBack();
+            searchSet.Sort(nullback);
 
         }
-
-        //Next Steps:
-        //Calculate cost for reaching child
-        //Create comparer for nodesearchable for cost, let null cost be "greater than" other values to shove them to the back of the list druing a sort.
 
         return null;
     }
 
+    public int? CalculateMoveCostToReachChildTile(INodeSearchable parent, INodeSearchable child)
+    {
+        Tile tileChild = child as Tile;
+        Tile tileParent = parent as Tile;
+        EDirection directionToParent = EDirection.Error;
+        EDirection directionToChild;
+        int wallCostFromChild;
+        int wallCostFromParent;
+        int floorCostFromChild;
+
+        for (int i = 0; i < 4; i++)
+        {
+            if(tileChild.neighbors[i] == tileParent)
+            {
+                directionToParent = (EDirection)i;
+                break;
+            }
+        }
+
+        directionToChild = FlipDirection(directionToParent);
+
+        wallCostFromChild = tileChild.walls[(int)directionToParent].moveCost;
+        wallCostFromParent = tileParent.walls[(int)directionToChild].moveCost;
+        floorCostFromChild = tileChild.terrainType.moveCost;
+
+        return wallCostFromChild + wallCostFromParent + floorCostFromChild;
+    }
+
+    public EDirection FlipDirection(EDirection direction)
+    {
+        EDirection newDirection;
+
+        switch (direction)
+        {
+            case EDirection.North:
+                newDirection = EDirection.South;
+                break;
+            case EDirection.East:
+                newDirection = EDirection.West;
+                break;
+            case EDirection.South:
+                newDirection = EDirection.North;
+                break;
+            case EDirection.West:
+                newDirection = EDirection.East;
+                break;
+            default:
+                newDirection = EDirection.Error;
+                Debug.LogError("Error case reached for func FlipDirection in PathfindingAgent.");
+                throw new System.ArgumentNullException("Invalid Direction provided at FlipDirection.");
+                break;
+        }
+
+        return newDirection;
+
+    }
 
     //For path part of pathfinding
 

@@ -7,5 +7,6 @@ public enum EDirection
     North,
     East,
     South,
-    West
+    West,
+    Error
 }

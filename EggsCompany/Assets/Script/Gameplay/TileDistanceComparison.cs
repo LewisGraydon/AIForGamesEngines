@@ -15,7 +15,7 @@ public class TileDistanceComparison : IComparer<INodeSearchable>
         testy = y as Tile;
 
 
-        if (testx .distanceToTarget> testy.distanceToTarget)
+        if (testx .distanceToTarget > testy.distanceToTarget)
         {
             return 1;
         }

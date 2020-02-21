@@ -102,13 +102,13 @@ public class OverwatchConsideration : Consideration
             // if the agent is in good cover from the enemies then + for this action
             switch (tileToConsider.ProvidesCoverInDirection(Vector3.forward)) //switch on amount of cover self is in from enemies;
             {
-                case coverValue.None:
+                case ECoverValue.None:
                     AgentInCoverTotalValue -= (int)Weighting.High / self.enemiesInSight.Count;
                     break;
-                case coverValue.Half:
+                case ECoverValue.Half:
                     AgentInCoverTotalValue += (int)Weighting.Medium / self.enemiesInSight.Count;
                     break;
-                case coverValue.Full:
+                case ECoverValue.Full:
                     AgentInCoverTotalValue += (int)Weighting.Low / self.enemiesInSight.Count;
                     break;
                 default:
@@ -119,13 +119,13 @@ public class OverwatchConsideration : Consideration
             // if the enemies are not in full cover then + for this action as expect them to move
             switch (enemy.occupiedTile.ProvidesCoverInDirection(Vector3.back))
             {
-                case coverValue.None:
+                case ECoverValue.None:
                     enemiesInCoverTotalValue += (int)Weighting.High / self.enemiesInSight.Count;
                     break;
-                case coverValue.Half:
+                case ECoverValue.Half:
                     enemiesInCoverTotalValue += (int)Weighting.Medium / self.enemiesInSight.Count;
                     break;
-                case coverValue.Full:
+                case ECoverValue.Full:
                     enemiesInCoverTotalValue -= (int)Weighting.Low / self.enemiesInSight.Count;
                     break;
                 default:
@@ -161,13 +161,13 @@ public class DefendConsideration : Consideration
             // if the agent is in good cover from the enemies then + for this action
             switch (tileToConsider.ProvidesCoverInDirection(Vector3.forward)) //switch on amount of cover self is in from enemies;
             {
-                case coverValue.None:
+                case ECoverValue.None:
                     AgentInCoverTotalValue -= (int)Weighting.High / self.enemiesInSight.Count;
                     break;
-                case coverValue.Half:
+                case ECoverValue.Half:
                     AgentInCoverTotalValue -= (int)Weighting.Medium / self.enemiesInSight.Count;
                     break;
-                case coverValue.Full:
+                case ECoverValue.Full:
                     AgentInCoverTotalValue += (int)Weighting.Low / self.enemiesInSight.Count;
                     break;
                 default:
@@ -178,13 +178,13 @@ public class DefendConsideration : Consideration
             // if the enemies are not in full cover then + for this action as expect them to move
             switch (enemy.occupiedTile.ProvidesCoverInDirection(Vector3.back))
             {
-                case coverValue.None:
+                case ECoverValue.None:
                     enemiesInCoverTotalValue += (int)Weighting.High / self.enemiesInSight.Count;
                     break;
-                case coverValue.Half:
+                case ECoverValue.Half:
                     enemiesInCoverTotalValue += (int)Weighting.Medium / self.enemiesInSight.Count;
                     break;
-                case coverValue.Full:
+                case ECoverValue.Full:
                     enemiesInCoverTotalValue -= (int)Weighting.Low / self.enemiesInSight.Count;
                     break;
                 default:
@@ -229,13 +229,13 @@ public class ShootConsideration : Consideration
             // if the agent is in good cover from the enemies then + for this action
             switch (tileToConsider.ProvidesCoverInDirection(Vector3.forward)) //switch on amount of cover self is in from enemies;
             {
-                case coverValue.None:
+                case ECoverValue.None:
                     AgentInCoverTotalValue -= (int)Weighting.High / self.enemiesInSight.Count;
                     break;
-                case coverValue.Half:
+                case ECoverValue.Half:
                     AgentInCoverTotalValue += (int)Weighting.Medium / self.enemiesInSight.Count;
                     break;
-                case coverValue.Full:
+                case ECoverValue.Full:
                     AgentInCoverTotalValue += (int)Weighting.Low / self.enemiesInSight.Count;
                     break;
                 default:
@@ -246,13 +246,13 @@ public class ShootConsideration : Consideration
             // if the enemies are not in full cover then + for this action as expect them to move
             switch (enemy.occupiedTile.ProvidesCoverInDirection(Vector3.back))
             {
-                case coverValue.None:
+                case ECoverValue.None:
                     enemiesInCoverTotalValue += (int)Weighting.High / self.enemiesInSight.Count;
                     break;
-                case coverValue.Half:
+                case ECoverValue.Half:
                     enemiesInCoverTotalValue += (int)Weighting.Medium / self.enemiesInSight.Count;
                     break;
-                case coverValue.Full:
+                case ECoverValue.Full:
                     enemiesInCoverTotalValue -= (int)Weighting.Low / self.enemiesInSight.Count;
                     break;
                 default:
@@ -390,13 +390,13 @@ public class SelfCoverConsideration : Consideration
             // if the agent is in good cover from the enemies then + for this action
             switch (tileToConsider.ProvidesCoverInDirection(Vector3.forward)) //switch on amount of cover self is in from enemies;
             {
-                case coverValue.None:
+                case ECoverValue.None:
                     AgentInCoverTotalValue -= (int)Weighting.High / self.enemiesInSight.Count;
                     break;
-                case coverValue.Half:
+                case ECoverValue.Half:
                     AgentInCoverTotalValue += (int)Weighting.Medium / self.enemiesInSight.Count;
                     break;
-                case coverValue.Full:
+                case ECoverValue.Full:
                     AgentInCoverTotalValue += (int)Weighting.Low / self.enemiesInSight.Count;
                     break;
                 default:
@@ -407,13 +407,13 @@ public class SelfCoverConsideration : Consideration
             // if the enemies are not in full cover then + for this action as expect them to move
             switch (enemy.occupiedTile.ProvidesCoverInDirection(Vector3.back))
             {
-                case coverValue.None:
+                case ECoverValue.None:
                     enemiesInCoverTotalValue += (int)Weighting.High / self.enemiesInSight.Count;
                     break;
-                case coverValue.Half:
+                case ECoverValue.Half:
                     enemiesInCoverTotalValue += (int)Weighting.Medium / self.enemiesInSight.Count;
                     break;
-                case coverValue.Full:
+                case ECoverValue.Full:
                     enemiesInCoverTotalValue -= (int)Weighting.Low / self.enemiesInSight.Count;
                     break;
                 default:

@@ -2,16 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-
-public enum coverValue
-{
-    None,
-    Half,
-    Full
-}
-
-
-
 public class Tile : MonoBehaviour, INodeSearchable
 {
 
@@ -28,7 +18,7 @@ public class Tile : MonoBehaviour, INodeSearchable
         }
     }
 
-    private List<WallType> walls = new List<WallType>(4);
+    public List<WallType> walls = new List<WallType>(4);
     public WallType nWall;
     public WallType eWall;
     public WallType sWall;
@@ -92,10 +82,10 @@ public class Tile : MonoBehaviour, INodeSearchable
         return terrainType.moveCost + walls[(int)direction].moveCost;
     }
 
-    public coverValue ProvidesCoverInDirection(Vector3 direction)
+    public ECoverValue ProvidesCoverInDirection(Vector3 direction)
     {
         //TODO: CHECK IF THERE IS A WALL IN THE DIRECTION GIVEN.
-        return coverValue.Half;
+        return ECoverValue.Half;
     }
 
     public int chanceToHit(Tile other)
