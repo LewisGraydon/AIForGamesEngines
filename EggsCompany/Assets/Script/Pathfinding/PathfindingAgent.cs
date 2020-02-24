@@ -145,6 +145,7 @@ public class PathfindingAgent : MonoBehaviour
                                 float childMagnitude = childTile.transform.position.magnitude;
                                 float targetMagnitude = targetTile.transform.position.magnitude;
                                 childTile.distanceToTarget = targetMagnitude - childMagnitude;
+                                child.HeuristicCost = childTile.distanceToTarget;
 
                                 //if(distance < bestDistance || bestDistance == 0)
                                 //{
@@ -152,9 +153,11 @@ public class PathfindingAgent : MonoBehaviour
                                 //    bestDistance = distance;
                                 //}
 
+                                //Refactor: Create comparer that is generic to nodes based on heuristic sort.
+
                                 nodeList.Add(childTile);
-                                TileDistanceComparison testcompare = new TileDistanceComparison();
-                                nodeList.Sort(testcompare);
+                                TileDistanceComparison compare = new TileDistanceComparison();
+                                nodeList.Sort(compare);
                                 break;
                             case EHeuristic.Manhattan:
                                 throw new System.NotImplementedException("Manhattan Style Distance Calculation not yet implemented.");
@@ -194,12 +197,12 @@ public class PathfindingAgent : MonoBehaviour
 
         foreach (var node in searchSet)
         {
-            node.Cost = null;
+            node.DijkstraCost = null;
         }
         //Ensures we don't check our starting node twice, and that our starting node is at the front of our "queue"
         searchSet.Remove(currentNode);
         searchSet.Insert(0, currentNode);
-        currentNode.Cost = 0;
+        currentNode.DijkstraCost = 0;
 
         while (searchSet.Count > 0)
         {
@@ -211,7 +214,7 @@ public class PathfindingAgent : MonoBehaviour
             {
                 return targetNode;
             }
-            else if (currentNode.Cost == null)
+            else if (currentNode.DijkstraCost == null)
             {
                 //Remaining nodes are assumed unreachable, no path to target, return null as a fail state
                 return null;
@@ -220,7 +223,7 @@ public class PathfindingAgent : MonoBehaviour
             {
                 foreach (var child in currentNode.children)
                 {
-                    int? calculatedCost = currentNode.Cost;
+                    float? calculatedCost = currentNode.DijkstraCost;
 
                     switch (costType)
                     {
@@ -233,9 +236,10 @@ public class PathfindingAgent : MonoBehaviour
                             break;
                     }
 
-                    if(calculatedCost < child.Cost || child.Cost == null)
+                    if(calculatedCost < child.DijkstraCost || child.DijkstraCost == null)
                     {
-                        child.Cost = calculatedCost;
+                        child.DijkstraCost = calculatedCost;
+                        child.TotalCost = calculatedCost;
                         child.parent = currentNode;
                     }
 
@@ -243,7 +247,7 @@ public class PathfindingAgent : MonoBehaviour
 
             }
 
-            IComparer<INodeSearchable> nullback = new SortNullToBack();
+            IComparer<INodeSearchable> nullback = new SortNullToBackByTotalCost();
             searchSet.Sort(nullback);
 
         }
@@ -251,7 +255,7 @@ public class PathfindingAgent : MonoBehaviour
         return null;
     }
 
-    public int? CalculateMoveCostToReachChildTile(INodeSearchable parent, INodeSearchable child)
+    public float? CalculateMoveCostToReachChildTile(INodeSearchable parent, INodeSearchable child)
     {
         Tile tileChild = child as Tile;
         Tile tileParent = parent as Tile;
@@ -307,6 +311,124 @@ public class PathfindingAgent : MonoBehaviour
         return newDirection;
 
     }
+
+    //@Param searchSet: A list containing all nodes to be searched.
+    INodeSearchable AStarBasic(INodeSearchable startNode, INodeSearchable targetNode, List<INodeSearchable> searchSet, ECostType costType, EHeuristic heuristic)
+    {
+
+        //A* selects the path that minimizes:
+        //f(x) = g(x) + h(x)
+        //Where g(x) is the cost of the node, and h(x) is the cost of heursitic
+        //
+
+        INodeSearchable currentNode;
+        currentNode = startNode;
+
+        foreach (var node in searchSet)
+        {
+            node.DijkstraCost = null;
+            node.HeuristicCost = null;
+            node.TotalCost = null;
+        }
+        //Ensures we don't check our starting node twice, and that our starting node is at the front of our "queue"
+        searchSet.Remove(currentNode);
+        searchSet.Insert(0, currentNode);
+        currentNode.DijkstraCost = 0;
+
+        while (searchSet.Count > 0)
+        {
+            currentNode = searchSet[0];
+            searchSet.RemoveAt(0);
+            searchSet.TrimExcess();
+
+            if (currentNode == targetNode)
+            {
+                return targetNode;
+            }
+            else if (currentNode.DijkstraCost == null)
+            {
+                //Remaining nodes are assumed unreachable, no path to target, return null as a fail state
+                return null;
+            }
+            else
+            {
+                foreach (var child in currentNode.children)
+                {
+                    //Calc the heuristic cost of chosen heuristic measure: h(x)
+                    switch (heuristic)
+                    {
+                        case EHeuristic.Distance:
+                            //Checking what the node is: We could attach an enum to the interface which allows us
+                            //to know what it is. Maybe? Could be bad coding practice; do research when possible.
+                            //Add error checking. eg: expected object tile got object {x}
+                            Tile targetTile = targetNode as Tile;
+                            Tile childTile = child as Tile;
+
+                            float childMagnitude = childTile.transform.position.magnitude;
+                            float targetMagnitude = targetTile.transform.position.magnitude;
+                            child.HeuristicCost = targetMagnitude - childMagnitude;
+
+                            //if(distance < bestDistance || bestDistance == 0)
+                            //{
+                            //    bestNode = child;
+                            //    bestDistance = distance;
+                            //}
+
+                            //nodeList.Add(childTile);
+                            //TileDistanceComparison compare = new TileDistanceComparison();
+                            //nodeList.Sort(compare);
+                            break;
+                        case EHeuristic.Manhattan:
+                            throw new System.NotImplementedException("Manhattan Style Distance Calculation not yet implemented.");
+                            break;
+                        default:
+                            //bestNode = null;
+                            Debug.LogError("No heuristic provided for Pathfinding Agent func BestFirst search with start: "
+                                + startNode + " and target: " + targetNode);
+                            break;
+                    }
+
+                    //Calc the Dijkstra cost of chosen cost measure g(x)
+                    float? calculatedCost = currentNode.DijkstraCost;
+
+                    switch (costType)
+                    {
+                        case ECostType.Movement:
+
+                            calculatedCost += CalculateMoveCostToReachChildTile(currentNode, child);
+
+                            break;
+                        default:
+                            break;
+                    }
+
+                    if (calculatedCost < child.DijkstraCost || child.DijkstraCost == null)
+                    {
+                        child.DijkstraCost = calculatedCost;
+                        child.parent = currentNode;
+                    }
+
+                    //Calc the total cost: f(x) = g(x) + h(x)
+                    child.TotalCost = child.DijkstraCost + child.HeuristicCost;
+
+                    if (!searchSet.Contains(child))
+                    {
+                        searchSet.Add(child);
+                    }
+
+                }
+
+            }
+
+            IComparer<INodeSearchable> nullback = new SortNullToBackByTotalCost();
+            searchSet.Sort(nullback);
+
+        }
+
+        return null;
+    }
+
+
 
     //For path part of pathfinding
 

@@ -4,29 +4,29 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-//A comparer that sorts int? null values to the back of a list, as oppsed to the front.
-public class SortNullToBack : IComparer<INodeSearchable>
+//A comparer that sorts int? null values to the back of a list, as oppsed to the front. Uses TotalCost to sort.
+public class SortNullToBackByTotalCost : IComparer<INodeSearchable>
 {
     public int Compare(INodeSearchable x, INodeSearchable y)
     {
-        if(x.Cost == null && y.Cost == null)
+        if(x.TotalCost == null && y.TotalCost == null)
         {
             return 0;
         }
-        else if (x.Cost == null)
+        else if (x.TotalCost == null)
         {
             return 1;
         }
-        else if (y.Cost == null)
+        else if (y.TotalCost == null)
         {
             return -1;
         }
 
-        if(x.Cost > y.Cost)
+        if(x.TotalCost > y.TotalCost)
         {
             return 1;
         }
-        else if (x.Cost < y.Cost)
+        else if (x.TotalCost < y.TotalCost)
         {
             return -1;
         }

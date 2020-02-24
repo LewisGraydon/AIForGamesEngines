@@ -25,11 +25,12 @@ public class Tile : MonoBehaviour, INodeSearchable
     public WallType wWall;
 
     public bool searched { get => searched; set => searched = value; }
-    public int? Cost { get => Cost; set => Cost = value; }
+    public float? DijkstraCost { get => DijkstraCost; set => DijkstraCost = value; }
+    public float? HeuristicCost { get => DijkstraCost; set => DijkstraCost = value; }
+    public float? TotalCost { get => TotalCost; set => TotalCost = value; }
     public INodeSearchable parent { get => parent; set => parent = value; }
     public List<INodeSearchable> children { get => children; set => children = value; }
 
-    
     public float distanceToTarget { get => distanceToTarget; set => distanceToTarget = value; }
 
     // Start is called before the first frame update

@@ -11,7 +11,19 @@ public interface INodeSearchable
         set;
     }
 
-    int? Cost
+    float? DijkstraCost
+    {
+        get;
+        set;
+    }
+
+    float? HeuristicCost
+    {
+        get;
+        set;
+    }
+
+    float? TotalCost
     {
         get;
         set;
