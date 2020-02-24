@@ -34,6 +34,7 @@ public class LGFlock : MonoBehaviour
                 Quaternion.Euler(Vector3.forward * Random.Range(0.0f, 360.0f)), transform);
 
             newFlockAgent.name = "Agent " + i;
+            newFlockAgent.IdentificationNumber = i;
             newFlockAgent.Initialize(this);
             flockAgents.Add(newFlockAgent);
         }

@@ -13,6 +13,7 @@ public class LGFlockingAgent : MonoBehaviour
 
     private bool movingToDestination = false;
     Vector3 randomPosition = new Vector3(-1,-1,-1);
+    public int IdentificationNumber = -1;
 
     LGFlock agentFlock;
     SphereCollider agentCollider;
@@ -43,6 +44,8 @@ public class LGFlockingAgent : MonoBehaviour
         //      Arrival(objectToFollow.transform.position);
         //      Flee(objectToFollow.transform.position);
         //      Wander(3);
+        //      LeaderFollowing(objectToFollow);
+        //      Queue();
     }
 
     public void Initialize(LGFlock flock)
@@ -269,7 +272,7 @@ public class LGFlockingAgent : MonoBehaviour
         // Pursuit is process of following a target aiming to catch it.
         // While pursuing the target, the agent to predict the targets future movement.
 
-        Vector3 targetVector = (target.transform.position + target.GetComponent<Rigidbody>().velocity) - transform.position;
+        Vector3 targetVector = (target.transform.position /*+ target.GetComponent<Rigidbody>().velocity*/) - transform.position;
 
         if (targetVector == Vector3.zero)
         {
@@ -288,15 +291,13 @@ public class LGFlockingAgent : MonoBehaviour
         // Evade is the exact opposite behavior of pursuit.
         // Instead of seeking the target’s future position, it will flee that position.
 
-        Vector3 targetVector = transform.position - (target.transform.position + target.GetComponent<Rigidbody>().velocity);
+        Vector3 targetVector = transform.position - (target.transform.position  + target.GetComponent<LGFlockingAgent>().agentVelocity);
 
-        if (targetVector == Vector3.zero)
+        if (targetVector.magnitude <= 0.1f)
         {
-            return;
+            transform.forward = target.GetComponent<LGFlockingAgent>().agentVelocity.normalized;
+            transform.position += target.GetComponent<LGFlockingAgent>().agentVelocity * Time.deltaTime;
         }
-
-        transform.forward = targetVector.normalized;
-        transform.position += targetVector * Time.deltaTime;
 
         // If an attack misses i.e. a ranged weapon attack the flock can flee from the projectile and then reconvene on the hive.
     }
@@ -318,23 +319,37 @@ public class LGFlockingAgent : MonoBehaviour
         //      Separation: To avoid crowding while following the leader.
 
         Arrival(leader.transform.position);
+
+        // Evade doesn't quite work as intended for the Following / Queueing behaviour. Needs some feedback as I'm a bit stuck.
         Evade(leader);
-        FlockingBehaviour(false, false, true, false);
+
+
+        FlockingBehaviour(true, false, true, false);
     }
 
-    void Queue(GameObject target)
+    void Queue()
     {
         // Moving all the agent in line formation or in queue.
         // At first, the character should find out if there is someone ahead of them.
         // It should stop if someone is ahead.
 
-        //  If nobody ahead
-        //  {
-        //      Do thing
-        //  }
-        //  Else
-        //  {
-        //      stop
-        //  }
+        GameObject agentToFollow = null;
+        
+        foreach(LGFlockingAgent fa in AgentFlock.FlockAgents)
+        {
+            if (fa.IdentificationNumber == (IdentificationNumber + 1))
+            {
+                agentToFollow = fa.gameObject;
+            }
+        }
+
+        if (agentToFollow)
+        {
+            LeaderFollowing(agentToFollow);
+        }
+        else
+        {
+            Wander(2);
+        }
     }
 }
