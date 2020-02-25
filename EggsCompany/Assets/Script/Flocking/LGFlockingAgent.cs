@@ -44,7 +44,7 @@ public class LGFlockingAgent : MonoBehaviour
         //      Arrival(objectToFollow.transform.position);
         //      Flee(objectToFollow.transform.position);
         //      Wander(3);
-        //      LeaderFollowing(objectToFollow);
+        //      LeaderFollowing(objectToFollow, true);
         //      Queue();
     }
 
@@ -65,7 +65,6 @@ public class LGFlockingAgent : MonoBehaviour
     {
         OnCollisionEnter(collision);
     }
-
 
     public LGFlock AgentFlock
     {
@@ -115,7 +114,7 @@ public class LGFlockingAgent : MonoBehaviour
                     if(separation)
                         separationVector += fa.transform.position - transform.position;
 
-                    // Increment the count variable, this is used to keep track of the number of 
+                    // Increment the count variable, this is used to keep track of the number of neighbours.
                     count++;
                 }
             }
@@ -185,7 +184,6 @@ public class LGFlockingAgent : MonoBehaviour
         transform.position = Vector3.Lerp(transform.position, transform.position + velocity, Time.deltaTime);
     }
 
-    // Done
     void Seek(Vector3 targetPosition)
     {
         // If the target agent moves then the character (current agent) will changes its velocity vector, trying to reach the target at its new location.
@@ -205,12 +203,10 @@ public class LGFlockingAgent : MonoBehaviour
         transform.position += targetVector * Time.deltaTime;
     }
 
-    // Done.
     void Flee(Vector3 targetPosition)
     {
         // Flee also uses desired velocity and steering. But it uses it to move away from the target.
 
-        // The question being, is the movement in a random direction or is it set?
         Vector3 targetVector = transform.position - targetPosition;
 
         if (targetVector == Vector3.zero)
@@ -222,7 +218,6 @@ public class LGFlockingAgent : MonoBehaviour
         transform.position += targetVector * Time.deltaTime;
     }
 
-    // Done.
     void Arrival(Vector3 targetPosition)
     {
         // Arrival has two phases:
@@ -239,7 +234,6 @@ public class LGFlockingAgent : MonoBehaviour
         MoveAgent(targetVector);
     }
 
-    // Done.
     void Wander(float wanderRadius)
     {
         // Used when characters in games need to move randomly in the game world.
@@ -263,40 +257,39 @@ public class LGFlockingAgent : MonoBehaviour
             return;
         }
      
-        Seek(randomPosition);
+        Arrival(randomPosition);
     }
 
-    // Done.
     void Pursuit(GameObject target)
     {
         // Pursuit is process of following a target aiming to catch it.
         // While pursuing the target, the agent to predict the targets future movement.
 
-        Vector3 targetVector = (target.transform.position /*+ target.GetComponent<Rigidbody>().velocity*/) - transform.position;
+        Vector3 targetVector = (target.transform.position + target.GetComponent<LGFlockingAgent>().agentVelocity) - transform.position;
 
         if (targetVector == Vector3.zero)
         {
             return;
         }
 
-        transform.forward = targetVector.normalized;
-        transform.position += targetVector * Time.deltaTime;
+        MoveAgent(targetVector);
 
         // May be an idea to use this for overwatch ability (as in whilst someone is moving attack) though otherwise this may just be theorycrafting.
     }
 
-    // Done.
     void Evade(GameObject target)
     {
         // Evade is the exact opposite behavior of pursuit.
         // Instead of seeking the target’s future position, it will flee that position.
 
         Vector3 targetVector = transform.position - (target.transform.position  + target.GetComponent<LGFlockingAgent>().agentVelocity);
-
-        if (targetVector.magnitude <= 0.1f)
+       
+        if (targetVector.magnitude <= 0.4f)
         {
-            transform.forward = target.GetComponent<LGFlockingAgent>().agentVelocity.normalized;
-            transform.position += target.GetComponent<LGFlockingAgent>().agentVelocity * Time.deltaTime;
+            Quaternion q = Quaternion.AngleAxis(90, target.transform.up);
+            Vector3 rotatedVelocity =  q * target.GetComponent<LGFlockingAgent>().agentVelocity;
+
+            MoveAgent(rotatedVelocity);
         }
 
         // If an attack misses i.e. a ranged weapon attack the flock can flee from the projectile and then reconvene on the hive.
@@ -310,8 +303,7 @@ public class LGFlockingAgent : MonoBehaviour
         // It is simple collision detection not a path finding algorithm.
     }
 
-    // Done, I believe.
-    void LeaderFollowing(GameObject leader)
+    void LeaderFollowing(GameObject leader, bool stayNearLeader)
     {
         // It is a combination of three steering behaviors:
         //      Arrive: Move towards leader and slow down.
@@ -319,12 +311,8 @@ public class LGFlockingAgent : MonoBehaviour
         //      Separation: To avoid crowding while following the leader.
 
         Arrival(leader.transform.position);
-
-        // Evade doesn't quite work as intended for the Following / Queueing behaviour. Needs some feedback as I'm a bit stuck.
         Evade(leader);
-
-
-        FlockingBehaviour(true, false, true, false);
+        FlockingBehaviour(true, false, true, stayNearLeader);
     }
 
     void Queue()
@@ -345,7 +333,7 @@ public class LGFlockingAgent : MonoBehaviour
 
         if (agentToFollow)
         {
-            LeaderFollowing(agentToFollow);
+            LeaderFollowing(agentToFollow, false);
         }
         else
         {
