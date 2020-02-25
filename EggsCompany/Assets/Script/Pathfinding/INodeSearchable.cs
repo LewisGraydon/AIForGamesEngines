@@ -11,6 +11,10 @@ public interface INodeSearchable
         set;
     }
 
+    //Costs ref types are ? to make them nullable.
+    //This is because costs of 0 or high numbers are seen as valid costs by the search systems.
+    //Null allows us to check for unassigned/non-caculated costs in the searches.
+
     float? DijkstraCost
     {
         get;
