@@ -33,6 +33,8 @@ public class Tile : MonoBehaviour, INodeSearchable
 
     public float distanceToTarget { get => distanceToTarget; set => distanceToTarget = value; }
 
+    static private float activeCoverDirectionThreshold = 0.44f;
+
     // Start is called before the first frame update
     void Awake()
     {
@@ -83,9 +85,35 @@ public class Tile : MonoBehaviour, INodeSearchable
         return terrainType.moveCost + walls[(int)direction].moveCost;
     }
 
+    //MADE ON THE UNDERSTANDING THAT +X = North and +Z = West
     public ECoverValue ProvidesCoverInDirection(Vector3 direction)
     {
         //TODO: CHECK IF THERE IS A WALL IN THE DIRECTION GIVEN.
+        if(direction.x >= activeCoverDirectionThreshold)
+        {
+            return (ECoverValue)walls[(int)EDirection.West].coverValue;
+        }
+        else if(direction.x <= -activeCoverDirectionThreshold)
+        {
+            return (ECoverValue)walls[(int)EDirection.East].coverValue;
+        }
+        else
+        {
+            //bobble;
+        }
+        if (direction.x >= activeCoverDirectionThreshold)
+        {
+            return (ECoverValue)walls[(int)EDirection.North].coverValue;
+        }
+        else if (direction.x <= -activeCoverDirectionThreshold)
+        {
+            return (ECoverValue)walls[(int)EDirection.South].coverValue;
+        }
+        else
+        {
+            //bobble;
+        }
+
         return ECoverValue.Half;
     }
 
@@ -99,7 +127,5 @@ public class Tile : MonoBehaviour, INodeSearchable
     {
         return true;
     }
-
-
 }
 
