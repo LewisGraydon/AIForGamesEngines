@@ -4,10 +4,7 @@ using UnityEngine;
 
 public class TileGrid : MonoBehaviour
 {
-    public int gridX;
-    public int gridY;
-
-    private List<Tile> _tilesList { get => _tilesList; set => _tilesList = value; }
+    private List<Tile> _tilesList;
 
     public List<Tile> GetGridTileList()
     {
@@ -17,7 +14,7 @@ public class TileGrid : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        _tilesList = new List<Tile>(gridX * gridY);
+        _tilesList = new List<Tile>();
 
         var temparray = FindObjectsOfType<Tile>();
 
@@ -34,47 +31,8 @@ public class TileGrid : MonoBehaviour
 
         for(int i = 0; i < _tilesList.Count; i++)
         {
-
             _tilesList[i].NeighborListFill();
-
-            if (i - gridX >= 0) {
-                _tilesList[i].AssignNeighbor(EDirection.North, _tilesList[i - gridX]);
-            }
-            else
-            {
-                _tilesList[i].AssignNeighbor(EDirection.North, null);
-            }
-
-            if(i + 1 < _tilesList.Count)
-            {
-                _tilesList[i].AssignNeighbor(EDirection.East, _tilesList[i + 1]);
-            }
-            else
-            {
-                _tilesList[i].AssignNeighbor(EDirection.East, null);
-            }
-
-            if(i + gridX < _tilesList.Count)
-            {
-                _tilesList[i].AssignNeighbor(EDirection.South, _tilesList[i + gridX]);
-            }
-            else
-            {
-                _tilesList[i].AssignNeighbor(EDirection.South, null);
-
-            }
-
-            if (i - 1 >= 0)
-            {
-                _tilesList[i].AssignNeighbor(EDirection.West, _tilesList[i - 1]);
-            }
-            else
-            {
-                _tilesList[i].AssignNeighbor(EDirection.West, null);
-            }
-
             _tilesList[i].CopyNeighborsToChildren();
-
         }
 
         foreach (var tile in _tilesList)

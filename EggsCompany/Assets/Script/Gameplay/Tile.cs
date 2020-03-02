@@ -9,7 +9,7 @@ public class Tile : MonoBehaviour, INodeSearchable
     //GameObject is placeholder for egg or terrainBlocker object
     public ETileOccupier occupier = ETileOccupier.None;
     public FloorType terrainType;
-    private List<Tile> _neighbors = new List<Tile>(4);
+    private List<Tile> _neighbors = new List<Tile>((int)EDirection.Error);
     public List<Tile> neighbors
     {
         get
@@ -18,24 +18,24 @@ public class Tile : MonoBehaviour, INodeSearchable
         }
     }
 
-    public List<WallType> walls = new List<WallType>(4);
-    public WallType nWall;
-    public WallType eWall;
-    public WallType sWall;
-    public WallType wWall;
+    public List<WallType> walls = new List<WallType>();
+    public WallType nWall = null;
+    public WallType eWall = null;
+    public WallType sWall = null;
+    public WallType wWall = null;
 
     public bool searched { get => searched; set => searched = value; }
     public float? DijkstraCost { get => DijkstraCost; set => DijkstraCost = value; }
     public float? HeuristicCost { get => DijkstraCost; set => DijkstraCost = value; }
     public float? TotalCost { get => TotalCost; set => TotalCost = value; }
     public INodeSearchable parent { get => parent; set => parent = value; }
-    public List<INodeSearchable> children { get => children; set => children = value; }
+    public List<INodeSearchable> children { get; set; }
+ 
 
     public float distanceToTarget { get => distanceToTarget; set => distanceToTarget = value; }
 
     static private float activeCoverDirectionThreshold = 0.44f;
 
-    // Start is called before the first frame update
     void Awake()
     {
         //Order here is important to align with direction
@@ -44,6 +44,8 @@ public class Tile : MonoBehaviour, INodeSearchable
         walls.Add(sWall);
         walls.Add(wWall);
 
+        children = new List<INodeSearchable>();
+        
         //parent = GetComponentInParent<Transform>();
     }
 
@@ -74,7 +76,7 @@ public class Tile : MonoBehaviour, INodeSearchable
     //Awake does not appear to run in time/during TileGrid start. Use constructor?
     public void NeighborListFill()
     {
-        for(int i = 0; i < 4; i++)
+        for(int i = 0; i < (int)EDirection.Error; i++)
         {
             _neighbors.Add(null);
         }
@@ -126,6 +128,60 @@ public class Tile : MonoBehaviour, INodeSearchable
     public bool isVisibleFromTile(Tile other)
     {
         return true;
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        Tile otherTile = other.gameObject.GetComponent<Tile>();
+        if (otherTile != null)
+        {
+            if(otherTile.name == "Tile (5)" && name == "Tile")
+            {
+                bool here = true;
+            }
+
+            EDirection dir = EDirection.Error;
+
+            if (other.transform.position.x < transform.position.x && other.transform.position.z < transform.position.z)
+            {
+                dir = EDirection.SouthWest;
+            }
+            else if (other.transform.position.x < transform.position.x && other.transform.position.z > transform.position.z)
+            {
+                dir = EDirection.NorthWest;
+            }
+            else if (other.transform.position.x > transform.position.x && other.transform.position.z < transform.position.z)
+            {
+                dir = EDirection.SouthEast;   
+            }
+            else if (other.transform.position.x > transform.position.x && other.transform.position.z > transform.position.z)
+            {
+                dir = EDirection.NorthEast;
+            }
+            else if(other.transform.position.x > transform.position.x)
+            {
+                dir = EDirection.East;
+                otherTile.walls[(int)EWallDirection.West] = walls[(int)EWallDirection.East];             
+            }
+            else if (other.transform.position.x < transform.position.x)
+            {
+                dir = EDirection.West;
+                otherTile.walls[(int)EWallDirection.East] = walls[(int)EWallDirection.West];
+            }
+            else if (other.transform.position.z > transform.position.z)
+            {
+                dir = EDirection.North;
+                otherTile.walls[(int)EWallDirection.South] = walls[(int)EWallDirection.North];
+            }
+            else if (other.transform.position.z < transform.position.z)
+            {
+                dir = EDirection.South;
+                otherTile.walls[(int)EWallDirection.North] = walls[(int)EWallDirection.South];
+            }
+
+            print(this + ", " + dir + ", " + otherTile);
+            AssignNeighbor(dir, otherTile);
+        }
     }
 }
 

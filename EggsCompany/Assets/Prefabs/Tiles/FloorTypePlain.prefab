@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1194845831282416910}
   - component: {fileID: 6864104327890585884}
+  - component: {fileID: 8785066079017118493}
   m_Layer: 0
   m_Name: FloorTypePlain
   m_TagString: Untagged
@@ -26,7 +27,7 @@ Transform:
   m_GameObject: {fileID: 3820058808745772011}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0.26814842, y: 2.257482, z: -0.84770393}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1, y: 0, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 0
@@ -47,3 +48,16 @@ MonoBehaviour:
   coverValue: 0
   blocksSight: 0
   floorName: 1
+--- !u!65 &8785066079017118493
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3820058808745772011}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 1.25, y: 0, z: 1.25}
+  m_Center: {x: 0, y: 0, z: 0}
