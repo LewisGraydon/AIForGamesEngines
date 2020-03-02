@@ -122,11 +122,11 @@ MonoBehaviour:
   occupier: 0
   terrainType: {fileID: 6864104327890585884, guid: 25c8b2238fc186247bbe21573c74dbf7,
     type: 3}
-  walls: []
-  nWall: {fileID: 661267901639845119, guid: 60ca2d2448215964e98fc64e673eef1b, type: 3}
-  eWall: {fileID: 661267901639845119, guid: 60ca2d2448215964e98fc64e673eef1b, type: 3}
-  sWall: {fileID: 661267901639845119, guid: 60ca2d2448215964e98fc64e673eef1b, type: 3}
-  wWall: {fileID: 661267901639845119, guid: 60ca2d2448215964e98fc64e673eef1b, type: 3}
+  walls:
+  - {fileID: 661267901639845119, guid: 60ca2d2448215964e98fc64e673eef1b, type: 3}
+  - {fileID: 661267901639845119, guid: 60ca2d2448215964e98fc64e673eef1b, type: 3}
+  - {fileID: 661267901639845119, guid: 60ca2d2448215964e98fc64e673eef1b, type: 3}
+  - {fileID: 661267901639845119, guid: 60ca2d2448215964e98fc64e673eef1b, type: 3}
 --- !u!54 &540548765786080439
 Rigidbody:
   m_ObjectHideFlags: 0

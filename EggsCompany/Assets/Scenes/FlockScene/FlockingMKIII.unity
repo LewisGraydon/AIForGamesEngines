@@ -1290,5 +1290,17 @@ PrefabInstance:
       propertyPath: m_Size.x
       value: 1.25
       objectReference: {fileID: 0}
+    - target: {fileID: 9223068994331916695, guid: 4841bdf107dfdb54cbf0f21959bd574e,
+        type: 3}
+      propertyPath: sWall
+      value: 
+      objectReference: {fileID: 661267901639845119, guid: 729b96abef1b5634fb19687d7e6ea125,
+        type: 3}
+    - target: {fileID: 9223068994331916695, guid: 4841bdf107dfdb54cbf0f21959bd574e,
+        type: 3}
+      propertyPath: walls.Array.data[2]
+      value: 
+      objectReference: {fileID: 661267901639845119, guid: 729b96abef1b5634fb19687d7e6ea125,
+        type: 3}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 4841bdf107dfdb54cbf0f21959bd574e, type: 3}
