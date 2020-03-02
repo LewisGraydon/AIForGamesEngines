@@ -46,6 +46,10 @@ public class PathfindingAgent : MonoBehaviour
                 currentNode.searched = true;
                 foreach (var child in currentNode.children)
                 {
+                    if (child == null)
+                    {
+                        continue;
+                    }
                     if (!child.searched && !nodeQueue.Contains(child))
                     {
                         child.parent = currentNode;
@@ -83,6 +87,10 @@ public class PathfindingAgent : MonoBehaviour
                 {
                     foreach (var child in currentNode.children)
                     {
+                        if (child == null)
+                        {
+                            continue;
+                        }
                         if (!child.searched && !nodeQueue.Contains(child))
                         {
                             child.parent = currentNode;
@@ -101,7 +109,6 @@ public class PathfindingAgent : MonoBehaviour
     //An implementation of a best first search which uses a single heuristic.
     //A priority queue with a self-balancing binary tree would be better optimization.
     //For now, a list that sorts after an insert will work for a quick/dirty implementaion.
-    //That is the next current step.
     INodeSearchable BestFirst(INodeSearchable startNode, INodeSearchable targetNode, EHeuristic heuristic)
     {
         //Queue<INodeSearchable> nodeQueue = new Queue<INodeSearchable>();
@@ -129,6 +136,10 @@ public class PathfindingAgent : MonoBehaviour
 
                 foreach (var child in currentNode.children)
                 {
+                    if (child == null)
+                    {
+                        continue;
+                    }
                     if (!child.searched && !nodeList.Contains(child))
                     {
                         child.parent = currentNode;
@@ -154,7 +165,6 @@ public class PathfindingAgent : MonoBehaviour
         return null;
 
     }
-
 
     //A Dijkstra Search implementation focused on finding the most efficent way to move to a target tile given the environemental cost to get there.
     INodeSearchable DijkstraSearch(INodeSearchable startNode, INodeSearchable targetNode, List<INodeSearchable> searchSet, ECostType costType)
@@ -191,6 +201,10 @@ public class PathfindingAgent : MonoBehaviour
             {
                 foreach (var child in currentNode.children)
                 {
+                    if (child == null)
+                    {
+                        continue;
+                    }
                     CalculateDijkstra(currentNode, child, costType);
                     child.TotalCost = child.DijkstraCost;
                 }
@@ -203,63 +217,6 @@ public class PathfindingAgent : MonoBehaviour
         }
 
         return null;
-    }
-
-    public float? CalculateMoveCostToReachChildTile(INodeSearchable parent, INodeSearchable child)
-    {
-        Tile tileChild = child as Tile;
-        Tile tileParent = parent as Tile;
-        EDirection directionToParent = EDirection.Error;
-        EDirection directionToChild;
-        int wallCostFromChild;
-        int wallCostFromParent;
-        int floorCostFromChild;
-
-        for (int i = 0; i < 4; i++)
-        {
-            if(tileChild.neighbors[i] == tileParent)
-            {
-                directionToParent = (EDirection)i;
-                break;
-            }
-        }
-
-        directionToChild = FlipDirection(directionToParent);
-
-        wallCostFromChild = tileChild.walls[(int)directionToParent].moveCost;
-        wallCostFromParent = tileParent.walls[(int)directionToChild].moveCost;
-        floorCostFromChild = tileChild.terrainType.moveCost;
-
-        return wallCostFromChild + wallCostFromParent + floorCostFromChild;
-    }
-
-    public EDirection FlipDirection(EDirection direction)
-    {
-        EDirection newDirection;
-
-        switch (direction)
-        {
-            case EDirection.North:
-                newDirection = EDirection.South;
-                break;
-            case EDirection.East:
-                newDirection = EDirection.West;
-                break;
-            case EDirection.South:
-                newDirection = EDirection.North;
-                break;
-            case EDirection.West:
-                newDirection = EDirection.East;
-                break;
-            default:
-                newDirection = EDirection.Error;
-                Debug.LogError("Error case reached for func FlipDirection in PathfindingAgent.");
-                throw new System.ArgumentNullException("Invalid Direction provided at FlipDirection.");
-                break;
-        }
-
-        return newDirection;
-
     }
 
     //@Param startNode: The INodeSearchable object the search should start from.
@@ -304,6 +261,10 @@ public class PathfindingAgent : MonoBehaviour
             {
                 foreach (var child in currentNode.children)
                 {
+                    if(child == null)
+                    {
+                        continue;
+                    }
                     //Calc the heuristic cost of chosen heuristic measure: h(x)
                     CalculateHeuristic(targetNode, child, heuristic);
 
@@ -328,6 +289,197 @@ public class PathfindingAgent : MonoBehaviour
         }
 
         return null;
+    }
+
+    public float? CalculateMoveCostToReachChildTile(INodeSearchable parent, INodeSearchable child)
+    {
+        Tile tileChild = child as Tile;
+        Tile tileParent = parent as Tile;
+        EDirection directionToParent = EDirection.Error;
+        EDirection directionToChild;
+        EWallDirection wallDirectionToChild;
+        EWallDirection wallDirectionToParent;
+        int wallCostFromChild = 999;
+        int wallCostFromParent = 999;
+        int floorCostFromChild = 999;
+
+        for (int i = 0; i < (int)EDirection.Error; i++)
+        {
+            if (tileChild.neighbors[i] == tileParent)
+            {
+                directionToParent = (EDirection)i;
+                break;
+            }
+        }
+
+        directionToChild = FlipDirection(directionToParent);
+
+        //this switchcase feel wet, might want to refactor
+        switch (directionToChild)
+        {
+            case EDirection.North:
+                wallDirectionToChild = EDirectionToEWallDirection(directionToChild);
+                wallDirectionToParent = EDirectionToEWallDirection(directionToParent);
+
+                wallCostFromChild = tileChild.walls[(int)wallDirectionToParent].moveCost;
+                wallCostFromParent = tileParent.walls[(int)wallDirectionToChild].moveCost;
+                floorCostFromChild = tileChild.terrainType.moveCost;
+                break;
+
+            case EDirection.NorthEast:
+                if ((tileChild.walls[(int)EWallDirection.South].moveCost != 0 || tileChild.walls[(int)EWallDirection.West].moveCost != 0) ||
+                    (tileParent.walls[(int)EWallDirection.North].moveCost != 0 || tileParent.walls[(int)EWallDirection.East].moveCost != 0))
+                {
+                    wallCostFromChild = 999;
+                    wallCostFromParent = 999;
+                }
+                else
+                {
+                    wallCostFromChild = 0;
+                    wallCostFromParent = 0;
+                }
+                floorCostFromChild = tileChild.terrainType.moveCost;
+                break;
+
+            case EDirection.East:
+                wallDirectionToChild = EDirectionToEWallDirection(directionToChild);
+                wallDirectionToParent = EDirectionToEWallDirection(directionToParent);
+
+                wallCostFromChild = tileChild.walls[(int)wallDirectionToParent].moveCost;
+                wallCostFromParent = tileParent.walls[(int)wallDirectionToChild].moveCost;
+                floorCostFromChild = tileChild.terrainType.moveCost;
+                break;
+
+            case EDirection.SouthEast:
+                if ((tileChild.walls[(int)EWallDirection.North].moveCost != 0 || tileChild.walls[(int)EWallDirection.West].moveCost != 0) ||
+                    (tileParent.walls[(int)EWallDirection.South].moveCost != 0 || tileParent.walls[(int)EWallDirection.East].moveCost != 0))
+                {
+                    wallCostFromChild = 999;
+                    wallCostFromParent = 999;
+                }
+                else
+                {
+                    wallCostFromChild = 0;
+                    wallCostFromParent = 0;
+                }
+                floorCostFromChild = tileChild.terrainType.moveCost;
+                break;
+
+            case EDirection.South:
+                wallDirectionToChild = EDirectionToEWallDirection(directionToChild);
+                wallDirectionToParent = EDirectionToEWallDirection(directionToParent);
+                wallCostFromChild = tileChild.walls[(int)wallDirectionToParent].moveCost;
+                wallCostFromParent = tileParent.walls[(int)wallDirectionToChild].moveCost;
+                floorCostFromChild = tileChild.terrainType.moveCost;
+                break;
+
+            case EDirection.SouthWest:
+                if ((tileChild.walls[(int)EWallDirection.North].moveCost != 0 || tileChild.walls[(int)EWallDirection.East].moveCost != 0) ||
+                    (tileParent.walls[(int)EWallDirection.South].moveCost != 0 || tileParent.walls[(int)EWallDirection.West].moveCost != 0))
+                {
+                    wallCostFromChild = 999;
+                    wallCostFromParent = 999;
+                }
+                else
+                {
+                    wallCostFromChild = 0;
+                    wallCostFromParent = 0;
+                }
+                floorCostFromChild = tileChild.terrainType.moveCost;
+                break;
+
+            case EDirection.West:
+                wallDirectionToChild = EDirectionToEWallDirection(directionToChild);
+                wallDirectionToParent = EDirectionToEWallDirection(directionToParent);
+
+                wallCostFromChild = tileChild.walls[(int)wallDirectionToParent].moveCost;
+                wallCostFromParent = tileParent.walls[(int)wallDirectionToChild].moveCost;
+                floorCostFromChild = tileChild.terrainType.moveCost;
+                break;
+
+            case EDirection.NorthWest:
+                if ((tileChild.walls[(int)EWallDirection.South].moveCost != 0 || tileChild.walls[(int)EWallDirection.East].moveCost != 0) ||
+                    (tileParent.walls[(int)EWallDirection.North].moveCost != 0 || tileParent.walls[(int)EWallDirection.West].moveCost != 0))
+                {
+                    wallCostFromChild = 999;
+                    wallCostFromParent = 999;
+                }
+                else
+                {
+                    wallCostFromChild = 0;
+                    wallCostFromParent = 0;
+                }
+                floorCostFromChild = tileChild.terrainType.moveCost;
+                break;
+
+            case EDirection.Error:
+                break;
+            default:
+
+                break;
+        }
+
+        return wallCostFromChild + wallCostFromParent + floorCostFromChild;
+    }
+
+    private EWallDirection EDirectionToEWallDirection(EDirection direction)
+    {
+        switch (direction)
+        {
+            case EDirection.North:
+                return EWallDirection.North;
+            case EDirection.East:
+                return EWallDirection.East;
+            case EDirection.South:
+                return EWallDirection.South;
+            case EDirection.West:
+                return EWallDirection.West;
+            case EDirection.Error:
+                return EWallDirection.Error;
+            default:
+                return EWallDirection.Error;
+        }
+    }
+
+    public EDirection FlipDirection(EDirection direction)
+    {
+        EDirection newDirection;
+
+        switch (direction)
+        {
+            case EDirection.North:
+                newDirection = EDirection.South;
+                break;
+            case EDirection.NorthEast:
+                newDirection = EDirection.SouthWest;
+                break;
+            case EDirection.East:
+                newDirection = EDirection.West;
+                break;
+            case EDirection.SouthEast:
+                newDirection = EDirection.NorthWest;
+                break;
+            case EDirection.South:
+                newDirection = EDirection.North;
+                break;
+            case EDirection.SouthWest:
+                newDirection = EDirection.NorthEast;
+                break;
+            case EDirection.West:
+                newDirection = EDirection.East;
+                break;
+            case EDirection.NorthWest:
+                newDirection = EDirection.SouthEast;
+                break;
+            default:
+                newDirection = EDirection.Error;
+                Debug.LogError("Error case reached for func FlipDirection in PathfindingAgent.");
+                throw new System.ArgumentNullException("Invalid Direction provided at FlipDirection.");
+                break;
+        }
+
+        return newDirection;
+
     }
 
     public void CalculateDijkstra(INodeSearchable currentNode, INodeSearchable child, ECostType costType)
@@ -389,7 +541,6 @@ public class PathfindingAgent : MonoBehaviour
     }
 
     //For path part of pathfinding
-
 
     //@Desc: A function that finds all tiles a unit can move to with the next move action.
     //@Param - moveRange : The maximum tile distance the given unit can move with a single movement pip.

@@ -7,5 +7,6 @@ enum EWallDirection
     North,
     East,
     South,
-    West
+    West,
+    Error
 }
