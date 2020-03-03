@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+//TODO: Ensure that nodes are cleaned once the pathfinding has finished for that turn.
+
+
 //A Utility class that gameobjects may use to call and obtain pathfinding information.
 //If we expand to two tilegrids in scene (verticality) we will need to restructure this class.
 public class PathfindingAgent : MonoBehaviour
@@ -475,7 +478,7 @@ public class PathfindingAgent : MonoBehaviour
                 newDirection = EDirection.Error;
                 Debug.LogError("Error case reached for func FlipDirection in PathfindingAgent.");
                 throw new System.ArgumentNullException("Invalid Direction provided at FlipDirection.");
-                break;
+                //break;
         }
 
         return newDirection;
@@ -532,7 +535,7 @@ public class PathfindingAgent : MonoBehaviour
                 break;
             case EHeuristic.Manhattan:
                 throw new System.NotImplementedException("Manhattan Style Distance Calculation not yet implemented.");
-                break;
+                //break;
             default:
                 //bestNode = null;
                 Debug.LogError("No heuristic provided for Pathfinding Agent func BestFirst search with target: " + targetNode);
@@ -541,6 +544,23 @@ public class PathfindingAgent : MonoBehaviour
     }
 
     //For path part of pathfinding
+
+    public Stack<INodeSearchable> CreatePath(INodeSearchable endingNode)
+    {
+        Stack<INodeSearchable> nodePath = new Stack<INodeSearchable>();
+        nodePath.Push(endingNode);
+        INodeSearchable currentNode = endingNode;
+
+        while(currentNode.parent != null)
+        {
+            nodePath.Push(currentNode.parent);
+            currentNode = currentNode.parent;
+        }
+
+        return nodePath;
+    }
+
+
 
     //@Desc: A function that finds all tiles a unit can move to with the next move action.
     //@Param - moveRange : The maximum tile distance the given unit can move with a single movement pip.
