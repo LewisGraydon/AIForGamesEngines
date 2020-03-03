@@ -5,5 +5,6 @@ using UnityEngine;
 public enum EWallName
 {
     Empty,
-    HalfWall
+    HalfWall,
+    FullWall
 }

@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4603593044284743169}
   - component: {fileID: 661267901639845119}
   m_Layer: 0
-  m_Name: WallTypeSouth
+  m_Name: HalfWall 1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -44,6 +44,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveCost: 0
-  coverValue: 1
-  blocksSight: 0
-  floorName: 1
+  coverValue: 2
+  blocksSight: 1
+  wallName: 2

@@ -26,10 +26,7 @@ public class Tile : MonoBehaviour, INodeSearchable
     public float? TotalCost { get => TotalCost; set => TotalCost = value; }
     public INodeSearchable parent { get => parent; set => parent = value; }
     public List<INodeSearchable> children { get; set; }
- 
-
     public float distanceToTarget { get => distanceToTarget; set => distanceToTarget = value; }
-
     static private float activeCoverDirectionThreshold = 0.44f;
 
     void Awake()
@@ -38,6 +35,63 @@ public class Tile : MonoBehaviour, INodeSearchable
         children = new List<INodeSearchable>();
         
         //parent = GetComponentInParent<Transform>();
+    }
+
+    void Start()
+    {
+        GenerateWalls();
+    }
+
+    void GenerateWalls()
+    {
+        for(int i = 0; i < walls.Count; i++)
+        {
+            float wallHeight;
+            if(walls[i].wallName != EWallName.Empty)
+            {
+                GameObject wallCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                wallHeight = walls[i].wallName == EWallName.FullWall ? 1.0f : 0.5f;                                               
+
+                if(i == (int)EWallDirection.North || i == (int)EWallDirection.South)
+                {
+                    wallCube.transform.localScale = new Vector3(1.0f, wallHeight, 0.05f);
+                }
+
+                else if (i == (int)EWallDirection.East || i == (int)EWallDirection.West)
+                {
+                    wallCube.transform.localScale = new Vector3(0.05f, wallHeight, 1.0f);
+                }
+
+                float wallCubeX = transform.position.x;
+                float wallCubeY = transform.position.y + (wallCube.transform.localScale.y / 2.0f + transform.localScale.y / 2.0f);
+                float wallCubeZ = transform.position.z;
+
+                switch(i)
+                {
+                    case (int)EWallDirection.North:
+                        wallCubeZ = transform.position.z + (transform.localScale.z / 2.0f - wallCube.transform.localScale.z / 2.0f);
+                        break;
+
+                    case (int)EWallDirection.East:
+                        wallCubeX = transform.position.x + (transform.localScale.z / 2.0f - wallCube.transform.localScale.x / 2.0f);
+                        break;
+
+                    case (int)EWallDirection.South:
+                        wallCubeZ = transform.position.z - (transform.localScale.z / 2.0f - wallCube.transform.localScale.z / 2.0f);
+                        break;
+
+                    case (int)EWallDirection.West:
+                        wallCubeX = transform.position.x - (transform.localScale.z / 2.0f - wallCube.transform.localScale.x / 2.0f);
+                        break;
+
+                    default:
+                        break;
+                }
+
+                wallCube.transform.position = new Vector3(wallCubeX, wallCubeY, wallCubeZ);
+                // Make tile parent of wall nodes.
+            }
+        }
     }
 
     // Update is called once per frame

@@ -37,9 +37,11 @@ public class TileGrid : MonoBehaviour
 
         foreach (var tile in _tilesList)
         {
-            Debug.Log(tile);
+            foreach (INodeSearchable child in tile.children)
+            {
+                Debug.Log(child);
+            }
         }
-        Debug.Log("testing");
     }
 
     // Update is called once per frame

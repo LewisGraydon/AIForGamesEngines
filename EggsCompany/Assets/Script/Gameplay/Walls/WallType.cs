@@ -7,7 +7,7 @@ public class WallType : MonoBehaviour, ITerrainType
     public int moveCost;
     public int coverValue;
     public bool blocksSight;
-    public EWallName floorName;
+    public EWallName wallName;
 
     int ITerrainType.moveCost { get => moveCost; }
     int ITerrainType.coverValue { get => coverValue; }
