@@ -225,7 +225,7 @@ public class PathfindingAgent : MonoBehaviour
     //@Param startNode: The INodeSearchable object the search should start from.
     //@Param targetNode: The INodeSearchable object the search should be attempting to reach.
     //@Param searchSet: A list containing all nodes to be searched/in the search range.
-    INodeSearchable AStarBasic(INodeSearchable startNode, INodeSearchable targetNode, List<INodeSearchable> searchSet, ECostType costType, EHeuristic heuristic)
+    INodeSearchable AStarBasic(INodeSearchable startNode, INodeSearchable targetNode, List<INodeSearchable> searchSet, ECostType costType, EHeuristic heuristic, float dijkstraWeight, float heuristicWeight)
     {
         //A* selects the path that minimizes:
         //f(x) = g(x) + h(x)
@@ -275,7 +275,7 @@ public class PathfindingAgent : MonoBehaviour
                     CalculateDijkstra(currentNode, child, costType);
 
                     //Calc the total cost: f(x) = g(x) + h(x)
-                    child.TotalCost = child.DijkstraCost + child.HeuristicCost;
+                    child.TotalCost = (child.DijkstraCost * dijkstraWeight) + (child.HeuristicCost * heuristicWeight);
 
                     if (!searchSet.Contains(child))
                     {
@@ -302,9 +302,9 @@ public class PathfindingAgent : MonoBehaviour
         EDirection directionToChild;
         EWallDirection wallDirectionToChild;
         EWallDirection wallDirectionToParent;
-        int wallCostFromChild = 999;
-        int wallCostFromParent = 999;
-        int floorCostFromChild = 999;
+        float? wallCostFromChild = null;
+        float? wallCostFromParent = null;
+        float? floorCostFromChild = null;
 
         for (int i = 0; i < (int)EDirection.Error; i++)
         {
@@ -317,10 +317,12 @@ public class PathfindingAgent : MonoBehaviour
 
         directionToChild = FlipDirection(directionToParent);
 
-        //this switchcase feel wet, might want to refactor
         switch (directionToChild)
         {
             case EDirection.North:
+            case EDirection.West:
+            case EDirection.South:
+            case EDirection.East:
                 wallDirectionToChild = EDirectionToEWallDirection(directionToChild);
                 wallDirectionToParent = EDirectionToEWallDirection(directionToParent);
 
@@ -344,15 +346,6 @@ public class PathfindingAgent : MonoBehaviour
                 floorCostFromChild = tileChild.terrainType.moveCost;
                 break;
 
-            case EDirection.East:
-                wallDirectionToChild = EDirectionToEWallDirection(directionToChild);
-                wallDirectionToParent = EDirectionToEWallDirection(directionToParent);
-
-                wallCostFromChild = tileChild.walls[(int)wallDirectionToParent].moveCost;
-                wallCostFromParent = tileParent.walls[(int)wallDirectionToChild].moveCost;
-                floorCostFromChild = tileChild.terrainType.moveCost;
-                break;
-
             case EDirection.SouthEast:
                 if ((tileChild.walls[(int)EWallDirection.North].moveCost != 0 || tileChild.walls[(int)EWallDirection.West].moveCost != 0) ||
                     (tileParent.walls[(int)EWallDirection.South].moveCost != 0 || tileParent.walls[(int)EWallDirection.East].moveCost != 0))
@@ -368,14 +361,6 @@ public class PathfindingAgent : MonoBehaviour
                 floorCostFromChild = tileChild.terrainType.moveCost;
                 break;
 
-            case EDirection.South:
-                wallDirectionToChild = EDirectionToEWallDirection(directionToChild);
-                wallDirectionToParent = EDirectionToEWallDirection(directionToParent);
-                wallCostFromChild = tileChild.walls[(int)wallDirectionToParent].moveCost;
-                wallCostFromParent = tileParent.walls[(int)wallDirectionToChild].moveCost;
-                floorCostFromChild = tileChild.terrainType.moveCost;
-                break;
-
             case EDirection.SouthWest:
                 if ((tileChild.walls[(int)EWallDirection.North].moveCost != 0 || tileChild.walls[(int)EWallDirection.East].moveCost != 0) ||
                     (tileParent.walls[(int)EWallDirection.South].moveCost != 0 || tileParent.walls[(int)EWallDirection.West].moveCost != 0))
@@ -388,15 +373,6 @@ public class PathfindingAgent : MonoBehaviour
                     wallCostFromChild = 0;
                     wallCostFromParent = 0;
                 }
-                floorCostFromChild = tileChild.terrainType.moveCost;
-                break;
-
-            case EDirection.West:
-                wallDirectionToChild = EDirectionToEWallDirection(directionToChild);
-                wallDirectionToParent = EDirectionToEWallDirection(directionToParent);
-
-                wallCostFromChild = tileChild.walls[(int)wallDirectionToParent].moveCost;
-                wallCostFromParent = tileParent.walls[(int)wallDirectionToChild].moveCost;
                 floorCostFromChild = tileChild.terrainType.moveCost;
                 break;
 
@@ -581,7 +557,20 @@ public class PathfindingAgent : MonoBehaviour
         return templist;
     }
 
-
+    //@Desc: A Function which sets all nodes in a given list to default, letting it be used again in a clean search.
+    //@Param: nodes - A list of INodeSearchable objects. All nodes within this object list will be set to default.
+    //Notes: Only call this when done with the current function/path building, or your path will be lost.
+    public void NodeReset(List<INodeSearchable> nodes)
+    {
+        foreach(INodeSearchable node in nodes)
+        {
+            node.searched = false;
+            node.TotalCost = null;
+            node.HeuristicCost = null;
+            node.DijkstraCost = null;
+            node.parent = null;
+        }
+    }
 
 
 }
