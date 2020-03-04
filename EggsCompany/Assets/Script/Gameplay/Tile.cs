@@ -103,17 +103,12 @@ public class Tile : MonoBehaviour, INodeSearchable
     public void AssignNeighbor(EDirection direction, Tile neighborTile)
     {
         _neighbors[(int)direction] = neighborTile;
-        
-        //neighbors[(int)direction] = nieghborTile;
+        AssignNeighborToChildren(direction, neighborTile);
     }
 
-    //Can't directly copy to List of Interface. Manual copying over.
-    public void CopyNeighborsToChildren()
+    private void AssignNeighborToChildren(EDirection direction, INodeSearchable tileNode)
     {
-        foreach (var tile in _neighbors)
-        {
-            children.Add(tile);
-        }
+        children[(int)direction] = tileNode;
     }
 
     //Adds empty count for list.
@@ -123,7 +118,17 @@ public class Tile : MonoBehaviour, INodeSearchable
     {
         for(int i = 0; i < (int)EDirection.Error; i++)
         {
-            _neighbors.Add(null);
+            _neighbors.Add(null);   
+        }
+        ChildrenListFill();
+    }
+
+    //Also adds empty count for INodeSearchable list.
+    private void ChildrenListFill()
+    {
+        for (int i = 0; i < (int)EDirection.Error; i++)
+        {
+            children.Add(null);
         }
     }
 
