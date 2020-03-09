@@ -32,7 +32,6 @@ public class TileGrid : MonoBehaviour
         for(int i = 0; i < _tilesList.Count; i++)
         {
             _tilesList[i].NeighborListFill();
-            _tilesList[i].CopyNeighborsToChildren();
         }
 
         foreach (var tile in _tilesList)

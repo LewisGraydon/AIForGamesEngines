@@ -67,6 +67,43 @@ public class PathfindingAgent : MonoBehaviour
 
     }
 
+    //@Desc: A function that finds all tiles a unit can move to with the next move action.
+    //@Param - moveRange : The maximum tile distance the given unit can move with a single movement pip.
+    //@Param - startNode : The current node that unit occupies.
+    //@Return: A list of all nodes that the unit can move to from its current node.
+    //Notes: Might be able to change param to egg/unit object for ease of use. IE object could pass self.
+    List<INodeSearchable> FindMovementRange(INodeSearchable startNode, float moveValue)
+    {
+        INodeSearchable currentNode;
+        List<INodeSearchable> moveRange = new List<INodeSearchable>(); 
+        Stack<INodeSearchable> nodeStack = new Stack<INodeSearchable>();
+        nodeStack.Push(startNode);
+
+        while(nodeStack.Count > 0)
+        {
+            currentNode = nodeStack.Pop();
+            foreach(var child in currentNode.children)
+            {
+                CalculateDijkstra(currentNode, child, ECostType.Movement);
+                if(child.DijkstraCost <= moveValue)
+                {
+                    if (!nodeStack.Contains(child))
+                    {
+                        nodeStack.Push(child);
+                    }
+                    if (!moveRange.Contains(child))
+                    {
+                        moveRange.Add(child);
+                    }
+                }
+
+            }
+        }
+
+        return moveRange;
+    }
+
+
     public static int BreadthFirstAllySearch(INodeSearchable startNode)
     {
         int numberOfAllys = 0;
@@ -534,27 +571,6 @@ public class PathfindingAgent : MonoBehaviour
         }
 
         return nodePath;
-    }
-
-
-
-    //@Desc: A function that finds all tiles a unit can move to with the next move action.
-    //@Param - moveRange : The maximum tile distance the given unit can move with a single movement pip.
-    //@Return: A list of Tiles that the unit can move to.
-    //Notes: Might be able to change param to egg/unit object for ease of use. IE object could pass self.
-    public List<Tile> FindTileRange(int moveRange)
-    {
-
-
-
-
-
-
-
-        //This is just to stop the compiler from throwing an error while I work on the prototype
-        List<Tile> templist;
-        templist = new List<Tile>();
-        return templist;
     }
 
     //@Desc: A Function which sets all nodes in a given list to default, letting it be used again in a clean search.
