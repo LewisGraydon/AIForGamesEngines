@@ -5,5 +5,7 @@ using UnityEngine;
 public enum EFloorName
 {
     Empty,
-    Plain
+    Plain,
+    Road,
+    SpawnPoint
 }
