@@ -25,6 +25,55 @@ public class PathfindingAgent : MonoBehaviour
         
     }
 
+    List<INodeSearchable> FindNodeSightRange(INodeSearchable startNode, int sightRange)
+    {
+        Queue<INodeSearchable> nodeQueue = new Queue<INodeSearchable>();
+        List<INodeSearchable> nodesInSightRange = new List<INodeSearchable>();
+        nodeQueue.Enqueue(startNode);
+
+        INodeSearchable currentNode;
+        int searchDepth = 0;
+
+        while (nodeQueue.Count > 0 && searchDepth < sightRange)
+        {
+            currentNode = nodeQueue.Dequeue();
+                  
+            currentNode.searched = true;
+            foreach (var child in currentNode.children)
+            {
+                if (child == null)
+                {
+                    continue;
+                }
+                if (!child.searched && !nodeQueue.Contains(child))
+                {
+                    child.parent = currentNode;
+                    nodeQueue.Enqueue(child);
+                    nodesInSightRange.Add(child);
+                }
+            }
+
+            searchDepth = FindDepth(currentNode);
+        }
+        //Queue empty, target not found: return null as a fail state
+        return null;
+
+    }
+
+    //Finds the current depth of the given node during or after a recent search.
+    int FindDepth(INodeSearchable node)
+    {
+        int depth = 0;
+        while(node.parent != null)
+        {
+            depth += 1;
+            node = node.parent;
+        }
+
+        return depth;
+    }
+
+
     //A generic implementation of a breadth first search algorithm.
     //Anything that inherits from INodeSearchable should be able to use this.
     //example: Tile inherits from INodeSearchable. If you were to replace the word "node" with "tile"
