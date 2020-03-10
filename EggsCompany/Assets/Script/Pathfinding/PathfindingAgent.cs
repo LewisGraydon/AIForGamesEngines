@@ -32,12 +32,11 @@ public class PathfindingAgent : MonoBehaviour
         nodeQueue.Enqueue(startNode);
 
         INodeSearchable currentNode;
-        int searchDepth = 0;
 
-        while (nodeQueue.Count > 0 && searchDepth < sightRange)
+        while(nodeQueue.Count > 0)
         {
             currentNode = nodeQueue.Dequeue();
-                  
+
             currentNode.searched = true;
             foreach (var child in currentNode.children)
             {
@@ -45,23 +44,21 @@ public class PathfindingAgent : MonoBehaviour
                 {
                     continue;
                 }
-                if (!child.searched && !nodeQueue.Contains(child))
+                if (!child.searched && !nodeQueue.Contains(child) && SearchDepth(child) <= sightRange)
                 {
                     child.parent = currentNode;
                     nodeQueue.Enqueue(child);
                     nodesInSightRange.Add(child);
                 }
             }
-
-            searchDepth = FindDepth(currentNode);
         }
-        //Queue empty, target not found: return null as a fail state
-        return null;
+
+        return nodesInSightRange;
 
     }
 
     //Finds the current depth of the given node during or after a recent search.
-    int FindDepth(INodeSearchable node)
+    int SearchDepth(INodeSearchable node)
     {
         int depth = 0;
         while(node.parent != null)
@@ -72,7 +69,6 @@ public class PathfindingAgent : MonoBehaviour
 
         return depth;
     }
-
 
     //A generic implementation of a breadth first search algorithm.
     //Anything that inherits from INodeSearchable should be able to use this.
@@ -151,7 +147,6 @@ public class PathfindingAgent : MonoBehaviour
 
         return moveRange;
     }
-
 
     public static int BreadthFirstAllySearch(INodeSearchable startNode)
     {
@@ -255,6 +250,41 @@ public class PathfindingAgent : MonoBehaviour
 
     }
 
+    public void CalculateHeuristic(INodeSearchable targetNode, INodeSearchable child, EHeuristic heuristic)
+    {
+        switch (heuristic)
+        {
+            case EHeuristic.Distance:
+                //Checking what the node is: We could attach an enum to the interface which allows us
+                //to know what it is. Maybe? Could be bad coding practice; do research when possible.
+                //Add error checking. eg: expected object tile got object {x}
+                Tile targetTile = targetNode as Tile;
+                Tile childTile = child as Tile;
+
+                float childMagnitude = childTile.transform.position.magnitude;
+                float targetMagnitude = targetTile.transform.position.magnitude;
+                child.HeuristicCost = targetMagnitude - childMagnitude;
+
+                //if(distance < bestDistance || bestDistance == 0)
+                //{
+                //    bestNode = child;
+                //    bestDistance = distance;
+                //}
+
+                //nodeList.Add(childTile);
+                //TileDistanceComparison compare = new TileDistanceComparison();
+                //nodeList.Sort(compare);
+                break;
+            case EHeuristic.Manhattan:
+                throw new System.NotImplementedException("Manhattan Style Distance Calculation not yet implemented.");
+            //break;
+            default:
+                //bestNode = null;
+                Debug.LogError("No heuristic provided for Pathfinding Agent func BestFirst search with target: " + targetNode);
+                break;
+        }
+    }
+
     //A Dijkstra Search implementation focused on finding the most efficent way to move to a target tile given the environemental cost to get there.
     INodeSearchable DijkstraSearch(INodeSearchable startNode, INodeSearchable targetNode, List<INodeSearchable> searchSet, ECostType costType)
     {
@@ -308,10 +338,33 @@ public class PathfindingAgent : MonoBehaviour
         return null;
     }
 
+    public void CalculateDijkstra(INodeSearchable currentNode, INodeSearchable child, ECostType costType)
+    {
+
+        float? calculatedCost = currentNode.DijkstraCost;
+
+        switch (costType)
+        {
+            case ECostType.Movement:
+
+                calculatedCost += CalculateMoveCostToReachChildTile(currentNode, child);
+
+                break;
+            default:
+                break;
+        }
+
+        if (calculatedCost < child.DijkstraCost || child.DijkstraCost == null)
+        {
+            child.DijkstraCost = calculatedCost;
+            child.parent = currentNode;
+        }
+    }
+
     //@Param startNode: The INodeSearchable object the search should start from.
     //@Param targetNode: The INodeSearchable object the search should be attempting to reach.
     //@Param searchSet: A list containing all nodes to be searched/in the search range.
-    INodeSearchable AStarBasic(INodeSearchable startNode, INodeSearchable targetNode, List<INodeSearchable> searchSet, ECostType costType, EHeuristic heuristic, float dijkstraWeight, float heuristicWeight)
+    INodeSearchable ASta  rBasic(INodeSearchable startNode, INodeSearchable targetNode, List<INodeSearchable> searchSet, ECostType costType, EHeuristic heuristic, float dijkstraWeight, float heuristicWeight)
     {
         //A* selects the path that minimizes:
         //f(x) = g(x) + h(x)
@@ -545,64 +598,6 @@ public class PathfindingAgent : MonoBehaviour
 
         return newDirection;
 
-    }
-
-    public void CalculateDijkstra(INodeSearchable currentNode, INodeSearchable child, ECostType costType)
-    {
-
-        float? calculatedCost = currentNode.DijkstraCost;
-
-        switch (costType)
-        {
-            case ECostType.Movement:
-
-                calculatedCost += CalculateMoveCostToReachChildTile(currentNode, child);
-
-                break;
-            default:
-                break;
-        }
-
-        if (calculatedCost < child.DijkstraCost || child.DijkstraCost == null)
-        {
-            child.DijkstraCost = calculatedCost;
-            child.parent = currentNode;
-        }
-    }
-
-    public void CalculateHeuristic(INodeSearchable targetNode, INodeSearchable child, EHeuristic heuristic)
-    {
-        switch (heuristic)
-        {
-            case EHeuristic.Distance:
-                //Checking what the node is: We could attach an enum to the interface which allows us
-                //to know what it is. Maybe? Could be bad coding practice; do research when possible.
-                //Add error checking. eg: expected object tile got object {x}
-                Tile targetTile = targetNode as Tile;
-                Tile childTile = child as Tile;
-
-                float childMagnitude = childTile.transform.position.magnitude;
-                float targetMagnitude = targetTile.transform.position.magnitude;
-                child.HeuristicCost = targetMagnitude - childMagnitude;
-
-                //if(distance < bestDistance || bestDistance == 0)
-                //{
-                //    bestNode = child;
-                //    bestDistance = distance;
-                //}
-
-                //nodeList.Add(childTile);
-                //TileDistanceComparison compare = new TileDistanceComparison();
-                //nodeList.Sort(compare);
-                break;
-            case EHeuristic.Manhattan:
-                throw new System.NotImplementedException("Manhattan Style Distance Calculation not yet implemented.");
-                //break;
-            default:
-                //bestNode = null;
-                Debug.LogError("No heuristic provided for Pathfinding Agent func BestFirst search with target: " + targetNode);
-                break;
-        }
     }
 
     //For path part of pathfinding
