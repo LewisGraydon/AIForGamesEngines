@@ -364,7 +364,7 @@ public class PathfindingAgent : MonoBehaviour
     //@Param startNode: The INodeSearchable object the search should start from.
     //@Param targetNode: The INodeSearchable object the search should be attempting to reach.
     //@Param searchSet: A list containing all nodes to be searched/in the search range.
-    INodeSearchable ASta  rBasic(INodeSearchable startNode, INodeSearchable targetNode, List<INodeSearchable> searchSet, ECostType costType, EHeuristic heuristic, float dijkstraWeight, float heuristicWeight)
+    INodeSearchable AStarBasic(INodeSearchable startNode, INodeSearchable targetNode, List<INodeSearchable> searchSet, ECostType costType, EHeuristic heuristic, float dijkstraWeight, float heuristicWeight)
     {
         //A* selects the path that minimizes:
         //f(x) = g(x) + h(x)
