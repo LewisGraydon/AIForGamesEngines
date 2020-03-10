@@ -4,9 +4,7 @@ using UnityEngine;
 
 public class PlayerCharacter : CharacterBase
 {
-    // Names not guarenteed to be unique at the moment.
-    private string[] nameArray = { "Benedict", "Royale", "Nog", "Beauregard", "Custard", "Meyerbeer", "Florentine", "Flæskeæggekage", "Foo Yung", "Mayo"};
-    private string _characterName;
+    public string _characterName;
 
     public string characterName
     {
@@ -17,7 +15,6 @@ public class PlayerCharacter : CharacterBase
     void Start()
     {
         onPlayerTeam = true;
-        _characterName = nameArray[Random.Range(0, nameArray.Length - 1)];
     }
 
     // Update is called once per frame
