@@ -4,6 +4,13 @@ using UnityEngine;
 
 public class CharacterBase : MonoBehaviour
 {
+    protected bool onPlayerTeam;
+
+    public bool getOnPlayerTeam
+    {
+        get { return onPlayerTeam; }
+    }
+
     protected int actionPips = 2;
     public int remainingPips
     {

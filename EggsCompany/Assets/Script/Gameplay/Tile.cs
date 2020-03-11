@@ -39,7 +39,23 @@ public class Tile : MonoBehaviour, INodeSearchable
 
     void Start()
     {
+        NeighborListFill();
         GenerateWalls();
+
+        switch(terrainType.floorName)
+        {
+            case EFloorName.Road:
+                GetComponent<Renderer>().material.color = Color.grey;
+                break;
+
+            case EFloorName.SpawnPoint:
+                GetComponent<Renderer>().material.color = Color.green;
+                break;
+
+            default:
+                break;
+        }
+        
     }
 
     void GenerateWalls()
@@ -89,7 +105,15 @@ public class Tile : MonoBehaviour, INodeSearchable
                 }
 
                 wallCube.transform.position = new Vector3(wallCubeX, wallCubeY, wallCubeZ);
+                
                 // Make tile parent of wall nodes.
+                wallCube.transform.parent = transform;   
+                
+                // For debug purposes, half walls will be a different colour to regular walls.
+                if(walls[i].wallName == EWallName.HalfWall)
+                {
+                    wallCube.GetComponent<Renderer>().material.color = Color.magenta;
+                }
             }
         }
     }
