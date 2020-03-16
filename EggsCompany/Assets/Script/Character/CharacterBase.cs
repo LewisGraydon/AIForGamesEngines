@@ -5,7 +5,6 @@ using UnityEngine;
 public class CharacterBase : MonoBehaviour
 {
     protected bool onPlayerTeam;
-
     public bool getOnPlayerTeam
     {
         get { return onPlayerTeam; }
@@ -18,6 +17,18 @@ public class CharacterBase : MonoBehaviour
         {
             return actionPips;
         }
+    }
+
+    protected int health = 6;
+    public int remainingHealth
+    {
+        get { return health; }
+    }
+
+    protected int maxHealthValue = 6;
+    public int maximumHealth
+    {
+        get { return health; }
     }
 
     protected List<CharacterBase> _enemiesInSight = new List<CharacterBase>();

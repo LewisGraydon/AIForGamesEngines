@@ -7,5 +7,6 @@ public enum EFloorName
     Empty,
     Plain,
     Road,
-    SpawnPoint
+    SpawnPoint,
+    SpawnPointEnemy
 }

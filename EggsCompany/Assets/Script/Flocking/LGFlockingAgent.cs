@@ -5,9 +5,9 @@ using UnityEngine;
 public class LGFlockingAgent : MonoBehaviour
 {
     private Vector3 agentVelocity = new Vector3();
-    private float maxAgentVelocity = 5.0f;
+    private float maxAgentVelocity = 1.0f;
     private float maxAgentVelocitySquared;
-    private float maxAgentDistanceFromCenter = 1.0f;
+    private float maxAgentDistanceFromCenter = 0.2f;
     private GameObject objectToFollow;
     Vector3 centre = new Vector3();
 

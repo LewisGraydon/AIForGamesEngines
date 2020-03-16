@@ -42,10 +42,4 @@ public class PlayerSpawn : MonoBehaviour
             player.transform.SetParent(container.transform, false);
         }
     }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 }

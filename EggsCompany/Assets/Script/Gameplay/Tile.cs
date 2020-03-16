@@ -52,10 +52,13 @@ public class Tile : MonoBehaviour, INodeSearchable
                 GetComponent<Renderer>().material.color = Color.green;
                 break;
 
+            case EFloorName.SpawnPointEnemy:
+                GetComponent<Renderer>().material.color = Color.red;
+                break;
+
             default:
                 break;
         }
-        
     }
 
     void GenerateWalls()
