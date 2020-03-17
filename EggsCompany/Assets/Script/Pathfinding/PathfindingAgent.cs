@@ -138,6 +138,7 @@ public class PathfindingAgent : MonoBehaviour
                     }
                     if (!moveRange.Contains(child))
                     {
+                        //TODO: copy? add as function pass? Whatever, add the cost calculation for the tile.
                         moveRange.Add(child);
                     }
                 }
@@ -599,7 +600,6 @@ public class PathfindingAgent : MonoBehaviour
         return newDirection;
 
     }
-
     //For path part of pathfinding
 
     public Stack<INodeSearchable> CreatePath(INodeSearchable endingNode)

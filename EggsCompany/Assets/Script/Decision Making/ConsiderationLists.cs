@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
 public static class ConsiderationLists
 {
+    
     public static List<SingleEnemyActionConsideration> singleEnemyBasedActionConsiderationList = new List<SingleEnemyActionConsideration>()
     {
         new MoveConsideration(),
@@ -29,7 +31,10 @@ public static class ConsiderationLists
     {
         new ProximityToAllyConsideration()
     };
+    private const int numberTilesToRandomlySelectFrom = 3;
+    public static List<KeyValuePair<Tile, int>> topTileScoresList = new List<KeyValuePair<Tile, int>>(numberTilesToRandomlySelectFrom);
 
+    #region Action Consideration List Functions
     public static Dictionary<ActionID, int> ConsiderActions(ref CharacterBase self)
     {
         Dictionary<ActionID, int> actionIdValuePair = new Dictionary<ActionID, int>();
@@ -57,37 +62,55 @@ public static class ConsiderationLists
         return actionIdValuePair;
     }
 
-    public static Dictionary<MoveFactorID, int> ConsiderTileForMovement(ref CharacterBase self, ref Tile tileToConsider)
+
+    public static void SortActionList(ref Dictionary<ActionID, int> actionDictionary, ref CharacterBase self)
     {
-        Dictionary<MoveFactorID, int> movementConsiderationIdValuePair = new Dictionary<MoveFactorID, int>();
+        List<KeyValuePair<ActionID, int>> actionList = actionDictionary.ToList();
+        actionList.Sort((pair1, pair2) => pair1.Value.CompareTo(pair2.Value));
+        int bob = UnityEngine.Random.Range(0, 2);
+        if((int)actionList[bob].Key <= singleEnemyBasedActionConsiderationList.Count)
+        {
+            singleEnemyBasedActionConsiderationList[(int)actionList[bob].Key].Enact(self);
+        }
+        else
+        {
+            nonEnemyActionConsiderationList[(int)actionList[bob].Key - singleEnemyBasedActionConsiderationList.Count].Enact(self);
+        }
+    }
+
+    #endregion
+
+    public static int ConsiderSingleTileForMovement(ref CharacterBase self, ref Tile tileToConsider)
+    {
+        int totalTileValue = 0;
         foreach (CharacterBase enemy in self.enemiesInSight)
         {
             foreach (SingleEnemyMovementConsideration consideration in singleEnemyMovementConsiderationList)
             {
-                if (movementConsiderationIdValuePair.ContainsKey(consideration.moveFactorID))
-                {
-                    movementConsiderationIdValuePair.Add(consideration.moveFactorID, 0);
-                }
-                ECoverValue agentCoverFromEnemy = self.occupiedTile.ProvidesCoverInDirection(enemy.transform.position - self.transform.position);
-                ECoverValue enemtCoverFromAgent = self.occupiedTile.ProvidesCoverInDirection(self.transform.position - enemy.transform.position);
-                movementConsiderationIdValuePair[consideration.moveFactorID] = consideration.CompareValues((movementConsiderationIdValuePair[consideration.moveFactorID]), consideration.ConsiderTile(ref self, enemy, ref tileToConsider));
+                totalTileValue += consideration.ConsiderTile(ref self, enemy, ref tileToConsider);
             }
         }
-        foreach(NoEnemyMovementConsideration consideration in noEnemyMovementConsiderationList)
+        foreach (NoEnemyMovementConsideration consideration in noEnemyMovementConsiderationList)
         {
-            if (!movementConsiderationIdValuePair.ContainsKey(consideration.moveFactorID))
-            {
-                movementConsiderationIdValuePair.Add(consideration.moveFactorID, consideration.ConsiderTile(ref self));
-            }
-            else
-            {
-                movementConsiderationIdValuePair[consideration.moveFactorID] = consideration.ConsiderTile(ref self);
-            }
+            totalTileValue += consideration.ConsiderTile(ref self);
         }
 
-        return movementConsiderationIdValuePair;
+        topTileScoresList.Add(new KeyValuePair<Tile, int>(tileToConsider, totalTileValue));
+
+        topTileScoresList.Sort((pair1, pair2) => pair2.Value.CompareTo(pair1.Value));
+        while(topTileScoresList.Count > numberTilesToRandomlySelectFrom)
+        {
+            topTileScoresList.RemoveAt(numberTilesToRandomlySelectFrom);
+        }
+        return totalTileValue;
     }
 
+    public static Tile GetTileToMoveTo()
+    {
+        Tile outTile = topTileScoresList[Random.Range(0, numberTilesToRandomlySelectFrom)].Key;
+        topTileScoresList.Clear();
+        return outTile;
+    }
 }
 
 

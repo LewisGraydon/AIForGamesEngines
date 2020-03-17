@@ -21,6 +21,8 @@ public abstract class ActionConsideration
     {
         SetActionID();
     }
+
+    public abstract void Enact(CharacterBase self);
 }
 
 public abstract class SingleEnemyActionConsideration : ActionConsideration
@@ -34,14 +36,6 @@ public abstract class NoEnemyActionConsideration : ActionConsideration
     public abstract int ConsiderAction(CharacterBase self);
 }
 
-
-public static class ActionConsiderations
-{
-    public static int ConsiderDefendAction(ref CharacterBase Self, ref CharacterBase Enemy)
-    {
-        return 0;
-    }
-}
 #region ActionConsideration classes
 
 public class MoveConsideration : SingleEnemyActionConsideration
@@ -66,6 +60,11 @@ public class MoveConsideration : SingleEnemyActionConsideration
 
         //if the enemy is < 1/2 range
         return actionValue;
+    }
+
+    public override void Enact(CharacterBase self)
+    {
+        // SELF.MOVE BAAAYYYYBBBBAAYYYY.
     }
 
     public override void SetActionID()
@@ -172,6 +171,11 @@ public class OverwatchConsideration : SingleEnemyActionConsideration
                 break;
         }
         return actionValue;
+    }
+
+    public override void Enact(CharacterBase self)
+    {
+        self.EnterOverwatchStance();
     }
 
     public override void SetActionID()
@@ -283,6 +287,11 @@ public class DefendConsideration : SingleEnemyActionConsideration
         return actionValue;
     }
 
+    public override void Enact(CharacterBase self)
+    {
+        self.EnterDefenseStance();
+    }
+
     public override void SetActionID()
     {
         _actionID = ActionID.Defend;
@@ -359,9 +368,16 @@ public class DefendConsideration : SingleEnemyActionConsideration
 
 public class ShootConsideration : SingleEnemyActionConsideration
 {
+    private CharacterBase enemyToAttack;
+    private CharacterBase enemyLastChecked;
     public override int CompareValues(int oldValue, int newValue)
     {
-        return oldValue + newValue;
+        if(newValue > oldValue)
+        {
+            enemyToAttack = enemyLastChecked;
+            return newValue;
+        }
+        return oldValue;
     }
 
     public override int ConsiderAction(CharacterBase self, CharacterBase enemy, ECoverValue agentLevelOfCoverFromEnemy, ECoverValue enemyLevelOfCoverFromAgent)
@@ -371,13 +387,13 @@ public class ShootConsideration : SingleEnemyActionConsideration
         switch (agentLevelOfCoverFromEnemy)
         {
             case ECoverValue.None:
-                actionValue -= (int)Weighting.High / self.enemiesInSight.Count;
+                actionValue -= (int)Weighting.High;
                 break;
             case ECoverValue.Half:
-                actionValue += (int)Weighting.Medium / self.enemiesInSight.Count;
+                actionValue += (int)Weighting.Medium;
                 break;
             case ECoverValue.Full:
-                actionValue += (int)Weighting.Low / self.enemiesInSight.Count;
+                actionValue += (int)Weighting.Low;
                 break;
             default:
                 Debug.LogError("issue with cover Value returned");
@@ -386,19 +402,27 @@ public class ShootConsideration : SingleEnemyActionConsideration
         switch (enemyLevelOfCoverFromAgent)
         {
             case ECoverValue.None:
-                actionValue += (int)Weighting.High / self.enemiesInSight.Count;
+                actionValue += (int)Weighting.High;
                 break;
             case ECoverValue.Half:
-                actionValue += (int)Weighting.Medium / self.enemiesInSight.Count;
+                actionValue += (int)Weighting.Medium;
                 break;
             case ECoverValue.Full:
-                actionValue -= (int)Weighting.Low / self.enemiesInSight.Count;
+                actionValue -= (int)Weighting.Low;
                 break;
             default:
                 break;
         }
+        enemyLastChecked = enemy;
+
+        //why is there no chanceToHitCalculation in here?
 
         return actionValue;
+    }
+
+    public override void Enact(CharacterBase self)
+    {
+        self.AttackCharacter(enemyToAttack);
     }
 
     public override void SetActionID()
@@ -437,6 +461,11 @@ public class ReloadConsideration : NoEnemyActionConsideration
             }
         }
         return actionValue;
+    }
+
+    public override void Enact(CharacterBase self)
+    {
+        self.Reload();
     }
 
     public override void SetActionID()
