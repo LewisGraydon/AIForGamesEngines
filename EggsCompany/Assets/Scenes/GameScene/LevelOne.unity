@@ -29675,6 +29675,7 @@ MonoBehaviour:
   playerDeathCount: 0
   gameState: 0
   playerContainer: {fileID: 1998153223}
+  enemyContainer: {fileID: 1806559635}
   EndScreenPrefab: {fileID: 6522518057925512850, guid: 3e34485b7dfa60d46ab8977804ff5e17,
     type: 3}
   psScript: {fileID: 0}
