@@ -7,6 +7,7 @@ public class EnemySpawn : MonoBehaviour
     public Tile[] spawnPoints;
     public GameObject container;
     public GameObject enemyCharacterPrefab;
+    public int numberOfEnemies = 7;
 
     // Start is called before the first frame update
     void Start()

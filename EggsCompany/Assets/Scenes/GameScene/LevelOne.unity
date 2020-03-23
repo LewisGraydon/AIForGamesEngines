@@ -39151,6 +39151,7 @@ MonoBehaviour:
   container: {fileID: 1806559635}
   enemyCharacterPrefab: {fileID: 2385923724340538729, guid: 494f0273dbde6dc4fb9c10e6ba797f92,
     type: 3}
+  numberOfEnemies: 7
 --- !u!1001 &1810069513
 PrefabInstance:
   m_ObjectHideFlags: 0

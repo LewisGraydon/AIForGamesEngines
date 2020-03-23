@@ -19,6 +19,12 @@ public class CharacterBase : MonoBehaviour
         }
     }
 
+    protected int maxActionPips = 2;
+    public int maximumActionPips
+    {
+        get { return maxActionPips; }
+    }
+
     protected int health = 6;
     public int remainingHealth
     {

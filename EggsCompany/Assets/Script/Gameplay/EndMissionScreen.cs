@@ -24,12 +24,12 @@ public class EndMissionScreen : MonoBehaviour
 
         if(stateScript.gameState == EGameState.victoryScreen)
         {
-            missionOutcome.text = "MISSION COMPLETE";
+            missionOutcome.text = "EGGCELLENT VICTORY";  
         }
 
         else if(stateScript.gameState == EGameState.failureScreen)
         {
-            missionOutcome.text = "MISSION FAILED";
+            missionOutcome.text = "CRACKED UNDER PRESSURE";
         }
     }
 }

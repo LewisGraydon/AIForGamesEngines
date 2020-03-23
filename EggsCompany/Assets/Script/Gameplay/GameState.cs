@@ -13,13 +13,20 @@ public class GameState : MonoBehaviour
     public GameObject enemyContainer;
     public GameObject EndScreenPrefab;
     public PlayerSpawn psScript;
+    private EnemySpawn esScript;
 
+    private int playerPipsRemaining = -1;
+    private int enemyPipsRemaining = -1;
+
+    // End Of Mission
     private bool transitioningToMM = false;
 
     // Start is called before the first frame update
     void Start()
     {
         psScript = playerContainer.GetComponent<PlayerSpawn>();
+        esScript = enemyContainer.GetComponent<EnemySpawn>();
+        ProcessGameState();
     }
 
     // Update is called once per frame
@@ -54,7 +61,7 @@ public class GameState : MonoBehaviour
     // Self explanatory, but checks if all enemies are dead and if so, it will initialise the end of mission screen in the victory state.
     public void EnemyDeathCheck()
     {
-        if (enemyDeathCount == 7) // 7 is the number of enemies in current level, may need to put it into a variable soon.
+        if (enemyDeathCount == esScript.numberOfEnemies) // 7 is the number of enemies in current level, may need to put it into a variable soon.
         {
             gameState = EGameState.victoryScreen;
             initialiseEndScreen();
@@ -107,12 +114,78 @@ public class GameState : MonoBehaviour
     // Debug function to kill all enemies.
     void KillAllEnemies()
     {
-        enemyDeathCount = 7;
+        enemyDeathCount = esScript.numberOfEnemies;
 
         for(int i = 0; i < enemyContainer.transform.childCount; i++)
         {
             GameObject obj = enemyContainer.transform.GetChild(i).gameObject;
             Destroy(obj);
         }
+    }
+
+    // This should ideally get called after each action.
+    void ProcessGameState()
+    {
+        int pipCount = 0;
+
+        switch(gameState)
+        {
+            case EGameState.setupState:
+
+                InitialisePlayerPips();
+                gameState = EGameState.playerTurn;
+
+                break;
+
+            case EGameState.playerTurn:
+
+                for (int i = 0; i < playerContainer.transform.childCount; i++)
+                {
+                    GameObject obj = playerContainer.transform.GetChild(i).gameObject;
+                    pipCount += obj.GetComponent<PlayerCharacter>().remainingPips;
+                }
+
+                playerPipsRemaining = pipCount;
+
+                if(playerPipsRemaining == 0)
+                {
+                    InitialiseEnemyPips();
+                    gameState = EGameState.enemyTurn;
+                }
+
+                break;
+
+            case EGameState.enemyTurn:
+
+                for (int i = 0; i < enemyContainer.transform.childCount; i++)
+                {
+                    GameObject obj = enemyContainer.transform.GetChild(i).gameObject;
+                    pipCount += obj.GetComponent<EnemyCharacter>().remainingPips;
+                }
+
+                enemyPipsRemaining = pipCount;
+
+                if (enemyPipsRemaining == 0)
+                {
+                    gameState = EGameState.setupState;
+                }
+
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    // Called at the start of player turn / end of enemy turn (haven't decided which yet) to set the pips to be the number of operators.
+    // Also, to note the number of operators should 
+    void InitialisePlayerPips()
+    {
+        playerPipsRemaining = (psScript.numberOfOperators - playerDeathCount) * 2;
+    }
+
+    void InitialiseEnemyPips()
+    {
+        enemyPipsRemaining = (esScript.numberOfEnemies - enemyDeathCount) * esScript.enemyCharacterPrefab.GetComponent<EnemyCharacter>().maximumActionPips;
     }
 }
