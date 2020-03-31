@@ -98,7 +98,9 @@ public class GameState : MonoBehaviour
             Debug.Log("Loading Main Menu");
         }
     }
-    
+
+    #region DebugFunctions
+
     // Debug function to kill all players.
     void KillAllPlayers()
     {
@@ -123,8 +125,10 @@ public class GameState : MonoBehaviour
         }
     }
 
+    #endregion
+
     // This should ideally get called after each action.
-    void ProcessGameState()
+    public void ProcessGameState()
     {
         int pipCount = 0;
 

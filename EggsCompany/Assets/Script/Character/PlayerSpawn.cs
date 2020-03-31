@@ -15,7 +15,7 @@ public class PlayerSpawn : MonoBehaviour
     private List<Tile> spawnPointsList = new List<Tile>();
     
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         nameList = new List<string> { "Benedict", "Royale", "Nog", "Beauregard", "Custard", "Meyerbeer", "Florentine", "Flæskeæggekage", "Foo Yung", "Mayo" };
         spawnPointsList = potentialSpawnPoints.ToList();

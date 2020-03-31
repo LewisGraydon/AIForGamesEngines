@@ -4,6 +4,14 @@ using UnityEngine;
 
 public class CharacterBase : MonoBehaviour
 {
+    protected GameObject gsm;
+    protected GameState gsmScript;
+    void Start()
+    {
+        gsm = GameObject.Find("GameStateManager");
+        gsmScript = gsm.GetComponent<GameState>();
+    }
+
     protected bool onPlayerTeam;
     public bool getOnPlayerTeam
     {
@@ -67,13 +75,13 @@ public class CharacterBase : MonoBehaviour
 
     public void AttackCharacter(CharacterBase otherCharacter)
     {
-
+        
     }
 
     public void Reload()
     {
         _ammunition = _maxAmmunition;
-        actionPips = 0;
+        actionPips = 0;   
     }
 
     public float sightDistance = 0.0f;
