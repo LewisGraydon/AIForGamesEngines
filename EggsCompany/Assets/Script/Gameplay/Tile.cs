@@ -29,6 +29,8 @@ public class Tile : MonoBehaviour, INodeSearchable
     public float distanceToTarget { get => distanceToTarget; set => distanceToTarget = value; }
     static private float activeCoverDirectionThreshold = 0.44f;
 
+    private Renderer gameObjectRenderer;
+
     void Awake()
     {
         //Order here is important to align with direction
@@ -37,23 +39,39 @@ public class Tile : MonoBehaviour, INodeSearchable
         //parent = GetComponentInParent<Transform>();
     }
 
+    private Color startcolor;
+    
+    void OnMouseEnter()
+    {
+        startcolor = gameObjectRenderer.material.color;
+        gameObjectRenderer.material.color = Color.cyan;
+        GameObject.Find("Players").GetComponent<PlayerManager>().destinationTile = gameObject;
+    }
+    void OnMouseExit()
+    {
+        gameObjectRenderer.material.color = startcolor;
+        GameObject.Find("Players").GetComponent<PlayerManager>().destinationTile = null;
+    }
+
+
     void Start()
     {
+        gameObjectRenderer = GetComponent<Renderer>();
         NeighborListFill();
         GenerateWalls();
 
         switch(terrainType.floorName)
         {
             case EFloorName.Road:
-                GetComponent<Renderer>().material.color = Color.grey;
+                gameObjectRenderer.material.color = Color.grey;
                 break;
 
             case EFloorName.SpawnPoint:
-                GetComponent<Renderer>().material.color = Color.green;
+                gameObjectRenderer.material.color = Color.green;
                 break;
 
             case EFloorName.SpawnPointEnemy:
-                GetComponent<Renderer>().material.color = Color.red;
+                gameObjectRenderer.material.color = Color.red;
                 break;
 
             default:

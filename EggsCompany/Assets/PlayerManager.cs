@@ -10,11 +10,13 @@ public class PlayerManager : MonoBehaviour
 
     private GameObject gsm;
     private GameState gsmScript;
-    private GameObject selectedPlayer = null;
+    public GameObject selectedPlayer = null;
     private Vector3 selectedPlayerCameraPosition = Vector3.zero;
 
     private int cameraPositionIndex = 0;
     private Vector3[] cameraPositionArray = new Vector3[4];
+
+    public GameObject destinationTile = null;
 
     // Start is called before the first frame update
     void Start()
@@ -42,6 +44,14 @@ public class PlayerManager : MonoBehaviour
     {
         if (gsmScript.gameState == EGameState.playerTurn)
         {
+            if(Input.GetMouseButtonUp(0))
+            {
+                if (destinationTile != null)
+                {
+                    print("Moving " + selectedPlayer + " to " + destinationTile.name);
+                }
+            }
+
             if (Input.GetKeyUp(KeyCode.Q))
             {
                 selectedIndex -= 1;
