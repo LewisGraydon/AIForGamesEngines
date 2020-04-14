@@ -1,4 +1,4 @@
-﻿using System.Collections;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -11,55 +11,70 @@ public enum ActionID
     Reload
 };
 
-public abstract class ActionConsideration
+public abstract class ActionConsideration : IComparable<ActionConsideration>
 {
-    protected ActionID _actionID;
-    public ActionID actionID { get => _actionID; }
+    //protected ActionID _actionID;
+    //public ActionID actionID { get => _actionID; }
 
-    public abstract void SetActionID();
+    protected int _actionValue;
+    public int actionValue
+    {
+        get { return _actionValue; }
+    }
+    
+    // TO BE REMOVED:
+    public void DANGEROUSDEBUGSETACTIONVALUE(int newActionValue)
+    {
+        _actionValue = newActionValue;
+    }
+
+    public void ResetValue()
+    {
+        _actionValue = 0;
+    }
+
+    //public abstract void SetActionID();
     protected ActionConsideration()
     {
-        SetActionID();
+        //SetActionID();
     }
 
     public abstract void Enact(CharacterBase self);
+
+    public int CompareTo(ActionConsideration other)
+    {
+        return (this is SingleEnemyActionConsideration) && (other is NoEnemyActionConsideration) ? -1 : (this is NoEnemyActionConsideration) && (other is SingleEnemyActionConsideration) ? 1 : 0;
+    }
 }
 
 public abstract class SingleEnemyActionConsideration : ActionConsideration
 {
-    public abstract int ConsiderAction(CharacterBase self, CharacterBase enemy, ECoverValue agentLevelOfCoverFromEnemy, ECoverValue enemyLevelOfCoverFromAgent);
-    public abstract int CompareValues(int oldValue, int newValue);
+    public abstract void ConsiderAction(CharacterBase self, CharacterBase enemy, ECoverValue agentLevelOfCoverFromEnemy, ECoverValue enemyLevelOfCoverFromAgent);
+    //public abstract void CompareValue(int newValue);
 }
 
 public abstract class NoEnemyActionConsideration : ActionConsideration
 {
-    public abstract int ConsiderAction(CharacterBase self);
+    public abstract void ConsiderAction(CharacterBase self);
 }
 
 #region ActionConsideration classes
 
 public class MoveConsideration : SingleEnemyActionConsideration
 {
-    public override int CompareValues(int oldValue, int newValue)
+    public override void ConsiderAction(CharacterBase self, CharacterBase enemy, ECoverValue agentLevelOfCoverFromEnemy, ECoverValue enemyLevelOfCoverFromAgent)
     {
-        return oldValue + newValue;
-    }
-
-    public override int ConsiderAction(CharacterBase self, CharacterBase enemy, ECoverValue agentLevelOfCoverFromEnemy, ECoverValue enemyLevelOfCoverFromAgent)
-    {
-        int actionValue = 0;
-        actionValue += self.remainingPips > 1 ? 1 : 0;
+        _actionValue += self.remainingPips > 1 ? 1 : 0;
         int inCoverFromEnemiesValue = 0;
         foreach (CharacterBase c in self.enemiesInSight)
         {
             //inCoverFromEnemiesValue += (Weighting)self.occupiedTile.ProvidesCoverInDirection(self.transform.position - tileToConsider.transform.position);
-            actionValue += self.isInCover(c) ? 0 : (1 / self.enemiesInSight.Count);
+            _actionValue += self.isInCover(c) ? 0 : (1 / self.enemiesInSight.Count);
         }
-        actionValue += inCoverFromEnemiesValue;
-        actionValue += self.enemiesInSight.Count < 1 ? 1 : 0;
+        _actionValue += inCoverFromEnemiesValue;
+        _actionValue += self.enemiesInSight.Count < 1 ? 1 : 0;
 
         //if the enemy is < 1/2 range
-        return actionValue;
     }
 
     public override void Enact(CharacterBase self)
@@ -132,25 +147,19 @@ public class MoveConsideration : SingleEnemyActionConsideration
 
 public class OverwatchConsideration : SingleEnemyActionConsideration
 {
-    public override int CompareValues(int oldValue, int newValue)
+    public override void ConsiderAction(CharacterBase self, CharacterBase enemy, ECoverValue agentLevelOfCoverFromEnemy, ECoverValue enemyLevelOfCoverFromAgent)
     {
-        return oldValue + newValue;
-    }
-
-    public override int ConsiderAction(CharacterBase self, CharacterBase enemy, ECoverValue agentLevelOfCoverFromEnemy, ECoverValue enemyLevelOfCoverFromAgent)
-    {
-        int actionValue = 0;
 
         switch (agentLevelOfCoverFromEnemy)
         {
             case ECoverValue.None:
-                actionValue -= (int)Weighting.High / self.enemiesInSight.Count; 
+                _actionValue -= (int)Weighting.High / self.enemiesInSight.Count; 
                 break;
             case ECoverValue.Half:
-                actionValue += (int)Weighting.Low / self.enemiesInSight.Count;
+                _actionValue += (int)Weighting.Low / self.enemiesInSight.Count;
                 break;
             case ECoverValue.Full:
-                actionValue += (int)Weighting.High / self.enemiesInSight.Count;
+                _actionValue += (int)Weighting.High / self.enemiesInSight.Count;
                 break;
             default:
                 break;
@@ -159,18 +168,17 @@ public class OverwatchConsideration : SingleEnemyActionConsideration
         switch (enemyLevelOfCoverFromAgent)
         {
             case ECoverValue.None:
-                actionValue += (int)Weighting.High / self.enemiesInSight.Count;
+                _actionValue += (int)Weighting.High / self.enemiesInSight.Count;
                 break;
             case ECoverValue.Half:
-                actionValue += (int)Weighting.Low / self.enemiesInSight.Count;
+                _actionValue += (int)Weighting.Low / self.enemiesInSight.Count;
                 break;
             case ECoverValue.Full:
-                actionValue -= (int)Weighting.High / self.enemiesInSight.Count;
+                _actionValue -= (int)Weighting.High / self.enemiesInSight.Count;
                 break;
             default:
                 break;
         }
-        return actionValue;
     }
 
     public override void Enact(CharacterBase self)
@@ -245,25 +253,18 @@ public class OverwatchConsideration : SingleEnemyActionConsideration
 
 public class DefendConsideration : SingleEnemyActionConsideration
 {
-    public override int CompareValues(int oldValue, int newValue)
+    public override void ConsiderAction(CharacterBase self, CharacterBase enemy, ECoverValue agentLevelOfCoverFromEnemy, ECoverValue enemyLevelOfCoverFromAgent)
     {
-        throw new System.NotImplementedException();
-    }
-
-    public override int ConsiderAction(CharacterBase self, CharacterBase enemy, ECoverValue agentLevelOfCoverFromEnemy, ECoverValue enemyLevelOfCoverFromAgent)
-    {
-        int actionValue = 0;
-
         switch (agentLevelOfCoverFromEnemy)
         {
             case ECoverValue.None:
-                actionValue -= (int)Weighting.High / self.enemiesInSight.Count;
+                _actionValue -= (int)Weighting.High / self.enemiesInSight.Count;
                 break;
             case ECoverValue.Half:
-                actionValue -= (int)Weighting.Medium / self.enemiesInSight.Count;
+                _actionValue -= (int)Weighting.Medium / self.enemiesInSight.Count;
                 break;
             case ECoverValue.Full:
-                actionValue += (int)Weighting.Low / self.enemiesInSight.Count;
+                _actionValue += (int)Weighting.Low / self.enemiesInSight.Count;
                 break;
             default:
                 break;
@@ -272,19 +273,17 @@ public class DefendConsideration : SingleEnemyActionConsideration
         switch (enemyLevelOfCoverFromAgent)
         {
             case ECoverValue.None:
-                actionValue += (int)Weighting.High / self.enemiesInSight.Count;
+                _actionValue += (int)Weighting.High / self.enemiesInSight.Count;
                 break;
             case ECoverValue.Half:
-                actionValue += (int)Weighting.Medium / self.enemiesInSight.Count;
+                _actionValue += (int)Weighting.Medium / self.enemiesInSight.Count;
                 break;
             case ECoverValue.Full:
-                actionValue -= (int)Weighting.Low / self.enemiesInSight.Count;
+                _actionValue -= (int)Weighting.Low / self.enemiesInSight.Count;
                 break;
             default:
                 break;
         }
-
-        return actionValue;
     }
 
     public override void Enact(CharacterBase self)
@@ -369,31 +368,21 @@ public class DefendConsideration : SingleEnemyActionConsideration
 public class ShootConsideration : SingleEnemyActionConsideration
 {
     private CharacterBase enemyToAttack;
-    private CharacterBase enemyLastChecked;
-    public override int CompareValues(int oldValue, int newValue)
-    {
-        if(newValue > oldValue)
-        {
-            enemyToAttack = enemyLastChecked;
-            return newValue;
-        }
-        return oldValue;
-    }
 
-    public override int ConsiderAction(CharacterBase self, CharacterBase enemy, ECoverValue agentLevelOfCoverFromEnemy, ECoverValue enemyLevelOfCoverFromAgent)
+    public override void ConsiderAction(CharacterBase self, CharacterBase enemy, ECoverValue agentLevelOfCoverFromEnemy, ECoverValue enemyLevelOfCoverFromAgent)
     {
-        int actionValue = 0;
+        int thisEnemyShootValue = 0;
 
         switch (agentLevelOfCoverFromEnemy)
         {
             case ECoverValue.None:
-                actionValue -= (int)Weighting.High;
+                thisEnemyShootValue -= (int)Weighting.High;
                 break;
             case ECoverValue.Half:
-                actionValue += (int)Weighting.Medium;
+                thisEnemyShootValue += (int)Weighting.Medium;
                 break;
             case ECoverValue.Full:
-                actionValue += (int)Weighting.Low;
+                thisEnemyShootValue += (int)Weighting.Low;
                 break;
             default:
                 Debug.LogError("issue with cover Value returned");
@@ -402,22 +391,23 @@ public class ShootConsideration : SingleEnemyActionConsideration
         switch (enemyLevelOfCoverFromAgent)
         {
             case ECoverValue.None:
-                actionValue += (int)Weighting.High;
+                thisEnemyShootValue += (int)Weighting.High;
                 break;
             case ECoverValue.Half:
-                actionValue += (int)Weighting.Medium;
+                thisEnemyShootValue += (int)Weighting.Medium;
                 break;
             case ECoverValue.Full:
-                actionValue -= (int)Weighting.Low;
+                thisEnemyShootValue -= (int)Weighting.Low;
                 break;
             default:
                 break;
         }
-        enemyLastChecked = enemy;
-
+        if(thisEnemyShootValue > _actionValue)
+        {
+            enemyToAttack = enemy;
+            _actionValue = thisEnemyShootValue;
+        }
         //why is there no chanceToHitCalculation in here?
-
-        return actionValue;
     }
 
     public override void Enact(CharacterBase self)
@@ -433,34 +423,32 @@ public class ShootConsideration : SingleEnemyActionConsideration
 
 public class ReloadConsideration : NoEnemyActionConsideration
 {
-    public override int ConsiderAction(CharacterBase self)
+    public override void ConsiderAction(CharacterBase self)
     {
         // if numshots == 0 then +
         // 
         // if numshots == 0 && pips remaining == 1 then guarantee
         //
         // tileValue = 1 - (numshots / maxShots)
-        int actionValue = 0;
         if (self.remainingPips == 1)
         {
             if (self.remainingShots > (self.maxShots / 2))
             {
-                actionValue = 0;
+                _actionValue = 0;
             }
             else if (self.remainingShots > (self.maxShots / 4) && self.remainingShots != 0)
             {
-                actionValue += (int)Weighting.High;
+                _actionValue += (int)Weighting.High;
             }
             else if (self.remainingShots == self.maxShots)
             {
-                actionValue = -(int)Weighting.guarantee;
+                _actionValue = -(int)Weighting.guarantee;
             }
             else
             {
-                actionValue += (int)Weighting.guarantee;
+                _actionValue += (int)Weighting.guarantee;
             }
         }
-        return actionValue;
     }
 
     public override void Enact(CharacterBase self)

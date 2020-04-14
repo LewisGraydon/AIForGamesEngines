@@ -1,6 +1,8 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public enum MoveFactorID
 {
@@ -12,30 +14,38 @@ public enum MoveFactorID
 };
 
 
-public abstract class MovementConsideration
+public abstract class MovementConsideration: IComparable<MovementConsideration>
 {
-    protected MoveFactorID _moveFactorID;
-    public MoveFactorID moveFactorID { get => _moveFactorID; }
+    //protected MoveFactorID _moveFactorID;
+    //public MoveFactorID moveFactorID { get => _moveFactorID; }
 
-    public abstract void setMoveFactorID();
+    //public abstract void setMoveFactorID();
 
+    protected int _movementValue;
+    public int movementValue { get { return _movementValue; } }
     protected MovementConsideration()
     {
-        setMoveFactorID();
+    //    setMoveFactorID();
     }
-
+    public int CompareTo(MovementConsideration other)
+    {
+        return (this is SingleEnemyMovementConsideration) && (other is TileOnlyMovementConsideration) ? -1 : (this is TileOnlyMovementConsideration) && (other is SingleEnemyMovementConsideration) ? 1 : 0;
+    }
 }
 
 public abstract class SingleEnemyMovementConsideration : MovementConsideration
 {
-    public abstract int ConsiderTile(ref CharacterBase self, CharacterBase enemy, ref Tile tileToConsider);
+    public abstract void ConsiderTile(ref CharacterBase self, CharacterBase enemy, ref Tile tileToConsider);
 
-    public abstract int CompareValues(int oldValue, int newValue);
+    //public abstract int CompareValues(int oldValue, int newValue);
+
+
 }
 
-public abstract class NoEnemyMovementConsideration : MovementConsideration
+//  should  probable be TileOnlyMovementConsideration with hindsight
+public abstract class TileOnlyMovementConsideration : MovementConsideration
 {
-    public abstract int ConsiderTile(ref CharacterBase self);
+    public abstract void ConsiderTile(ref Tile tileToConsider);
 }
 
 
@@ -80,27 +90,26 @@ public abstract class NoEnemyMovementConsideration : MovementConsideration
 //}
 public class HitChanceDifferenceConsideration : SingleEnemyMovementConsideration
 {
-    public override int CompareValues(int oldValue, int newValue)
-    {
-        return oldValue + newValue;
-    }
+    //public override int CompareValues(int oldValue, int newValue)
+    //{
+    //    return oldValue + newValue;
+    //}
 
-    public override int ConsiderTile(ref CharacterBase self, CharacterBase enemy, ref Tile tileToConsider)
+    public override void ConsiderTile(ref CharacterBase self, CharacterBase enemy, ref Tile tileToConsider)
     {
-        int tileValue = 0;
+
         bool isPredictonAccurate = Random.Range(0, 1) == 1;
         int estimatedHitChance = isPredictonAccurate ? tileToConsider.chanceToHit(enemy.occupiedTile) : Random.Range(0, 100);
 
-        tileValue += estimatedHitChance == 100 ? (int)Weighting.guarantee : 
+        _movementValue += estimatedHitChance == 100 ? (int)Weighting.guarantee : 
                                                     estimatedHitChance > self.occupiedTile.chanceToHit(enemy.occupiedTile) ? (int)Weighting.High :
                                                     -(int)Weighting.High;
-        return tileValue;
     }
 
-    public override void setMoveFactorID()
-    {
-        _moveFactorID = MoveFactorID.HitChance;
-    }
+    //public override void setMoveFactorID()
+    //{
+    //    _moveFactorID = MoveFactorID.HitChance;
+    //}
 }
 
 
@@ -136,21 +145,21 @@ public class HitChanceDifferenceConsideration : SingleEnemyMovementConsideration
 //}
 public class FlankingConsideration : SingleEnemyMovementConsideration
 {
-    public override int CompareValues(int oldValue, int newValue)
-    {
-        return oldValue + newValue;
-    }
+    //public override int CompareValues(int oldValue, int newValue)
+    //{
+    //    return oldValue + newValue;
+    //}
 
-    public override int ConsiderTile(ref CharacterBase self, CharacterBase enemy, ref Tile tileToConsider)
+    public override void ConsiderTile(ref CharacterBase self, CharacterBase enemy, ref Tile tileToConsider)
     {
-        return self.occupiedTile.transform.position.x == enemy.transform.position.x || self.occupiedTile.transform.position.y == enemy.transform.position.y ?
+        _movementValue += self.occupiedTile.transform.position.x == enemy.transform.position.x || self.occupiedTile.transform.position.y == enemy.transform.position.y ?
                (int)Weighting.guarantee : 0;
     }
 
-    public override void setMoveFactorID()
-    {
-        _moveFactorID = MoveFactorID.Flanking;
-    }
+    //public override void setMoveFactorID()
+    //{
+    //    _moveFactorID = MoveFactorID.Flanking;
+    //}
 }
 
 //public class SelfCoverConsideration : MovementConsideration
@@ -209,26 +218,26 @@ public class FlankingConsideration : SingleEnemyMovementConsideration
 
 public class SelfCoverConsideration : SingleEnemyMovementConsideration
 {
-    public override int CompareValues(int oldValue, int newValue)
-    {
-        return oldValue + newValue;
-    }
+    //public override int CompareValues(int oldValue, int newValue)
+    //{
+    //    return oldValue + newValue;
+    //}
 
-    public override int ConsiderTile(ref CharacterBase self, CharacterBase enemy, ref Tile tileToConsider)
+    public override void ConsiderTile(ref CharacterBase self, CharacterBase enemy, ref Tile tileToConsider)
     {
         ECoverValue tileCoverFromEnemy = tileToConsider.ProvidesCoverInDirection(enemy.transform.position - self.transform.position);
         ECoverValue enemyCoverFromTile = enemy.occupiedTile.ProvidesCoverInDirection(self.transform.position - enemy.transform.position);
-        int tileValue = 0;
+
         switch (tileCoverFromEnemy)
         {
             case ECoverValue.None:
-                tileValue -= (int)Weighting.High / self.enemiesInSight.Count;
+                _movementValue -= (int)Weighting.High / self.enemiesInSight.Count;
                 break;
             case ECoverValue.Half:
-                tileValue += (int)Weighting.Medium / self.enemiesInSight.Count;
+                _movementValue += (int)Weighting.Medium / self.enemiesInSight.Count;
                 break;
             case ECoverValue.Full:
-                tileValue += (int)Weighting.Low / self.enemiesInSight.Count;
+                _movementValue += (int)Weighting.Low / self.enemiesInSight.Count;
                 break;
             default:
                 Debug.LogError("issue with cover Value returned");
@@ -238,25 +247,24 @@ public class SelfCoverConsideration : SingleEnemyMovementConsideration
         switch (enemyCoverFromTile)
         {
             case ECoverValue.None:
-                tileValue += (int)Weighting.High / self.enemiesInSight.Count;
+                _movementValue += (int)Weighting.High / self.enemiesInSight.Count;
                 break;
             case ECoverValue.Half:
-                tileValue += (int)Weighting.Medium / self.enemiesInSight.Count;
+                _movementValue += (int)Weighting.Medium / self.enemiesInSight.Count;
                 break;
             case ECoverValue.Full:
-                tileValue -= (int)Weighting.Low / self.enemiesInSight.Count;
+                _movementValue -= (int)Weighting.Low / self.enemiesInSight.Count;
                 break;
             default:
                 break;
         }
 
-        return tileValue;
     }
 
-    public override void setMoveFactorID()
-    {
-        throw new System.NotImplementedException();
-    }
+    //public override void setMoveFactorID()
+    //{
+    //    throw new System.NotImplementedException();
+    //}
 }
 
 //public class SelfVisibilityConsideration : MovementConsideration
@@ -286,22 +294,22 @@ public class SelfCoverConsideration : SingleEnemyMovementConsideration
 
 public class SelfVisibilityConsideration : SingleEnemyMovementConsideration
 {
-    public override int CompareValues(int oldValue, int newValue)
-    {
-        return oldValue + newValue;
-    }
+    //public override int CompareValues(int oldValue, int newValue)
+    //{
+    //    return oldValue + newValue;
+    //}
 
-    public override int ConsiderTile(ref CharacterBase self, CharacterBase enemy, ref Tile tileToConsider)
+    public override void ConsiderTile(ref CharacterBase self, CharacterBase enemy, ref Tile tileToConsider)
     {
         bool isPredictonAccurate = Random.Range(0, 1) == 1;
         bool willEnemyBeVisisbleFromTile = isPredictonAccurate ? tileToConsider.isVisibleFromTile(enemy.occupiedTile) : Random.Range(0, 1) == 0;
-        return willEnemyBeVisisbleFromTile ? -((int)Weighting.Medium / self.enemiesInSight.Count) : ((int)Weighting.Medium / self.enemiesInSight.Count);
+        _movementValue += willEnemyBeVisisbleFromTile ? -((int)Weighting.Medium / self.enemiesInSight.Count) : ((int)Weighting.Medium / self.enemiesInSight.Count);
     }
 
-    public override void setMoveFactorID()
-    {
-        _moveFactorID = MoveFactorID.SelfVisibility;
-    }
+    //public override void setMoveFactorID()
+    //{
+    //    _moveFactorID = MoveFactorID.SelfVisibility;
+    //}
 }
 
 
@@ -328,17 +336,17 @@ public class SelfVisibilityConsideration : SingleEnemyMovementConsideration
 //    }
 //}
 
-public class ProximityToAllyConsideration : NoEnemyMovementConsideration
+public class ProximityToAllyConsideration : TileOnlyMovementConsideration
 {
-    public override int ConsiderTile(ref CharacterBase self)
+    public override void ConsiderTile(ref Tile tileToConsider)
     {
-        return -(int)Weighting.Medium * PathfindingAgent.BreadthFirstAllySearch((INodeSearchable)self.occupiedTile);
+        _movementValue += -(int)Weighting.Medium * PathfindingAgent.BreadthFirstAllySearch((INodeSearchable)tileToConsider);
     }
 
-    public override void setMoveFactorID()
-    {
-        _moveFactorID = MoveFactorID.AllyProximity;
-    }
+    //public override void setMoveFactorID()
+    //{
+    //    _moveFactorID = MoveFactorID.AllyProximity;
+    //}
 }
 
 #endregion

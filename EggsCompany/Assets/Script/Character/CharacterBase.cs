@@ -84,6 +84,9 @@ public class CharacterBase : MonoBehaviour
         actionPips = 0;   
     }
 
+    //should contian the code to actually move a character along a path in my mind.
+    public virtual void MoveCharacterTo(Tile tileToMoveTo) { }
+
     public float sightDistance = 0.0f;
 
     public Tile occupiedTile;

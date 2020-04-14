@@ -5,7 +5,7 @@ using UnityEngine;
 public class EnemyCharacter : CharacterBase
 {
     public string _characterName;
-
+    public PathfindingAgent pathfinder;
     public string characterName
     {
         get { return _characterName; }
@@ -21,5 +21,21 @@ public class EnemyCharacter : CharacterBase
     void Update()
     {
 
+    }
+
+    public int actionVariance = 2;
+
+    void MakeDecision()
+    {
+        //ConsiderationLists.ConsiderActions(this);
+        ConsiderationLists.MakeDecision(this);
+    }
+        
+        
+
+    public void moveDecision()
+    {
+        pathfinder.FindMovementRange(occupiedTile, 100, ConsiderationLists.ConsiderSingleTileForMovement, this);
+        this.MoveCharacterTo(ConsiderationLists.GetTileToMoveTo());
     }
 }
