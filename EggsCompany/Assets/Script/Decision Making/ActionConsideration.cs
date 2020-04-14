@@ -80,12 +80,13 @@ public class MoveConsideration : SingleEnemyActionConsideration
     public override void Enact(CharacterBase self)
     {
         // SELF.MOVE BAAAYYYYBBBBAAYYYY.
+        (self as EnemyCharacter).moveDecision();
     }
 
-    public override void SetActionID()
-    {
-        _actionID = ActionID.Move;
-    }
+    //public override void SetActionID()
+    //{
+    //    _actionID = ActionID.Move;
+    //}
 }
 
 //public class OverwatchConsideration : SingleEnemyActionConsideration
@@ -186,10 +187,10 @@ public class OverwatchConsideration : SingleEnemyActionConsideration
         self.EnterOverwatchStance();
     }
 
-    public override void SetActionID()
-    {
-        _actionID = ActionID.Overwatch;
-    }
+    //public override void SetActionID()
+    //{
+    //    _actionID = ActionID.Overwatch;
+    //}
 }
 
 
@@ -291,10 +292,10 @@ public class DefendConsideration : SingleEnemyActionConsideration
         self.EnterDefenseStance();
     }
 
-    public override void SetActionID()
-    {
-        _actionID = ActionID.Defend;
-    }
+    //public override void SetActionID()
+    //{
+    //    _actionID = ActionID.Defend;
+    //}
 }
 
 
@@ -415,10 +416,10 @@ public class ShootConsideration : SingleEnemyActionConsideration
         self.AttackCharacter(enemyToAttack);
     }
 
-    public override void SetActionID()
-    {
-        _actionID = ActionID.Shoot;
-    }
+    //public override void SetActionID()
+    //{
+    //    _actionID = ActionID.Shoot;
+    //}
 }
 
 public class ReloadConsideration : NoEnemyActionConsideration
@@ -456,10 +457,10 @@ public class ReloadConsideration : NoEnemyActionConsideration
         self.Reload();
     }
 
-    public override void SetActionID()
-    {
-        _actionID = ActionID.Reload;
-    }
+    //public override void SetActionID()
+    //{
+    //    _actionID = ActionID.Reload;
+    //}
 }
 #endregion
 

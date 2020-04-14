@@ -68,7 +68,7 @@ public static class ConsiderationLists
     //    return actionIdValuePair;
     //}
 
-    public static void AssignActionValues(CharacterBase self)
+    public static void MakeDecision(CharacterBase self)
     {
         //sort list so that the singleEnemyActionConsiderations are all at the front of the list, custom CompareTo function within the ActionConsideration Class should changes need to be made to order or new child class is created.
         actionConsiderationList.Sort((ActionConsideration val1, ActionConsideration val2) =>
