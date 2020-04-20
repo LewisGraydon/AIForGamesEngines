@@ -26,7 +26,7 @@ public class PathfindingAgent : MonoBehaviour
         
     }
 
-    List<INodeSearchable> FindNodeSightRange(INodeSearchable startNode, int sightRange)
+    public List<INodeSearchable> FindNodeSightRange(INodeSearchable startNode, int sightRange)
     {
         Queue<INodeSearchable> nodeQueue = new Queue<INodeSearchable>();
         List<INodeSearchable> nodesInSightRange = new List<INodeSearchable>();

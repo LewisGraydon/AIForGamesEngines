@@ -14,6 +14,7 @@ public class GameState : MonoBehaviour
     public GameObject EndScreenPrefab;
     public PlayerSpawn psScript;
     private EnemySpawn esScript;
+    public PathfindingAgent pathfindingAgent;
 
     private int playerPipsRemaining = -1;
     private int enemyPipsRemaining = -1;

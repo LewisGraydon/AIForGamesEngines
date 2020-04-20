@@ -84,6 +84,45 @@ public class CharacterBase : MonoBehaviour
         actionPips = 0;   
     }
 
+    public void FindSightline(int visionRange)
+    {
+        List<INodeSearchable> possibleSeenTiles  = gsmScript.pathfindingAgent.FindNodeSightRange(occupiedTile, visionRange);
+        List<INodeSearchable> seenTiles = new List<INodeSearchable>();
+
+        //Math from pawn to target tile
+        //center to center
+        //center to directions
+        //Layer mask to ignore anything that isn't a wall
+        //Tile distance to figure out max raycast distance
+        //direction to send the raycast "2D" Vector
+
+        //max distance of raycast = magnitude of (center of pawn transform - tile transform + pawn.y)
+        //target transform vector - starting transform vector = direction
+
+        foreach (var tile in possibleSeenTiles)
+        {
+            Tile workingTile = tile as Tile;
+            Vector3 pawnYoffset = new Vector3(0, .5f, 0);
+
+            Vector3 difference = (workingTile.transform.position + pawnYoffset) - (occupiedTile.transform.position + pawnYoffset);
+
+            //calc distance
+            float distance = Vector3.Magnitude(difference);
+            //calc direction
+            Vector3 direction = Vector3.Normalize(difference); 
+            //find layer mask
+
+            //If the raycast hits nothing, add this tile to seen
+            if (true //!Physics.Raycast()
+               )
+            {
+                seenTiles.Add(tile);
+            }
+        }
+        
+        //occupiedTile;
+    }
+
     //should contian the code to actually move a character along a path in my mind.
     public virtual void MoveCharacterTo(Tile tileToMoveTo) { }
 
