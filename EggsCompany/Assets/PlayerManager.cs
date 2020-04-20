@@ -49,6 +49,17 @@ public class PlayerManager : MonoBehaviour
                 if (destinationTile != null)
                 {
                     print("Moving " + selectedPlayer + " to " + destinationTile.name);
+                    Vector3 endPos = destinationTile.transform.position;
+
+                    while(transform.position.x < endPos.x)
+                    {
+                        transform.position += new Vector3(1, 0, 0);
+                    }
+
+                    while (transform.position.z < endPos.z)
+                    {
+                        transform.position += new Vector3(0, 0, 1);
+                    }
                 }
             }
 

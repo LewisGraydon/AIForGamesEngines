@@ -27,6 +27,17 @@ public class CharacterBase : MonoBehaviour
         }
     }
 
+    public void SetRemainingPips(int pipsRemaining)
+    {
+        if(pipsRemaining > maxActionPips)
+        {
+            actionPips = maxActionPips;
+            return;
+        }
+
+        actionPips = pipsRemaining;
+    }
+
     protected int maxActionPips = 2;
     public int maximumActionPips
     {
