@@ -109,15 +109,16 @@ public class CharacterBase : MonoBehaviour
             //calc distance
             float distance = Vector3.Magnitude(difference);
             //calc direction
-            Vector3 direction = Vector3.Normalize(difference); 
-            //find layer mask
+            Vector3 direction = Vector3.Normalize(difference);
+            //find layer mask, assuming wall layer is 8
+            int wallLayer = 1 << 8;
 
             //If the raycast hits nothing, add this tile to seen
-            if (true //!Physics.Raycast()
-               )
+            if (!Physics.Raycast(occupiedTile.transform.position + pawnYoffset, direction, distance, wallLayer))
             {
                 seenTiles.Add(tile);
             }
+            //next: else - 4 cardinal directions raycast.
         }
         
         //occupiedTile;
