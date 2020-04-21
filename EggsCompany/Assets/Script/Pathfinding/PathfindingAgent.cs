@@ -118,7 +118,7 @@ public class PathfindingAgent : MonoBehaviour
     //@Param - startNode : The current node that unit occupies.
     //@Return: A list of all nodes that the unit can move to from its current node.
     //Notes: Might be able to change param to egg/unit object for ease of use. IE object could pass self.
-    List<INodeSearchable> FindMovementRange(INodeSearchable startNode, float moveValue)
+    public List<INodeSearchable> FindMovementRange(INodeSearchable startNode, float moveValue)
     {
         INodeSearchable currentNode;
         List<INodeSearchable> moveRange = new List<INodeSearchable>(); 

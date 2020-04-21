@@ -44,6 +44,11 @@ public class PlayerManager : MonoBehaviour
     {
         if (gsmScript.gameState == EGameState.playerTurn)
         {
+            if(destinationTile != null)
+            {
+                
+            }
+
             if(Input.GetMouseButtonUp(0))
             {
                 if (destinationTile != null)
@@ -51,15 +56,13 @@ public class PlayerManager : MonoBehaviour
                     print("Moving " + selectedPlayer + " to " + destinationTile.name);
                     Vector3 endPos = destinationTile.transform.position;
 
-                    while(transform.position.x < endPos.x)
+                    List<INodeSearchable> nodeSearchables = gsmScript.pathfindingAgent.FindMovementRange(selectedPlayer.GetComponent<CharacterBase>().occupiedTile, 5);  //IDGAF
+                    Stack<INodeSearchable> pathToDestination = gsmScript.pathfindingAgent.CreatePath(destinationTile.GetComponent<Tile>());
+                    foreach (INodeSearchable node in pathToDestination)
                     {
-                        transform.position += new Vector3(1, 0, 0);
+                        print(node);
                     }
-
-                    while (transform.position.z < endPos.z)
-                    {
-                        transform.position += new Vector3(0, 0, 1);
-                    }
+                    gsmScript.pathfindingAgent.NodeReset(nodeSearchables);
                 }
             }
 
