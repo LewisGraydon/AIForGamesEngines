@@ -14,9 +14,12 @@ public class GameState : MonoBehaviour
     public GameObject EndScreenPrefab;
     public PlayerSpawn psScript;
     private EnemySpawn esScript;
+    public PathfindingAgent pathfindingAgent;
 
     private int playerPipsRemaining = -1;
     private int enemyPipsRemaining = -1;
+
+    public Text turnText;
 
     // End Of Mission
     private bool transitioningToMM = false;
@@ -26,6 +29,7 @@ public class GameState : MonoBehaviour
     {
         psScript = playerContainer.GetComponent<PlayerSpawn>();
         esScript = enemyContainer.GetComponent<EnemySpawn>();
+        turnText.gameObject.SetActive(true);
         ProcessGameState();
     }
 
@@ -41,6 +45,34 @@ public class GameState : MonoBehaviour
             else if (Input.GetKeyUp(KeyCode.RightBracket)) // For Debug purposes.
             {
                 KillAllEnemies();
+            }
+
+            if(gameState == EGameState.playerTurn)
+            {
+                if(Input.GetKeyUp(KeyCode.LeftAlt))
+                {
+                    for (int i = 0; i < playerContainer.transform.childCount; i++)
+                    {
+                        GameObject obj = playerContainer.transform.GetChild(i).gameObject;
+                        PlayerCharacter pc = obj.GetComponent<PlayerCharacter>();
+                        pc.SetRemainingPips(0);
+                        ProcessGameState();
+                    }
+                }
+            }
+
+            if (gameState == EGameState.enemyTurn)
+            {
+                if (Input.GetKeyUp(KeyCode.RightAlt))
+                {
+                    for (int i = 0; i < enemyContainer.transform.childCount; i++)
+                    {
+                        GameObject obj = enemyContainer.transform.GetChild(i).gameObject;
+                        EnemyCharacter ec = obj.GetComponent<EnemyCharacter>();
+                        ec.SetRemainingPips(0);
+                        ProcessGameState();
+                    }
+                }
             }
 
             PlayerDeathCheck();
@@ -71,6 +103,8 @@ public class GameState : MonoBehaviour
     // Initialises the end of screen prefab and sets it to be the child of the canvas in the scene.
     public void initialiseEndScreen()
     {
+        turnText.gameObject.SetActive(false);
+        
         GameObject canvas = GameObject.Find("Canvas");
         GameObject eomScreen = Instantiate(EndScreenPrefab, new Vector3(0, 0, 0), Quaternion.identity);
         eomScreen.transform.SetParent(canvas.transform, false);
@@ -138,10 +172,13 @@ public class GameState : MonoBehaviour
 
                 InitialisePlayerPips();
                 gameState = EGameState.playerTurn;
+                ProcessGameState();
 
                 break;
 
             case EGameState.playerTurn:
+
+                turnText.text = "Player Turn";
 
                 for (int i = 0; i < playerContainer.transform.childCount; i++)
                 {
@@ -151,15 +188,18 @@ public class GameState : MonoBehaviour
 
                 playerPipsRemaining = pipCount;
 
-                if(playerPipsRemaining == 0)
+                if(playerPipsRemaining <= 0)
                 {
                     InitialiseEnemyPips();
                     gameState = EGameState.enemyTurn;
+                    ProcessGameState();
                 }
 
                 break;
 
             case EGameState.enemyTurn:
+
+                turnText.text = "Enemy Turn";
 
                 for (int i = 0; i < enemyContainer.transform.childCount; i++)
                 {
@@ -169,9 +209,10 @@ public class GameState : MonoBehaviour
 
                 enemyPipsRemaining = pipCount;
 
-                if (enemyPipsRemaining == 0)
+                if (enemyPipsRemaining <= 0)
                 {
                     gameState = EGameState.setupState;
+                    ProcessGameState();
                 }
 
                 break;
@@ -190,6 +231,6 @@ public class GameState : MonoBehaviour
 
     void InitialiseEnemyPips()
     {
-        enemyPipsRemaining = (esScript.numberOfEnemies - enemyDeathCount) * esScript.enemyCharacterPrefab.GetComponent<EnemyCharacter>().maximumActionPips;
+        enemyPipsRemaining = (esScript.numberOfEnemies - enemyDeathCount) * 2;
     }
 }
