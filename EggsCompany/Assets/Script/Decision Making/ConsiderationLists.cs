@@ -84,17 +84,16 @@ public static class ConsiderationLists
                 //foreach enemy, calculate the cover from and for the agent (could be expensive hence this is calculated once and the actions are the more commonly calculated part.
                 ECoverValue agentCoverFromEnemy = self.occupiedTile.ProvidesCoverInDirection(self.enemiesInSight[enemyCounter].transform.position - self.transform.position);
                 ECoverValue enemyCoverFromAgent = self.occupiedTile.ProvidesCoverInDirection(self.transform.position - self.enemiesInSight[enemyCounter].transform.position);
-                int startI = i;
+                int firstSingleEnemyActionConsiderationIndex = i;
                 while (actionConsiderationList[i] is SingleEnemyActionConsideration)
                 {
                     (actionConsiderationList[i] as SingleEnemyActionConsideration).ConsiderAction(self, self.enemiesInSight[enemyCounter], agentCoverFromEnemy, enemyCoverFromAgent);
                     i++;
                 }
-                i = enemyCounter != (self.enemiesInSight.Count - 1) ? startI // if not the end of the enemies then reset the i counter;
-                                    : i + 1 < actionConsiderationList.Count ? i + 1 // if the end of the enemies but not the last consideration, increment I for the rest of the consideration checks.
-                                    : i; // end of consideration list so leave as last i so the outer for loop ends as normal. 
+                i = enemyCounter != (self.enemiesInSight.Count - 1) ? firstSingleEnemyActionConsiderationIndex // if not the end of the enemies then reset the i counter;
+                                                                    : i;
             }
-            if(actionConsiderationList[i] is NoEnemyActionConsideration)
+            if(i <= actionConsiderationList.Count && actionConsiderationList[i] is NoEnemyActionConsideration)
             {
                 (actionConsiderationList[i] as NoEnemyActionConsideration).ConsiderAction(self);
             }
@@ -105,6 +104,10 @@ public static class ConsiderationLists
             return consideration2.actionValue.CompareTo(consideration1.actionValue);
         }); //order list by value descending;
         actionConsiderationList[UnityEngine.Random.Range(0, (self as EnemyCharacter).actionVariance)].Enact(self);
+        foreach(ActionConsideration ac in actionConsiderationList)
+        {
+            ac.ResetValue();
+        }
     }
 
     //public static void EnactTopAction(CharacterBase self)
@@ -239,30 +242,30 @@ public enum Weighting
     guarantee = 10000
 }
 
-public abstract class Consideration
-{
-    public Consideration(){}
-    public int numberOfChecksWithinConsideration = 0;
-    private float _tileValue = 0.0f;
-    public float tileValue
-    {
-        get
-        {
-            return _tileValue;
-        }
-        set
-        {
-            numberOfChecksWithinConsideration++;
-            _tileValue = value;
-        }
-    }
-    virtual public float ConsiderTile(CharacterBase self, Tile tileToConsider)
-    {
-        _tileValue = 0.0f;
-        numberOfChecksWithinConsideration = 0;
-        return -999.999f;
-    }
-}
+//public abstract class Consideration
+//{
+//    public Consideration(){}
+//    public int numberOfChecksWithinConsideration = 0;
+//    private float _tileValue = 0.0f;
+//    public float tileValue
+//    {
+//        get
+//        {
+//            return _tileValue;
+//        }
+//        set
+//        {
+//            numberOfChecksWithinConsideration++;
+//            _tileValue = value;
+//        }
+//    }
+//    virtual public float ConsiderTile(CharacterBase self, Tile tileToConsider)
+//    {
+//        _tileValue = 0.0f;
+//        numberOfChecksWithinConsideration = 0;
+//        return -999.999f;
+//    }
+//}
 
 
 // ConsiderActions OLD IMPLEMENTATION IDEA

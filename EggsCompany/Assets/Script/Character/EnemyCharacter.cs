@@ -23,7 +23,7 @@ public class EnemyCharacter : CharacterBase
 
     }
 
-    public int actionVariance = 2;
+    public int actionVariance = 1;
 
     void MakeDecision()
     {
@@ -35,7 +35,15 @@ public class EnemyCharacter : CharacterBase
 
     public void moveDecision()
     {
-        pathfinder.FindMovementRange(occupiedTile, 100, ConsiderationLists.ConsiderSingleTileForMovement, this);
-        this.MoveCharacterTo(ConsiderationLists.GetTileToMoveTo());
+        Debug.Log("Doing A Move Decision");
+        if(pathfinder != null)
+        {
+            pathfinder.FindMovementRange(occupiedTile, 100, ConsiderationLists.ConsiderSingleTileForMovement, this);
+            this.MoveCharacterTo(ConsiderationLists.GetTileToMoveTo());
+        }
+        else
+        {
+            Debug.LogWarning("pathfinder variable on enemy character is not set");
+        }
     }
 }
