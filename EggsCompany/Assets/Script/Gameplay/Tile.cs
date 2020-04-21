@@ -24,7 +24,7 @@ public class Tile : MonoBehaviour, INodeSearchable
     public float? DijkstraCost { get => DijkstraCost; set => DijkstraCost = value; }
     public float? HeuristicCost { get => DijkstraCost; set => DijkstraCost = value; }
     public float? TotalCost { get => TotalCost; set => TotalCost = value; }
-    public INodeSearchable parent { get => parent; set => parent = value; }
+    public INodeSearchable parent { get; set; }
     public List<INodeSearchable> children { get; set; }
     public float distanceToTarget { get => distanceToTarget; set => distanceToTarget = value; }
     static private float activeCoverDirectionThreshold = 0.44f;
@@ -45,7 +45,7 @@ public class Tile : MonoBehaviour, INodeSearchable
     {
         startcolor = gameObjectRenderer.material.color;
         gameObjectRenderer.material.color = Color.cyan;
-        GameObject.Find("Players").GetComponent<PlayerManager>().destinationTile = gameObject;
+        GameObject.Find("Players").GetComponent<PlayerManager>().destinationTile = gameObject;       
     }
     void OnMouseExit()
     {
