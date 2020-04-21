@@ -77,20 +77,22 @@ public class CharacterBase : MonoBehaviour
     public void EnterOverwatchStance()
     {
         //probably have a ref to gamestate and add to an overwatch list. then have it looped over during other movements etc.
+        Debug.Log("Doing An Overwatch Stance");
     }
 
     public void EnterDefenseStance()
     {
-
+        Debug.Log("Doing A Defensive Stance");
     }
 
     public void AttackCharacter(CharacterBase otherCharacter)
     {
-        
+        Debug.Log("Doing An Attack");
     }
 
     public void Reload()
     {
+        Debug.Log("Doing A Reload");
         _ammunition = _maxAmmunition;
         actionPips = 0;   
     }
@@ -136,7 +138,10 @@ public class CharacterBase : MonoBehaviour
     }
 
     //should contian the code to actually move a character along a path in my mind.
-    public virtual void MoveCharacterTo(Tile tileToMoveTo) { }
+    public virtual void MoveCharacterTo(Tile tileToMoveTo)
+    {
+        Debug.Log("moving Character to: Some Tile I have no way to identify I think: " + tileToMoveTo != null ? tileToMoveTo.name : "tile is null");
+    }
 
     public float sightDistance = 0.0f;
 

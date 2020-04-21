@@ -431,24 +431,32 @@ public class ReloadConsideration : NoEnemyActionConsideration
         // if numshots == 0 && pips remaining == 1 then guarantee
         //
         // tileValue = 1 - (numshots / maxShots)
-        if (self.remainingPips == 1)
+
+        //adjustments based on number of shots left;
+        if (self.remainingShots > (self.maxShots / 2))
         {
-            if (self.remainingShots > (self.maxShots / 2))
-            {
-                _actionValue = 0;
-            }
-            else if (self.remainingShots > (self.maxShots / 4) && self.remainingShots != 0)
-            {
-                _actionValue += (int)Weighting.High;
-            }
-            else if (self.remainingShots == self.maxShots)
-            {
-                _actionValue = -(int)Weighting.guarantee;
-            }
-            else
-            {
-                _actionValue += (int)Weighting.guarantee;
-            }
+            _actionValue -= (int)Weighting.High;
+        }
+        else if (self.remainingShots > (self.maxShots / 4) && self.remainingShots != 0)
+        {
+            _actionValue += (int)Weighting.High;
+        }
+        else if (self.remainingShots == self.maxShots)
+        {
+            _actionValue = -(int)Weighting.guarantee;
+        }
+        else
+        {
+            _actionValue += (int)Weighting.guarantee;
+        }
+        //adjustments based on pip value;
+        if(self.remainingPips < self.maximumActionPips)
+        {
+            _actionValue += (int)Weighting.Medium;
+        }
+        else
+        {
+            _actionValue -= (int)Weighting.Medium;
         }
     }
 

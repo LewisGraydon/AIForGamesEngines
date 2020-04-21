@@ -28,7 +28,7 @@ public class VectorChecker : MonoBehaviour
         //{
         //    Debug.Log("Key: " + kp.Key.ToString() + ", Value: " + kp.Value);
         //}
-        testBed3();
+
     }
 
     // Update is called once per frame
@@ -156,9 +156,21 @@ public class VectorChecker : MonoBehaviour
         {
             return val2.actionValue.CompareTo(val1.actionValue);
         });
+        EnemyCharacter e = new EnemyCharacter();
         foreach (ActionConsideration ac in actionConsiderationList)
         {
             Debug.Log(ac + ": " + ac.actionValue);
+            ac.Enact(e);
         }
+        //CharacterBase c = new EnemyCharacter();
+        //int randomisingNum = UnityEngine.Random.Range(0,1);
+        //Debug.Log("randomisingNum: " + randomisingNum);
+        //actionConsiderationList[randomisingNum].Enact(c);
+    }
+
+    void testBed4()
+    {
+        EnemyCharacter e = gameObject.AddComponent<EnemyCharacter>();
+        //ConsiderationLists.DEBUGMakeDecision(e);
     }
 }
