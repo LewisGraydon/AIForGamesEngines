@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -94,7 +95,7 @@ public class CharacterBase : MonoBehaviour
     {
         Debug.Log("Doing A Reload");
         _ammunition = _maxAmmunition;
-        actionPips = 0;   
+        actionPips = actionPips - 1 >= 0 ? actionPips - 1 : 0;
     }
 
     public void FindSightline(int visionRange)
