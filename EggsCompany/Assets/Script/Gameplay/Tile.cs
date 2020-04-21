@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using UnityEngine;
 
 public class Tile : MonoBehaviour, INodeSearchable
@@ -9,7 +10,9 @@ public class Tile : MonoBehaviour, INodeSearchable
     //GameObject is placeholder for egg or terrainBlocker object
     public ETileOccupier occupier = ETileOccupier.None;
     public FloorType terrainType;
-    private List<Tile> _neighbors = new List<Tile>((int)EDirection.Error);
+    private List<Tile> _neighbors = new List<Tile>((int)EDirection.Error)
+    {
+    };
     public List<Tile> neighbors
     {
         get
@@ -252,7 +255,7 @@ public class Tile : MonoBehaviour, INodeSearchable
                 dir = EDirection.NorthEast;
             }
 
-            else if(other.transform.position.x > transform.position.x)
+            else if(other.transform.position.x > transform.position.x && other.transform.position.z == transform.position.z)
             {
                 dir = EDirection.East;
                 if (otherTile.walls[(int)EWallDirection.West] != walls[(int)EWallDirection.East])
@@ -268,7 +271,7 @@ public class Tile : MonoBehaviour, INodeSearchable
                 }
             }
 
-            else if (other.transform.position.x < transform.position.x)
+            else if (other.transform.position.x < transform.position.x && other.transform.position.z == transform.position.z)
             {
                 dir = EDirection.West;
                 if (otherTile.walls[(int)EWallDirection.East] != walls[(int)EWallDirection.West])
@@ -284,7 +287,7 @@ public class Tile : MonoBehaviour, INodeSearchable
                 }
             }
 
-            else if (other.transform.position.z > transform.position.z)
+            else if (other.transform.position.z > transform.position.z && other.transform.position.x == transform.position.x)
             {
                 dir = EDirection.North;
                 if (otherTile.walls[(int)EWallDirection.South] != walls[(int)EWallDirection.North])
@@ -300,7 +303,7 @@ public class Tile : MonoBehaviour, INodeSearchable
                 }
             }
 
-            else if (other.transform.position.z < transform.position.z)
+            else if (other.transform.position.z < transform.position.z && other.transform.position.x == transform.position.x)
             {
                 dir = EDirection.South;
                 if(otherTile.walls[(int)EWallDirection.North] != walls[(int)EWallDirection.South])
