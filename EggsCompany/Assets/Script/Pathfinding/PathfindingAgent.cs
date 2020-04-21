@@ -123,6 +123,7 @@ public class PathfindingAgent : MonoBehaviour
         INodeSearchable currentNode;
         List<INodeSearchable> moveRange = new List<INodeSearchable>(); 
         Stack<INodeSearchable> nodeStack = new Stack<INodeSearchable>();
+        startNode.DijkstraCost = 0;
         nodeStack.Push(startNode);
 
         while(nodeStack.Count > 0)
@@ -130,18 +131,22 @@ public class PathfindingAgent : MonoBehaviour
             currentNode = nodeStack.Pop();
             foreach(var child in currentNode.children)
             {
-                CalculateDijkstra(currentNode, child, ECostType.Movement);
-                if(child.DijkstraCost <= moveValue)
+                if (child != null)
                 {
-                    if (!nodeStack.Contains(child))
+                    bool reassigned = CalculateDijkstra(currentNode, child, ECostType.Movement);
+                    if(child.DijkstraCost <= moveValue)
                     {
-                        nodeStack.Push(child);
+                        if (!nodeStack.Contains(child) && reassigned)
+                        {
+                            nodeStack.Push(child);
+                        }
+                        if (!moveRange.Contains(child))
+                        {
+                            //TODO: copy? add as function pass? Whatever, add the cost calculation for the tile.
+                            moveRange.Add(child);
+                        }
                     }
-                    if (!moveRange.Contains(child))
-                    {
-                        //TODO: copy? add as function pass? Whatever, add the cost calculation for the tile.
-                        moveRange.Add(child);
-                    }
+
                 }
 
             }
@@ -161,30 +166,36 @@ public class PathfindingAgent : MonoBehaviour
         INodeSearchable currentNode;
         List<INodeSearchable> moveRange = new List<INodeSearchable>();
         Stack<INodeSearchable> nodeStack = new Stack<INodeSearchable>();
+        startNode.DijkstraCost = 0;
         nodeStack.Push(startNode);
 
         while (nodeStack.Count > 0)
         {
             currentNode = nodeStack.Pop();
+
             foreach (var child in currentNode.children)
             {
-                CalculateDijkstra(currentNode, child, ECostType.Movement);
-                if (child.DijkstraCost <= moveValue)
+                if (child != null)
                 {
-                    if (!nodeStack.Contains(child))
+                    CalculateDijkstra(currentNode, child, ECostType.Movement);
+                    if (child.DijkstraCost <= moveValue)
                     {
-                        nodeStack.Push(child);
-                    }
-                    if (!moveRange.Contains(child))
-                    {
-                        if(characterToCheckFor != null && mappingFunction != null)
+                        if (!nodeStack.Contains(child))
                         {
-                            mappingFunction?.Invoke(characterToCheckFor, (Tile)child); 
-                            //Works for the decision making as the function to calculate the new value holds the top x tiles to move to and then decides from there;
+                            nodeStack.Push(child);
                         }
-                        moveRange.Add(child);
+                        if (!moveRange.Contains(child))
+                        {
+                            if (characterToCheckFor != null && mappingFunction != null)
+                            {
+                                mappingFunction?.Invoke(characterToCheckFor, (Tile)child);
+                                //Works for the decision making as the function to calculate the new value holds the top x tiles to move to and then decides from there;
+                            }
+                            moveRange.Add(child);
+                        }
                     }
                 }
+
 
             }
         }
@@ -382,7 +393,8 @@ public class PathfindingAgent : MonoBehaviour
         return null;
     }
 
-    public void CalculateDijkstra(INodeSearchable currentNode, INodeSearchable child, ECostType costType)
+    //Return: True if cost is reassigned, False if it is not;
+    public bool CalculateDijkstra(INodeSearchable currentNode, INodeSearchable child, ECostType costType)
     {
 
         float? calculatedCost = currentNode.DijkstraCost;
@@ -402,7 +414,9 @@ public class PathfindingAgent : MonoBehaviour
         {
             child.DijkstraCost = calculatedCost;
             child.parent = currentNode;
+            return true;
         }
+        return false;
     }
 
     //@Param startNode: The INodeSearchable object the search should start from.
@@ -491,11 +505,19 @@ public class PathfindingAgent : MonoBehaviour
 
         for (int i = 0; i < (int)EDirection.Error; i++)
         {
-            if (tileChild.neighbors[i] == tileParent)
+
+            //Debug.Log(tileParent);
+            //Debug.Log(tileChild);
+            if (tileChild.neighbors[i] != null)
             {
-                directionToParent = (EDirection)i;
-                break;
+                if (tileChild.neighbors[i] == tileParent)
+                {
+                    directionToParent = (EDirection)i;
+                    break;
+                }
             }
+
+
         }
 
         directionToChild = FlipDirection(directionToParent);

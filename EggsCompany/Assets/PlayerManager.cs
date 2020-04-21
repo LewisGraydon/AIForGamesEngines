@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class PlayerManager : MonoBehaviour
 {
@@ -55,6 +56,8 @@ public class PlayerManager : MonoBehaviour
                 {
                     print("Moving " + selectedPlayer + " to " + destinationTile.name);
                     Vector3 endPos = destinationTile.transform.position;
+
+                    List<Tile> bob = FindObjectsOfType<Tile>().ToList();
 
                     List<INodeSearchable> nodeSearchables = gsmScript.pathfindingAgent.FindMovementRange(selectedPlayer.GetComponent<CharacterBase>().occupiedTile, 5);  //IDGAF
                     Stack<INodeSearchable> pathToDestination = gsmScript.pathfindingAgent.CreatePath(destinationTile.GetComponent<Tile>());
