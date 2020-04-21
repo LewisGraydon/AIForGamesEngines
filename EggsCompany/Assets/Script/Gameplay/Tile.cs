@@ -20,13 +20,13 @@ public class Tile : MonoBehaviour, INodeSearchable
 
     public List<WallType> walls = new List<WallType>(4);
 
-    public bool searched { get => searched; set => searched = value; }
-    public float? DijkstraCost { get => DijkstraCost; set => DijkstraCost = value; }
-    public float? HeuristicCost { get => DijkstraCost; set => DijkstraCost = value; }
-    public float? TotalCost { get => TotalCost; set => TotalCost = value; }
-    public INodeSearchable parent { get => parent; set => parent = value; }
+    public bool searched { get; set; }
+    public float? DijkstraCost { get; set; }
+    public float? HeuristicCost { get; set; }
+    public float? TotalCost { get; set; }
+    public INodeSearchable parent { get; set; }
     public List<INodeSearchable> children { get; set; }
-    public float distanceToTarget { get => distanceToTarget; set => distanceToTarget = value; }
+    public float distanceToTarget { get; set; }
     static private float activeCoverDirectionThreshold = 0.44f;
 
     private Renderer gameObjectRenderer;
@@ -45,7 +45,7 @@ public class Tile : MonoBehaviour, INodeSearchable
     {
         startcolor = gameObjectRenderer.material.color;
         gameObjectRenderer.material.color = Color.cyan;
-        GameObject.Find("Players").GetComponent<PlayerManager>().destinationTile = gameObject;
+        GameObject.Find("Players").GetComponent<PlayerManager>().destinationTile = gameObject;       
     }
     void OnMouseExit()
     {

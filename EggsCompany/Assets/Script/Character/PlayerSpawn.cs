@@ -33,7 +33,9 @@ public class PlayerSpawn : MonoBehaviour
 
             player.name = nameList[randomNameInt];
             pcScript._characterName = nameList[randomNameInt];
-            spawnPointsList[rnd].occupier = ETileOccupier.PlayerCharacter;           
+            spawnPointsList[rnd].occupier = ETileOccupier.PlayerCharacter;
+
+            pcScript.occupiedTile = spawnPointsList[rnd];
 
             // Remove the spawn location and name from the list to ensure that each is unique.
             spawnPointsList.RemoveAt(rnd);
