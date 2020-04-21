@@ -20,6 +20,8 @@ public class EnemySpawn : MonoBehaviour
             GameObject enemy = Instantiate(enemyCharacterPrefab, spawnLocation, Quaternion.identity);
             spawnPoints[i].occupier = ETileOccupier.EnemyCharacter;
 
+            enemy.GetComponent<EnemyCharacter>().occupiedTile = spawnPoints[i];
+
             enemy.name = "Beehive " + i;
             enemy.transform.SetParent(container.transform, false);
         }

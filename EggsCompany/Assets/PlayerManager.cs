@@ -46,12 +46,7 @@ public class PlayerManager : MonoBehaviour
         {
             if(destinationTile != null)
             {
-                gsmScript.pathfindingAgent.FindMovementRange(selectedPlayer.GetComponent<CharacterBase>().occupiedTile, 5);  //IDGAF
-                Stack<INodeSearchable> pathToDestination = gsmScript.pathfindingAgent.CreatePath(destinationTile.GetComponent<Tile>());
-                foreach(INodeSearchable node in pathToDestination)
-                {
-                    print(node);
-                }
+                
             }
 
             if(Input.GetMouseButtonUp(0))
@@ -59,7 +54,15 @@ public class PlayerManager : MonoBehaviour
                 if (destinationTile != null)
                 {
                     print("Moving " + selectedPlayer + " to " + destinationTile.name);
-                    Vector3 endPos = destinationTile.transform.position;                 
+                    Vector3 endPos = destinationTile.transform.position;
+
+                    List<INodeSearchable> nodeSearchables = gsmScript.pathfindingAgent.FindMovementRange(selectedPlayer.GetComponent<CharacterBase>().occupiedTile, 5);  //IDGAF
+                    Stack<INodeSearchable> pathToDestination = gsmScript.pathfindingAgent.CreatePath(destinationTile.GetComponent<Tile>());
+                    foreach (INodeSearchable node in pathToDestination)
+                    {
+                        print(node);
+                    }
+                    gsmScript.pathfindingAgent.NodeReset(nodeSearchables);
                 }
             }
 
