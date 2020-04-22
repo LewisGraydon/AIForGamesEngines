@@ -150,6 +150,10 @@ public class Tile : MonoBehaviour, INodeSearchable
 
     public void AssignNeighbor(EDirection direction, Tile neighborTile)
     {
+        if(direction == EDirection.Error)
+        {
+            Debug.Log("HELP");
+        }
         _neighbors[(int)direction] = neighborTile;
         AssignNeighborToChildren(direction, neighborTile);
     }
@@ -234,28 +238,42 @@ public class Tile : MonoBehaviour, INodeSearchable
         if (otherTile != null)
         {
             EDirection dir = EDirection.Error;
+            if (name.Contains("(47)") && otherTile.name.Contains("(67)"))
+            {
+                Debug.Log("this.name = " + this.name);
+                Debug.Log("otherTile.name = " + otherTile.name);
 
-            if (other.transform.position.x < transform.position.x && other.transform.position.z < transform.position.z)
+                Debug.Log("this.transform.position.x = " + this.transform.position.x + "(int)this.transform.position.x = " + (int)this.transform.position.x + " Rounded: " + Mathf.RoundToInt(this.transform.position.x));
+                Debug.Log("this.transform.position.z = " + this.transform.position.z + "(int)this.transform.position.z = " + (int)this.transform.position.z + " Rounded: " + Mathf.RoundToInt(this.transform.position.z));
+
+                Debug.Log("otherTile.transform.position.x = " + (otherTile.transform.position.x) + "(int)otherTile.transform.position.x = " + (int)(otherTile.transform.position.x) + " Rounded: " + Mathf.RoundToInt((otherTile.transform.position.x)));
+                Debug.Log("otherTile.transform.position.z = " + (otherTile.transform.position.z) + "(int)otherTile.transform.position.z = " + (int)(otherTile.transform.position.z) + " Rounded: " + Mathf.RoundToInt((otherTile.transform.position.z)));
+
+                Debug.Log("is this.transform.x > otherTile.transform.x: " + (this.transform.position.x > otherTile.transform.position.x) + ", < ? " + (this.transform.position.x < otherTile.transform.position.x));
+                Debug.Log("is this.transform.z > otherTile.transform.z: " + (this.transform.position.z > otherTile.transform.position.z) + ", < ? " + (this.transform.position.z < otherTile.transform.position.z));
+            }
+
+            if (Mathf.RoundToInt(other.transform.position.x) < Mathf.RoundToInt(transform.position.x) && Mathf.RoundToInt(other.transform.position.z) < Mathf.RoundToInt(transform.position.z))
             {
                 dir = EDirection.SouthWest;
             }
 
-            else if (other.transform.position.x < transform.position.x && other.transform.position.z > transform.position.z)
+            else if (Mathf.RoundToInt(otherTile.transform.position.x) < Mathf.RoundToInt(transform.position.x) && Mathf.RoundToInt(otherTile.transform.position.z) > Mathf.RoundToInt(transform.position.z))
             {
                 dir = EDirection.NorthWest;
             }
 
-            else if (other.transform.position.x > transform.position.x && other.transform.position.z < transform.position.z)
+            else if (Mathf.RoundToInt(other.transform.position.x) > Mathf.RoundToInt(transform.position.x) && Mathf.RoundToInt(other.transform.position.z) < Mathf.RoundToInt(transform.position.z))
             {
-                dir = EDirection.SouthEast;   
+                dir = EDirection.SouthEast;
             }
 
-            else if (other.transform.position.x > transform.position.x && other.transform.position.z > transform.position.z)
+            else if (Mathf.RoundToInt(other.transform.position.x) > Mathf.RoundToInt(transform.position.x) && Mathf.RoundToInt(other.transform.position.z) > Mathf.RoundToInt(transform.position.z))
             {
                 dir = EDirection.NorthEast;
             }
 
-            else if(other.transform.position.x > transform.position.x && other.transform.position.z == transform.position.z)
+            else if(Mathf.RoundToInt(other.transform.position.x) > Mathf.RoundToInt(transform.position.x))
             {
                 dir = EDirection.East;
                 if (otherTile.walls[(int)EWallDirection.West] != walls[(int)EWallDirection.East])
@@ -271,7 +289,7 @@ public class Tile : MonoBehaviour, INodeSearchable
                 }
             }
 
-            else if (other.transform.position.x < transform.position.x && other.transform.position.z == transform.position.z)
+            else if (Mathf.RoundToInt(other.transform.position.x) < Mathf.RoundToInt(transform.position.x))
             {
                 dir = EDirection.West;
                 if (otherTile.walls[(int)EWallDirection.East] != walls[(int)EWallDirection.West])
@@ -287,7 +305,7 @@ public class Tile : MonoBehaviour, INodeSearchable
                 }
             }
 
-            else if (other.transform.position.z > transform.position.z && other.transform.position.x == transform.position.x)
+            else if (Mathf.RoundToInt(other.transform.position.z) > Mathf.RoundToInt(transform.position.z))
             {
                 dir = EDirection.North;
                 if (otherTile.walls[(int)EWallDirection.South] != walls[(int)EWallDirection.North])
@@ -303,7 +321,7 @@ public class Tile : MonoBehaviour, INodeSearchable
                 }
             }
 
-            else if (other.transform.position.z < transform.position.z && other.transform.position.x == transform.position.x)
+            else if (Mathf.RoundToInt(other.transform.position.z) < Mathf.RoundToInt(transform.position.z))
             {
                 dir = EDirection.South;
                 if(otherTile.walls[(int)EWallDirection.North] != walls[(int)EWallDirection.South])

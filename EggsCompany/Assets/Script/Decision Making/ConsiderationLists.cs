@@ -174,7 +174,7 @@ public static class ConsiderationLists
                 foreach(CharacterBase enemy in self.enemiesInSight)
                 {
                     (movementConsiderationList[i] as SingleEnemyMovementConsideration).ConsiderTile(ref self, enemy, ref tileToConsider);
-                } //possibly not ideal as calculating similar values given number of player characters seen a lot of times but in case some of the values replace rather than add it is necessary.
+                } //calculates for all seen enemies per consideration as some considerations replace?
             }
             else if(movementConsiderationList[i] is TileOnlyMovementConsideration)
             {
