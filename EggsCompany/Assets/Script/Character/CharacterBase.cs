@@ -98,7 +98,7 @@ public class CharacterBase : MonoBehaviour
         actionPips = actionPips - 1 >= 0 ? actionPips - 1 : 0;
     }
 
-    public void FindSightline(int visionRange)
+    public List<INodeSearchable> FindSightline(int visionRange)
     {
         List<INodeSearchable> possibleSeenTiles  = gsmScript.pathfindingAgent.FindNodeSightRange(occupiedTile, visionRange);
         List<INodeSearchable> seenTiles = new List<INodeSearchable>();
@@ -117,8 +117,13 @@ public class CharacterBase : MonoBehaviour
         {
             Tile workingTile = tile as Tile;
             Vector3 pawnYoffset = new Vector3(0, .5f, 0);
-
-            Vector3 difference = (workingTile.transform.position + pawnYoffset) - (occupiedTile.transform.position + pawnYoffset);
+            Vector3 tiledirectionEoffset = new Vector3(.4f, 0, 0);
+            Vector3 tiledirectionWoffset = new Vector3(-.4f, 0, 0);
+            Vector3 tiledirectionNoffset = new Vector3(0, 0, .4f);
+            Vector3 tiledirectionSoffset = new Vector3(0, 0, -.4f);
+            Vector3 targetcentre = workingTile.transform.position + pawnYoffset;
+            Vector3 startingcentre = occupiedTile.transform.position + pawnYoffset;
+            Vector3 difference = targetcentre - startingcentre;
 
             //calc distance
             float distance = Vector3.Magnitude(difference);
@@ -128,13 +133,44 @@ public class CharacterBase : MonoBehaviour
             int wallLayer = 1 << 8;
 
             //If the raycast hits nothing, add this tile to seen
-            if (!Physics.Raycast(occupiedTile.transform.position + pawnYoffset, direction, distance, wallLayer))
+            if (!Physics.Raycast(targetcentre, direction, distance, wallLayer))
             {
                 seenTiles.Add(tile);
             }
-            //next: else - 4 cardinal directions raycast.
+            else
+            {
+                bool hitN;
+                bool hitE;
+                bool hitS;
+                bool hitW;
+
+                Vector3 differenceN = (targetcentre + tiledirectionNoffset) - (startingcentre + tiledirectionNoffset);
+                Vector3 differenceE = (targetcentre + tiledirectionEoffset) - (startingcentre + tiledirectionEoffset);
+                Vector3 differenceS = (targetcentre + tiledirectionSoffset) - (startingcentre + tiledirectionSoffset);
+                Vector3 differenceW = (targetcentre + tiledirectionWoffset) - (startingcentre + tiledirectionWoffset);
+
+                float distanceN = Vector3.Magnitude(differenceN);
+                float distanceE = Vector3.Magnitude(differenceE);
+                float distanceS = Vector3.Magnitude(differenceS);
+                float distanceW = Vector3.Magnitude(differenceW);
+
+                Vector3 directionN = Vector3.Normalize(differenceN); 
+                Vector3 directionE = Vector3.Normalize(differenceE);
+                Vector3 directionS = Vector3.Normalize(differenceS);
+                Vector3 directionW = Vector3.Normalize(differenceW);
+
+                hitN = Physics.Raycast(targetcentre, directionN, distanceN, wallLayer);
+                hitE = Physics.Raycast(targetcentre, directionE, distanceE, wallLayer);
+                hitS = Physics.Raycast(targetcentre, directionS, distanceS, wallLayer);
+                hitW = Physics.Raycast(targetcentre, directionW, distanceW, wallLayer);
+
+                if(!hitN ||!hitE ||!hitS ||!hitW)
+                {
+                    seenTiles.Add(tile);
+                }
+            }
         }
-        
+        return seenTiles;
         //occupiedTile;
     }
 
