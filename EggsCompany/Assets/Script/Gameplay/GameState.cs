@@ -233,4 +233,16 @@ public class GameState : MonoBehaviour
     {
         enemyPipsRemaining = (esScript.numberOfEnemies - enemyDeathCount) * 2;
     }
+
+    public void updateCanvasRotations()
+    {
+        foreach(CharacterBase player in playerContainer.GetComponentsInChildren<CharacterBase>())
+        {
+            player.faceCanvasToCamera();
+        }
+        foreach(CharacterBase enemy in enemyContainer.GetComponentsInChildren<CharacterBase>())
+        {
+            enemy.faceCanvasToCamera();
+        }
+    }
 }

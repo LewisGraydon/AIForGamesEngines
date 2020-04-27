@@ -239,20 +239,6 @@ public class Tile : MonoBehaviour, INodeSearchable
         if (otherTile != null)
         {
             EDirection dir = EDirection.Error;
-            if (name.Contains("(47)") && otherTile.name.Contains("(67)"))
-            {
-                Debug.Log("this.name = " + this.name);
-                Debug.Log("otherTile.name = " + otherTile.name);
-
-                Debug.Log("this.transform.position.x = " + this.transform.position.x + "(int)this.transform.position.x = " + (int)this.transform.position.x + " Rounded: " + Mathf.RoundToInt(this.transform.position.x));
-                Debug.Log("this.transform.position.z = " + this.transform.position.z + "(int)this.transform.position.z = " + (int)this.transform.position.z + " Rounded: " + Mathf.RoundToInt(this.transform.position.z));
-
-                Debug.Log("otherTile.transform.position.x = " + (otherTile.transform.position.x) + "(int)otherTile.transform.position.x = " + (int)(otherTile.transform.position.x) + " Rounded: " + Mathf.RoundToInt((otherTile.transform.position.x)));
-                Debug.Log("otherTile.transform.position.z = " + (otherTile.transform.position.z) + "(int)otherTile.transform.position.z = " + (int)(otherTile.transform.position.z) + " Rounded: " + Mathf.RoundToInt((otherTile.transform.position.z)));
-
-                Debug.Log("is this.transform.x > otherTile.transform.x: " + (this.transform.position.x > otherTile.transform.position.x) + ", < ? " + (this.transform.position.x < otherTile.transform.position.x));
-                Debug.Log("is this.transform.z > otherTile.transform.z: " + (this.transform.position.z > otherTile.transform.position.z) + ", < ? " + (this.transform.position.z < otherTile.transform.position.z));
-            }
 
             if (Mathf.RoundToInt(other.transform.position.x) < Mathf.RoundToInt(transform.position.x) && Mathf.RoundToInt(other.transform.position.z) < Mathf.RoundToInt(transform.position.z))
             {

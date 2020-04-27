@@ -67,6 +67,7 @@ public class PlayerManager : MonoBehaviour
                     }
                     gsmScript.pathfindingAgent.NodeReset(nodeSearchables);
                 }
+                gsmScript.updateCanvasRotations();
             }
 
             if (Input.GetKeyUp(KeyCode.Q))
@@ -87,6 +88,7 @@ public class PlayerManager : MonoBehaviour
 
                 selectedPlayerCameraPosition = cameraPositionArray[cameraPositionIndex];
                 cameraObject.transform.position = selectedPlayerCameraPosition;
+                gsmScript.updateCanvasRotations();
             }
 
             if (Input.GetKeyUp(KeyCode.E))
@@ -107,6 +109,7 @@ public class PlayerManager : MonoBehaviour
 
                 selectedPlayerCameraPosition = cameraPositionArray[cameraPositionIndex];
                 cameraObject.transform.position = selectedPlayerCameraPosition;
+                gsmScript.updateCanvasRotations();
             }
 
 
@@ -130,7 +133,8 @@ public class PlayerManager : MonoBehaviour
                     case 3: // Down
                         cameraObject.transform.position = new Vector3(cameraObject.transform.position.x, cameraObject.transform.position.y, cameraObject.transform.position.z - 0.25f);                       
                         break;
-                }               
+                }
+                gsmScript.updateCanvasRotations();
             }
 
             if (Input.GetKey(KeyCode.RightArrow))
@@ -153,6 +157,7 @@ public class PlayerManager : MonoBehaviour
                         cameraObject.transform.position = new Vector3(cameraObject.transform.position.x, cameraObject.transform.position.y, cameraObject.transform.position.z + 0.25f);                        
                         break;
                 }           
+                gsmScript.updateCanvasRotations();
             }
 
             if (Input.GetKey(KeyCode.UpArrow))
@@ -175,6 +180,7 @@ public class PlayerManager : MonoBehaviour
                         cameraObject.transform.position = new Vector3(cameraObject.transform.position.x - 0.25f, cameraObject.transform.position.y, cameraObject.transform.position.z);                       
                         break;
                 }                
+                gsmScript.updateCanvasRotations();
             }
 
             if (Input.GetKey(KeyCode.DownArrow))
@@ -196,12 +202,14 @@ public class PlayerManager : MonoBehaviour
                     case 3: // Right
                         cameraObject.transform.position = new Vector3(cameraObject.transform.position.x + 0.25f, cameraObject.transform.position.y, cameraObject.transform.position.z);
                         break;
-                }              
+                }
+                gsmScript.updateCanvasRotations();
             }
 
             if (Input.GetKeyUp(KeyCode.Home))
             {
                 cameraObject.transform.position = selectedPlayerCameraPosition;
+                gsmScript.updateCanvasRotations();
             }
 
             if (Input.GetKeyUp(KeyCode.PageUp))
@@ -216,6 +224,7 @@ public class PlayerManager : MonoBehaviour
                 selectedPlayerCameraPosition = cameraPositionArray[cameraPositionIndex];
                 cameraObject.transform.position = selectedPlayerCameraPosition;
                 cameraObject.transform.Rotate((int)cameraObject.transform.rotation.x, (int)cameraObject.transform.rotation.y + 90, (int)cameraObject.transform.rotation.z, Space.World);
+                gsmScript.updateCanvasRotations();
             }
 
             if (Input.GetKeyUp(KeyCode.PageDown))
@@ -230,6 +239,7 @@ public class PlayerManager : MonoBehaviour
                 selectedPlayerCameraPosition = cameraPositionArray[cameraPositionIndex];
                 cameraObject.transform.position = selectedPlayerCameraPosition;
                 cameraObject.transform.Rotate((int)cameraObject.transform.rotation.x, (int)cameraObject.transform.rotation.y - 90, (int)cameraObject.transform.rotation.z, Space.World);
+                gsmScript.updateCanvasRotations();
             }
             #endregion
         }
