@@ -129,7 +129,8 @@ public class Tile : MonoBehaviour, INodeSearchable
                 }
 
                 wallCube.transform.position = new Vector3(wallCubeX, wallCubeY, wallCubeZ);
-                
+                wallCube.layer = 8;
+
                 // Make tile parent of wall nodes.
                 wallCube.transform.parent = transform;   
                 
