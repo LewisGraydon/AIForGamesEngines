@@ -7,6 +7,7 @@ public enum EGameState
     setupState,
     playerTurn,
     enemyTurn,
+    movement,
     victoryScreen,
     failureScreen
 }

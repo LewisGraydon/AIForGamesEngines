@@ -40,32 +40,74 @@ public class PlayerManager : MonoBehaviour
         cameraObject.transform.position = selectedPlayerCameraPosition;
     }
 
+    private Vector3 directionToDestination = Vector3.zero;
+    private Vector3 movementAmount = Vector3.zero;
+    private Tile currentDestinationTile = null;
+    private Stack<INodeSearchable> pathToDestination = null;
+    private List<INodeSearchable> nodeSearchables = null;
+
     // Update is called once per frame
     void Update()
     {
-        if (gsmScript.gameState == EGameState.playerTurn)
+        if (gsmScript.gameState == EGameState.movement)
         {
-            if(destinationTile != null)
-            {
-                
+            if (Mathf.Abs(selectedPlayer.transform.position.x - currentDestinationTile.transform.position.x) > 0.01f || Mathf.Abs(selectedPlayer.transform.position.z - currentDestinationTile.transform.position.z) > 0.01f)
+            {            
+                selectedPlayer.transform.position += directionToDestination * Time.deltaTime;  
+                print("SuckADickUnity");
+
+                selectedPlayer = selectablePlayers[selectedIndex];
+
+                cameraPositionArray = new Vector3[] {   new Vector3(selectedPlayer.transform.position.x, selectedPlayer.transform.position.y + 4.5f, selectedPlayer.transform.position.z - 5),
+                                                new Vector3(selectedPlayer.transform.position.x - 5, selectedPlayer.transform.position.y + 4.5f, selectedPlayer.transform.position.z),
+                                                new Vector3(selectedPlayer.transform.position.x, selectedPlayer.transform.position.y + 4.5f, selectedPlayer.transform.position.z + 5),
+                                                new Vector3(selectedPlayer.transform.position.x + 5, selectedPlayer.transform.position.y + 4.5f, selectedPlayer.transform.position.z) };
+
+                selectedPlayerCameraPosition = cameraPositionArray[cameraPositionIndex];
+                cameraObject.transform.position = selectedPlayerCameraPosition;
+
             }
 
+            else if (pathToDestination.Count() == 0)
+            {
+                gsmScript.gameState = EGameState.playerTurn;
+                gsmScript.pathfindingAgent.NodeReset(nodeSearchables);
+            }
+
+            else
+            {
+                // This is bullshit.            
+                currentDestinationTile.GetComponent<Tile>().occupier = ETileOccupier.None;
+
+                selectedPlayer.transform.position = new Vector3(currentDestinationTile.transform.position.x, selectedPlayer.transform.position.y, currentDestinationTile.transform.position.z);
+                currentDestinationTile = pathToDestination.Pop() as Tile;
+                directionToDestination = currentDestinationTile.gameObject.transform.position - selectedPlayer.transform.position;
+                directionToDestination.y = 0;
+                //movementAmount = directionToDestination / 10;
+
+                currentDestinationTile.GetComponent<Tile>().occupier = ETileOccupier.PlayerCharacter;
+                selectedPlayer.GetComponent<CharacterBase>().occupiedTile = currentDestinationTile;
+            }
+        }
+
+        if (gsmScript.gameState == EGameState.playerTurn)
+        {
             if(Input.GetMouseButtonUp(0))
             {
                 if (destinationTile != null)
                 {
                     print("Moving " + selectedPlayer + " to " + destinationTile.name);
-                    Vector3 endPos = destinationTile.transform.position;
 
-                    List<Tile> bob = FindObjectsOfType<Tile>().ToList();
+                    nodeSearchables = gsmScript.pathfindingAgent.FindMovementRange(selectedPlayer.GetComponent<CharacterBase>().occupiedTile, 5);  //IDGAF
+                    pathToDestination = gsmScript.pathfindingAgent.CreatePath(destinationTile.GetComponent<Tile>());
+                  
+                    currentDestinationTile = pathToDestination.Pop() as Tile;                                  
+                        
+                    directionToDestination = currentDestinationTile.gameObject.transform.position - selectedPlayer.transform.position;
+                    directionToDestination.y = 0;
+                    //movementAmount = directionToDestination / 10;
 
-                    List<INodeSearchable> nodeSearchables = gsmScript.pathfindingAgent.FindMovementRange(selectedPlayer.GetComponent<CharacterBase>().occupiedTile, 5);  //IDGAF
-                    Stack<INodeSearchable> pathToDestination = gsmScript.pathfindingAgent.CreatePath(destinationTile.GetComponent<Tile>());
-                    foreach (INodeSearchable node in pathToDestination)
-                    {
-                        print(node);
-                    }
-                    gsmScript.pathfindingAgent.NodeReset(nodeSearchables);
+                    gsmScript.gameState = EGameState.movement;
                 }
                 gsmScript.updateCanvasRotations();
             }
