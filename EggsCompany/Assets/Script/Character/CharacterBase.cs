@@ -15,6 +15,7 @@ public class CharacterBase : MonoBehaviour
     protected Canvas UICanvas;
     protected Text HealthText;
     protected Text ActionPipsText;
+
     void Start()
     {
         
@@ -60,6 +61,15 @@ public class CharacterBase : MonoBehaviour
     public bool getOnPlayerTeam
     {
         get { return onPlayerTeam; }
+    }
+
+    protected int movementRange = 5;
+    public int getMovementRange
+    {
+        get
+        {
+            return movementRange;
+        }
     }
 
     protected int actionPips = 2;

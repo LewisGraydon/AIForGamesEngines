@@ -17,7 +17,7 @@ public class PlayerManager : MonoBehaviour
     private int cameraPositionIndex = 0;
     private Vector3[] cameraPositionArray = new Vector3[4];
 
-    public GameObject destinationTile = null;
+    public Tile destinationTile = null;
 
     // Start is called before the first frame update
     void Start()
@@ -26,18 +26,11 @@ public class PlayerManager : MonoBehaviour
         {
             selectablePlayers[i] = (transform.GetChild(i).gameObject);
         }
-        selectedPlayer = selectablePlayers[selectedIndex];
-
+       
         gsm = GameObject.Find("GameStateManager");
         gsmScript = gsm.GetComponent<GameState>();
 
-        cameraPositionArray = new Vector3[] {   new Vector3(selectedPlayer.transform.position.x, selectedPlayer.transform.position.y + 4.5f, selectedPlayer.transform.position.z - 5),
-                                                new Vector3(selectedPlayer.transform.position.x - 5, selectedPlayer.transform.position.y + 4.5f, selectedPlayer.transform.position.z),
-                                                new Vector3(selectedPlayer.transform.position.x, selectedPlayer.transform.position.y + 4.5f, selectedPlayer.transform.position.z + 5),
-                                                new Vector3(selectedPlayer.transform.position.x + 5, selectedPlayer.transform.position.y + 4.5f, selectedPlayer.transform.position.z) };
-
-        selectedPlayerCameraPosition = cameraPositionArray[cameraPositionIndex];
-        cameraObject.transform.position = selectedPlayerCameraPosition;
+        SetupCameraPosition();
     }
 
     private Vector3 directionToDestination = Vector3.zero;
@@ -53,19 +46,8 @@ public class PlayerManager : MonoBehaviour
         {
             if (Mathf.Abs(selectedPlayer.transform.position.x - currentDestinationTile.transform.position.x) > 0.01f || Mathf.Abs(selectedPlayer.transform.position.z - currentDestinationTile.transform.position.z) > 0.01f)
             {            
-                selectedPlayer.transform.position += directionToDestination * Time.deltaTime;  
-                print("SuckADickUnity");
-
-                selectedPlayer = selectablePlayers[selectedIndex];
-
-                cameraPositionArray = new Vector3[] {   new Vector3(selectedPlayer.transform.position.x, selectedPlayer.transform.position.y + 4.5f, selectedPlayer.transform.position.z - 5),
-                                                new Vector3(selectedPlayer.transform.position.x - 5, selectedPlayer.transform.position.y + 4.5f, selectedPlayer.transform.position.z),
-                                                new Vector3(selectedPlayer.transform.position.x, selectedPlayer.transform.position.y + 4.5f, selectedPlayer.transform.position.z + 5),
-                                                new Vector3(selectedPlayer.transform.position.x + 5, selectedPlayer.transform.position.y + 4.5f, selectedPlayer.transform.position.z) };
-
-                selectedPlayerCameraPosition = cameraPositionArray[cameraPositionIndex];
-                cameraObject.transform.position = selectedPlayerCameraPosition;
-
+                selectedPlayer.transform.position += directionToDestination * Time.deltaTime;
+                SetupCameraPosition();
             }
 
             else if (pathToDestination.Count() == 0)
@@ -75,15 +57,13 @@ public class PlayerManager : MonoBehaviour
             }
 
             else
-            {
-                // This is bullshit.            
+            {         
                 currentDestinationTile.GetComponent<Tile>().occupier = ETileOccupier.None;
 
                 selectedPlayer.transform.position = new Vector3(currentDestinationTile.transform.position.x, selectedPlayer.transform.position.y, currentDestinationTile.transform.position.z);
                 currentDestinationTile = pathToDestination.Pop() as Tile;
                 directionToDestination = currentDestinationTile.gameObject.transform.position - selectedPlayer.transform.position;
                 directionToDestination.y = 0;
-                //movementAmount = directionToDestination / 10;
 
                 currentDestinationTile.GetComponent<Tile>().occupier = ETileOccupier.PlayerCharacter;
                 selectedPlayer.GetComponent<CharacterBase>().occupiedTile = currentDestinationTile;
@@ -98,14 +78,20 @@ public class PlayerManager : MonoBehaviour
                 {
                     print("Moving " + selectedPlayer + " to " + destinationTile.name);
 
-                    nodeSearchables = gsmScript.pathfindingAgent.FindMovementRange(selectedPlayer.GetComponent<CharacterBase>().occupiedTile, 5);  //IDGAF
+                    nodeSearchables = gsmScript.pathfindingAgent.FindMovementRange(selectedPlayer.GetComponent<CharacterBase>().occupiedTile, selectedPlayer.GetComponent<CharacterBase>().getMovementRange);  //IDGAF
+                    
+                    if(!nodeSearchables.Contains(destinationTile))
+                    {
+                        gsmScript.pathfindingAgent.NodeReset(nodeSearchables);
+                        return;
+                    }
+
                     pathToDestination = gsmScript.pathfindingAgent.CreatePath(destinationTile.GetComponent<Tile>());
                   
                     currentDestinationTile = pathToDestination.Pop() as Tile;                                  
                         
                     directionToDestination = currentDestinationTile.gameObject.transform.position - selectedPlayer.transform.position;
                     directionToDestination.y = 0;
-                    //movementAmount = directionToDestination / 10;
 
                     gsmScript.gameState = EGameState.movement;
                 }
@@ -121,15 +107,7 @@ public class PlayerManager : MonoBehaviour
                     selectedIndex = 3;
                 }
 
-                selectedPlayer = selectablePlayers[selectedIndex];
-
-                cameraPositionArray = new Vector3[] {   new Vector3(selectedPlayer.transform.position.x, selectedPlayer.transform.position.y + 4.5f, selectedPlayer.transform.position.z - 5),
-                                                new Vector3(selectedPlayer.transform.position.x - 5, selectedPlayer.transform.position.y + 4.5f, selectedPlayer.transform.position.z),
-                                                new Vector3(selectedPlayer.transform.position.x, selectedPlayer.transform.position.y + 4.5f, selectedPlayer.transform.position.z + 5),
-                                                new Vector3(selectedPlayer.transform.position.x + 5, selectedPlayer.transform.position.y + 4.5f, selectedPlayer.transform.position.z) };
-
-                selectedPlayerCameraPosition = cameraPositionArray[cameraPositionIndex];
-                cameraObject.transform.position = selectedPlayerCameraPosition;
+                SetupCameraPosition();
                 gsmScript.updateCanvasRotations();
             }
 
@@ -142,15 +120,7 @@ public class PlayerManager : MonoBehaviour
                     selectedIndex = 0;
                 }
 
-                selectedPlayer = selectablePlayers[selectedIndex];
-
-                cameraPositionArray = new Vector3[] {   new Vector3(selectedPlayer.transform.position.x, selectedPlayer.transform.position.y + 4.5f, selectedPlayer.transform.position.z - 5),
-                                                new Vector3(selectedPlayer.transform.position.x - 5, selectedPlayer.transform.position.y + 4.5f, selectedPlayer.transform.position.z),
-                                                new Vector3(selectedPlayer.transform.position.x, selectedPlayer.transform.position.y + 4.5f, selectedPlayer.transform.position.z + 5),
-                                                new Vector3(selectedPlayer.transform.position.x + 5, selectedPlayer.transform.position.y + 4.5f, selectedPlayer.transform.position.z) };
-
-                selectedPlayerCameraPosition = cameraPositionArray[cameraPositionIndex];
-                cameraObject.transform.position = selectedPlayerCameraPosition;
+                SetupCameraPosition();
                 gsmScript.updateCanvasRotations();
             }
 
@@ -285,5 +255,18 @@ public class PlayerManager : MonoBehaviour
             }
             #endregion
         }
+    }
+
+    void SetupCameraPosition()
+    {
+        selectedPlayer = selectablePlayers[selectedIndex];
+
+        cameraPositionArray = new Vector3[] {   new Vector3(selectedPlayer.transform.position.x, selectedPlayer.transform.position.y + 4.5f, selectedPlayer.transform.position.z - 5),
+                                                new Vector3(selectedPlayer.transform.position.x - 5, selectedPlayer.transform.position.y + 4.5f, selectedPlayer.transform.position.z),
+                                                new Vector3(selectedPlayer.transform.position.x, selectedPlayer.transform.position.y + 4.5f, selectedPlayer.transform.position.z + 5),
+                                                new Vector3(selectedPlayer.transform.position.x + 5, selectedPlayer.transform.position.y + 4.5f, selectedPlayer.transform.position.z)   };
+
+        selectedPlayerCameraPosition = cameraPositionArray[cameraPositionIndex];
+        cameraObject.transform.position = selectedPlayerCameraPosition;
     }
 }

@@ -48,12 +48,26 @@ public class Tile : MonoBehaviour, INodeSearchable
     {
         startcolor = gameObjectRenderer.material.color;
         gameObjectRenderer.material.color = Color.cyan;
-        GameObject.Find("Players").GetComponent<PlayerManager>().destinationTile = gameObject;       
+        GameObject.Find("Players").GetComponent<PlayerManager>().destinationTile = this;
+
+        //nodeSearchables = gsmScript.pathfindingAgent.FindMovementRange(selectedPlayer.GetComponent<CharacterBase>().occupiedTile, selectedPlayer.GetComponent<CharacterBase>().getMovementRange);  //IDGAF
+        //if (!nodeSearchables.Contains(destinationTile))
+        //{
+        //MAGENTA
+        //}
+        //else
+        //{
+        //CYAN
+        //}
+
+        //Probably text showing pip for movement to said tile (or something)
     }
     void OnMouseExit()
     {
         gameObjectRenderer.material.color = startcolor;
         GameObject.Find("Players").GetComponent<PlayerManager>().destinationTile = null;
+
+        //gsmScript.pathfindingAgent.NodeReset(nodeSearchables);
     }
 
 
