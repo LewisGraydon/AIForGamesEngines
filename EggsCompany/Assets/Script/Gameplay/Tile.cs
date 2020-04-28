@@ -51,7 +51,7 @@ public class Tile : MonoBehaviour, INodeSearchable
         startcolor = gameObjectRenderer.material.color;       
         pmScript.destinationTile = this;
 
-        pmScript.nodeSearchables = gsmScript.pathfindingAgent.FindMovementRange(pmScript.selectedPlayer.GetComponent<CharacterBase>().occupiedTile, pmScript.selectedPlayer.GetComponent<CharacterBase>().getMovementRange);
+        pmScript.nodeSearchables = gsmScript.pathfindingAgent.FindMovementRange(pmScript.selectedPlayer.GetComponent<CharacterBase>().occupiedTile, pmScript.selectedPlayer.GetComponent<CharacterBase>().MovementRange);
 
         if (!pmScript.nodeSearchables.Contains(pmScript.destinationTile))
         {
