@@ -18,7 +18,7 @@ public class EnemySpawn : MonoBehaviour
             spawnLocation.y = 1.0f;
 
             GameObject enemy = Instantiate(enemyCharacterPrefab, spawnLocation, Quaternion.identity);
-            spawnPoints[i].occupier = ETileOccupier.EnemyCharacter;
+            spawnPoints[i].occupier = enemy.GetComponent<EnemyCharacter>();
 
             enemy.GetComponent<EnemyCharacter>().occupiedTile = spawnPoints[i];
 

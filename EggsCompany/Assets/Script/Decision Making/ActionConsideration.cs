@@ -66,10 +66,10 @@ public class MoveConsideration : SingleEnemyActionConsideration
     {
         _actionValue += self.actionPips > 1 ? 1 : 0;
         int inCoverFromEnemiesValue = 0;
-        foreach (CharacterBase c in self.enemiesInSight)
+        foreach (KeyValuePair<CharacterBase, int> c in self.enemiesInSight)
         {
             //inCoverFromEnemiesValue += (Weighting)self.occupiedTile.ProvidesCoverInDirection(self.transform.position - tileToConsider.transform.position);
-            _actionValue += self.isInCover(c) ? 0 : (1 / self.enemiesInSight.Count);
+            _actionValue += self.isInCover(c.Key) ? 0 : (1 / self.enemiesInSight.Count);
         }
         _actionValue += inCoverFromEnemiesValue;
         _actionValue += self.enemiesInSight.Count < 1 ? 1 : 0;

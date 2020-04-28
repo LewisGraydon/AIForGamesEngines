@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.UI;
 using Vector3 = UnityEngine.Vector3;
@@ -29,7 +30,7 @@ public class CharacterBase : MonoBehaviour
         set
         {
             _currentDestinationTile = value;
-            _currentDestinationTile.GetComponent<Tile>().occupier = (this is PlayerCharacter) ? ETileOccupier.PlayerCharacter : ETileOccupier.EnemyCharacter;
+            _currentDestinationTile.GetComponent<Tile>().occupier = this;
             occupiedTile = _currentDestinationTile;
             directionToDestination = _currentDestinationTile.gameObject.transform.position - this.gameObject.transform.position;
             directionToDestination.y = 0;
@@ -41,7 +42,7 @@ public class CharacterBase : MonoBehaviour
 
     #region gameplay variables
     public bool OnPlayerTeam { get => (this is PlayerCharacter); }
-   
+
     public int MaximumActionPips { get => 2; }
     protected int _actionPips = 2;
     public int actionPips
@@ -81,8 +82,12 @@ public class CharacterBase : MonoBehaviour
         }
     }
 
-    protected List<CharacterBase> _enemiesInSight = new List<CharacterBase>();
-    public List<CharacterBase> enemiesInSight
+    private bool _isDefending = false;
+    public bool isDefending { get => isDefending; }
+
+
+    protected List<KeyValuePair<CharacterBase, int>> _enemiesInSight = new List<KeyValuePair<CharacterBase, int>>();
+    public List<KeyValuePair<CharacterBase, int>> enemiesInSight
     {
         get
         {
@@ -117,10 +122,6 @@ public class CharacterBase : MonoBehaviour
         actionPips = MaximumActionPips;
         ammunition = MaximumAmmunition;
     }
-    public void SetRemainingPips(int pipsRemaining)
-    {
-        actionPips = pipsRemaining;
-    }
 
     public bool isInCover(CharacterBase fromEnemy)
     {
@@ -136,6 +137,7 @@ public class CharacterBase : MonoBehaviour
     public void EnterDefenseStance()
     {
         Debug.Log("Doing A Defensive Stance");
+        _isDefending = true;
     }
 
     public void AttackCharacter(CharacterBase otherCharacter)
@@ -188,6 +190,10 @@ public class CharacterBase : MonoBehaviour
             if (!Physics.Raycast(targetcentre, direction, distance, wallLayer))
             {
                 seenTiles.Add(tile);
+                if((tile as Tile).occupier is EnemyCharacter)
+                {
+                    
+                }
             }
             else
             {
@@ -244,7 +250,7 @@ public class CharacterBase : MonoBehaviour
         }
         else
         {
-            currentDestinationTile.GetComponent<Tile>().occupier = ETileOccupier.None;
+            currentDestinationTile.GetComponent<Tile>().occupier = null;
             transform.position = new Vector3(currentDestinationTile.transform.position.x, this.transform.position.y, currentDestinationTile.transform.position.z);
             currentDestinationTile = tilePathToDestination.Pop() as Tile;
         }

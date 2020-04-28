@@ -215,7 +215,7 @@ public class PathfindingAgent : MonoBehaviour
         {
             currentNode = nodeQueue.Dequeue();
 
-            if ((currentNode as Tile).occupier == ETileOccupier.EnemyCharacter)
+            if ((currentNode as Tile).occupier is EnemyCharacter)
             {
                 numberOfAllys++;
             }

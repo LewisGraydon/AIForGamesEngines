@@ -33,7 +33,7 @@ public class PlayerSpawn : MonoBehaviour
 
             player.name = nameList[randomNameInt];
             pcScript._characterName = nameList[randomNameInt];
-            spawnPointsList[rnd].occupier = ETileOccupier.PlayerCharacter;
+            spawnPointsList[rnd].occupier = pcScript;
 
             pcScript.occupiedTile = spawnPointsList[rnd];
 

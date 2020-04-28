@@ -79,18 +79,18 @@ public static class ConsiderationLists
         for (int i = 0; i < actionConsiderationList.Count; i++)
         {
 
-            for (int enemyCounter = 0; enemyCounter < self.enemiesInSight.Count; enemyCounter++)
+            foreach (KeyValuePair<CharacterBase, int> EnemyHitChancePair in self.enemiesInSight)
             {
                 //foreach enemy, calculate the cover from and for the agent (could be expensive hence this is calculated once and the actions are the more commonly calculated part.
-                ECoverValue agentCoverFromEnemy = self.occupiedTile.ProvidesCoverInDirection(self.enemiesInSight[enemyCounter].transform.position - self.transform.position);
-                ECoverValue enemyCoverFromAgent = self.occupiedTile.ProvidesCoverInDirection(self.transform.position - self.enemiesInSight[enemyCounter].transform.position);
+                ECoverValue agentCoverFromEnemy = self.occupiedTile.ProvidesCoverInDirection(EnemyHitChancePair.Key.gameObject.transform.position - self.transform.position);
+                ECoverValue enemyCoverFromAgent = self.occupiedTile.ProvidesCoverInDirection(self.transform.position - EnemyHitChancePair.Key.gameObject.transform.position);
                 int firstSingleEnemyActionConsiderationIndex = i;
                 while (actionConsiderationList[i] is SingleEnemyActionConsideration)
                 {
-                    (actionConsiderationList[i] as SingleEnemyActionConsideration).ConsiderAction(self, self.enemiesInSight[enemyCounter], agentCoverFromEnemy, enemyCoverFromAgent);
+                    (actionConsiderationList[i] as SingleEnemyActionConsideration).ConsiderAction(self, EnemyHitChancePair.Key, agentCoverFromEnemy, enemyCoverFromAgent);
                     i++;
                 }
-                i = enemyCounter != (self.enemiesInSight.Count - 1) ? firstSingleEnemyActionConsiderationIndex // if not the end of the enemies then reset the i counter;
+                i = EnemyHitChancePair.Key != self.enemiesInSight.ElementAt(self.enemiesInSight.Count).Key ? firstSingleEnemyActionConsiderationIndex // if not the end of the enemies then reset the i counter;
                                                                     : i;
             }
             if(i <= actionConsiderationList.Count && actionConsiderationList[i] is NoEnemyActionConsideration)
@@ -171,9 +171,9 @@ public static class ConsiderationLists
         {
             if(movementConsiderationList[i] is SingleEnemyMovementConsideration)
             {
-                foreach(CharacterBase enemy in self.enemiesInSight)
+                foreach(KeyValuePair<CharacterBase, int> enemyHitChancePair in self.enemiesInSight)
                 {
-                    (movementConsiderationList[i] as SingleEnemyMovementConsideration).ConsiderTile(ref self, enemy, ref tileToConsider);
+                    (movementConsiderationList[i] as SingleEnemyMovementConsideration).ConsiderTile(ref self, enemyHitChancePair.Key, ref tileToConsider);
                 } //calculates for all seen enemies per consideration as some considerations replace?
             }
             else if(movementConsiderationList[i] is TileOnlyMovementConsideration)
