@@ -11,7 +11,7 @@ public class CharacterBase : MonoBehaviour
     protected GameState gsmScript;
 
     protected Text healthText;
-    protected Text actionPipsText;
+    public Text actionPipsText;
 
     public Tile occupiedTile;
     #endregion

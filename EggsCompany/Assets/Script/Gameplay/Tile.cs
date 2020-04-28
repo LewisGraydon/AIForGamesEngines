@@ -53,13 +53,14 @@ public class Tile : MonoBehaviour, INodeSearchable
 
         pmScript.nodeSearchables = gsmScript.pathfindingAgent.FindMovementRange(pmScript.selectedPlayer.GetComponent<CharacterBase>().occupiedTile, pmScript.selectedPlayer.GetComponent<CharacterBase>().MovementRange);
 
-        if (!pmScript.nodeSearchables.Contains(pmScript.destinationTile))
+        if (!pmScript.nodeSearchables.Contains(pmScript.destinationTile) || pmScript.selectedPlayer.GetComponent<CharacterBase>().actionPips == 0)
         {
             gameObjectRenderer.material.color = Color.magenta;
         }
         else
         {
             gameObjectRenderer.material.color = Color.cyan;
+            pmScript.selectedPlayer.GetComponent<CharacterBase>().actionPipsText.text += " (-1)";
         }
 
         //Probably text showing pip for movement to said tile (or something)
@@ -69,6 +70,8 @@ public class Tile : MonoBehaviour, INodeSearchable
     {
         gameObjectRenderer.material.color = startcolor;
         GameObject.Find("Players").GetComponent<PlayerManager>().destinationTile = null;
+
+        pmScript.selectedPlayer.GetComponent<CharacterBase>().SetRemainingPips(pmScript.selectedPlayer.GetComponent<CharacterBase>().actionPips);
 
         gsmScript.pathfindingAgent.NodeReset(pmScript.nodeSearchables);
     }
