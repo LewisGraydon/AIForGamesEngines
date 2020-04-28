@@ -183,7 +183,7 @@ public class GameState : MonoBehaviour
                 for (int i = 0; i < playerContainer.transform.childCount; i++)
                 {
                     GameObject obj = playerContainer.transform.GetChild(i).gameObject;
-                    pipCount += obj.GetComponent<PlayerCharacter>().remainingPips;
+                    pipCount += obj.GetComponent<PlayerCharacter>().actionPips;
                 }
 
                 playerPipsRemaining = pipCount;
@@ -204,7 +204,7 @@ public class GameState : MonoBehaviour
                 for (int i = 0; i < enemyContainer.transform.childCount; i++)
                 {
                     GameObject obj = enemyContainer.transform.GetChild(i).gameObject;
-                    pipCount += obj.GetComponent<EnemyCharacter>().remainingPips;
+                    pipCount += obj.GetComponent<EnemyCharacter>().actionPips;
                 }
 
                 enemyPipsRemaining = pipCount;

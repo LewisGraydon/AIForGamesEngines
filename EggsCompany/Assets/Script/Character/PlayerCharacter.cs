@@ -14,7 +14,6 @@ public class PlayerCharacter : CharacterBase
     // Start is called before the first frame update
     void Start()
     {
-        onPlayerTeam = true;
     }
 
     // Update is called once per frame

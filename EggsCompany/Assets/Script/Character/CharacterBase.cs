@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Numerics;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,121 +10,81 @@ using Vector3 = UnityEngine.Vector3;
 
 public class CharacterBase : MonoBehaviour
 {
+    #region external object references
     protected GameObject gsm;
     protected GameState gsmScript;
 
-    protected Canvas UICanvas;
-    protected Text HealthText;
-    protected Text ActionPipsText;
+    protected Text healthText;
+    protected Text actionPipsText;
 
-    void Start()
-    {
-        
-        //this.setRemainingHealth(4);
-        //this.SetRemainingPips(1);
-        //Debug.Log("HEALTH = 4, Pips = 1");
-        //this.setRemainingHealth(0);
-        //this.SetRemainingPips(0);
-        //Debug.Log("HEALTH = 0, Pips = 0");
-        //this.setRemainingHealth(-1);
-        //this.SetRemainingPips(4);
-        //Debug.Log("HEALTH = -1, Pips = 4");
-        this.setRemainingHealth(7);
-        this.SetRemainingPips(-1);
-        Debug.Log("HEALTH = 7, Pips = -1");
-        gsm = GameObject.Find("GameStateManager");
-        gsmScript = gsm.GetComponent<GameState>();
-    }
+    public Tile occupiedTile;
+    #endregion
 
-    private void Awake()
-    {
-        Text[] allAttachedTexts = gameObject.GetComponentsInChildren<Text>();
-        foreach (Text text in allAttachedTexts)
-        {
-            if (text.text.Contains("HEALTH"))
-            {
-                HealthText = text;
-                setRemainingHealth(maximumHealth);
-            }
-            else if (text.text.Contains("ACTION"))
-            {
-                ActionPipsText = text;
-                SetRemainingPips(maximumActionPips);
-            }
-            if (HealthText != null && ActionPipsText != null)
-            {
-                break;
-            }
-        }
-    }
-
-    protected bool onPlayerTeam;
-    public bool getOnPlayerTeam
-    {
-        get { return onPlayerTeam; }
-    }
-
-    protected int movementRange = 5;
-    public int getMovementRange
+    #region pathfinding variables
+    private Stack<INodeSearchable> tilePathToDestination = null;
+    private List<INodeSearchable> allPossibleMovementNodes = null;
+    private Vector3 directionToDestination;
+    private Tile _currentDestinationTile;
+    private Tile currentDestinationTile
     {
         get
         {
-            return movementRange;
+            return _currentDestinationTile;
         }
-    }
-
-    protected int actionPips = 2;
-    public int remainingPips
-    {
-        get
+        set
         {
-            return actionPips;
+            _currentDestinationTile = value;
+            _currentDestinationTile.GetComponent<Tile>().occupier = (this is PlayerCharacter) ? ETileOccupier.PlayerCharacter : ETileOccupier.EnemyCharacter;
+            occupiedTile = _currentDestinationTile;
+            directionToDestination = _currentDestinationTile.gameObject.transform.position - this.gameObject.transform.position;
+            directionToDestination.y = 0;
         }
     }
 
-    public void SetRemainingPips(int pipsRemaining)
+    public int MovementRange { get => 5; }
+    #endregion
+
+    #region gameplay variables
+    public bool OnPlayerTeam { get => (this is PlayerCharacter); }
+   
+    public int MaximumActionPips { get => 2; }
+    protected int _actionPips = 2;
+    public int actionPips
     {
-        //if(pipsRemaining > maxActionPips)
-        //{
-        //    actionPips = maxActionPips;
-        //    return;
-        //}
-        actionPips = Mathf.Clamp(pipsRemaining, 0, maxActionPips);
-        if(ActionPipsText != null)
+        get => _actionPips;
+        set
         {
-            ActionPipsText.text = "ACTION PIPS: " + actionPips;
+            _actionPips = Mathf.Clamp(value, 0, MaximumActionPips);
+            if (actionPipsText)
+                actionPipsText.text = "ACTION PIPS: " + _actionPips;
         }
     }
 
-    protected int maxActionPips = 2;
-    public int maximumActionPips
-    {
-        get { return maxActionPips; }
-    }
 
-    protected int health = 6;
-    public int remainingHealth
+    public int MaximumHealthValue { get => 6; }
+    protected int _health = 6;
+    public int health
     {
-        get { return health; }
-    }
-    public void setRemainingHealth(int newHealthValue)
-    {
-        health = Mathf.Clamp(newHealthValue, 0, maximumHealth);
-        if (HealthText != null)
+        get => _health;
+        set
         {
-            HealthText.text = "HEALTH: " + health;
+            _health = Mathf.Clamp(value, 0, MaximumHealthValue);
+            if (healthText)
+                healthText.text = "HEALTH: " + _health;
         }
     }
 
-    protected int maxHealthValue = 6;
-    public int maximumHealth
-    {
-        get { return maxHealthValue; }
-    }
-
+    public int MaximumAmmunition { get => 6; }
     protected int _ammunition = 5;
-
-    protected int _maxAmmunition;
+    public int ammunition
+    {
+        get => _ammunition;
+        set
+        {
+            _ammunition = Mathf.Clamp(value, 0, MaximumAmmunition);
+            //TODO: update UI;
+        }
+    }
 
     protected List<CharacterBase> _enemiesInSight = new List<CharacterBase>();
     public List<CharacterBase> enemiesInSight
@@ -132,6 +93,38 @@ public class CharacterBase : MonoBehaviour
         {
             return _enemiesInSight;
         }
+    }
+    public float sightDistance = 0.0f;
+    #endregion
+
+    //Awake instead of Start() as it is not called when instantiating an object.
+    private void Awake()
+    {
+        gsm = GameObject.Find("GameStateManager");
+        gsmScript = gsm.GetComponent<GameState>();
+        Text[] allAttachedTexts = gameObject.GetComponentsInChildren<Text>();
+        foreach (Text text in allAttachedTexts)
+        {
+            if (text.text.Contains("HEALTH"))
+            {
+                healthText = text;
+            }
+            else if (text.text.Contains("ACTION"))
+            {
+                actionPipsText = text;
+            }
+            if (healthText != null && actionPipsText != null)
+            {
+                break;
+            }
+        }
+        health = MaximumHealthValue;
+        actionPips = MaximumActionPips;
+        ammunition = MaximumAmmunition;
+    }
+    public void SetRemainingPips(int pipsRemaining)
+    {
+        actionPips = pipsRemaining;
     }
 
     public bool isInCover(CharacterBase fromEnemy)
@@ -158,8 +151,8 @@ public class CharacterBase : MonoBehaviour
     public void Reload()
     {
         Debug.Log("Doing A Reload");
-        _ammunition = _maxAmmunition;
-        actionPips = actionPips - 1 >= 0 ? actionPips - 1 : 0;
+        ammunition = MaximumAmmunition;
+        actionPips = 0;        
     }
 
     public List<INodeSearchable> FindSightline(int visionRange)
@@ -239,24 +232,40 @@ public class CharacterBase : MonoBehaviour
     }
 
     //should contian the code to actually move a character along a path in my mind.
-    public virtual void MoveCharacterTo(Tile tileToMoveTo)
+    public virtual void MoveCharacterAlongTilePath()
     {
-        Debug.Log("moving Character to: Some Tile I have no way to identify I think: " + tileToMoveTo != null ? tileToMoveTo.name : "tile is null");
+        //Debug.Log("moving Character to: Some Tile I have no way to identify I think: " + tileToMoveTo != null ? tileToMoveTo.name : "tile is null");
+        if (Mathf.Abs(this.transform.position.x - currentDestinationTile.transform.position.x) > 0.01f || Mathf.Abs(this.transform.position.z - currentDestinationTile.transform.position.z) > 0.01f)
+        {
+            this.transform.position += directionToDestination * Time.deltaTime;
+            Debug.Log("Moving " + name + ", by: " + directionToDestination);
+        }
+        else if(tilePathToDestination.Count == 0)
+        {
+            gsmScript.gameState = (this is PlayerCharacter) ? EGameState.playerTurn : EGameState.enemyTurn;
+            gsmScript.pathfindingAgent.NodeReset(allPossibleMovementNodes);
+        }
+        else
+        {
+            currentDestinationTile.GetComponent<Tile>().occupier = ETileOccupier.None;
+            transform.position = new Vector3(currentDestinationTile.transform.position.x, this.transform.position.y, currentDestinationTile.transform.position.z);
+            currentDestinationTile = tilePathToDestination.Pop() as Tile;
+            actionPips--;
+        }
     }
-
-    public float sightDistance = 0.0f;
-
-    public Tile occupiedTile;
-
-    public int remainingShots;
-
-    public int maxShots;
 
     public void faceCanvasToCamera()
     {
-        if(HealthText != null)
+        if(healthText != null)
         {
-            HealthText.canvas.transform.LookAt(gameObject.transform.position + Camera.main.transform.rotation * UnityEngine.Vector3.forward, Camera.main.transform.rotation * UnityEngine.Vector3.up);
+            healthText.canvas.transform.LookAt(gameObject.transform.position + Camera.main.transform.rotation * UnityEngine.Vector3.forward, Camera.main.transform.rotation * UnityEngine.Vector3.up);
         }
+    }
+
+    public void SetMovementStack(Stack<INodeSearchable> movementStack, List<INodeSearchable> allEffectedNodes)
+    {
+        tilePathToDestination = movementStack;
+        allPossibleMovementNodes = allEffectedNodes;
+        currentDestinationTile = movementStack.Pop() as Tile;
     }
 }

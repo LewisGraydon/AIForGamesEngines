@@ -33,9 +33,9 @@ public class PlayerManager : MonoBehaviour
         SetupCameraPosition();
     }
 
-    private Vector3 directionToDestination = Vector3.zero;
-    private Vector3 movementAmount = Vector3.zero;
-    private Tile currentDestinationTile = null;
+    //private Vector3 directionToDestination = Vector3.zero;
+    //private Vector3 movementAmount = Vector3.zero;
+    //private Tile currentDestinationTile = null;
     private Stack<INodeSearchable> pathToDestination = null;
     private List<INodeSearchable> nodeSearchables = null;
 
@@ -44,30 +44,32 @@ public class PlayerManager : MonoBehaviour
     {
         if (gsmScript.gameState == EGameState.movement)
         {
-            if (Mathf.Abs(selectedPlayer.transform.position.x - currentDestinationTile.transform.position.x) > 0.01f || Mathf.Abs(selectedPlayer.transform.position.z - currentDestinationTile.transform.position.z) > 0.01f)
-            {            
-                selectedPlayer.transform.position += directionToDestination * Time.deltaTime;
-                SetupCameraPosition();
-            }
+            //if (Mathf.Abs(selectedPlayer.transform.position.x - currentDestinationTile.transform.position.x) > 0.01f || Mathf.Abs(selectedPlayer.transform.position.z - currentDestinationTile.transform.position.z) > 0.01f)
+            //{            
+            //    selectedPlayer.transform.position += directionToDestination * Time.deltaTime;
+            //    SetupCameraPosition();
+            //}
 
-            else if (pathToDestination.Count() == 0)
-            {
-                gsmScript.gameState = EGameState.playerTurn;
-                gsmScript.pathfindingAgent.NodeReset(nodeSearchables);
-            }
+            //else if (pathToDestination.Count() == 0)
+            //{
+            //    gsmScript.gameState = EGameState.playerTurn;
+            //    gsmScript.pathfindingAgent.NodeReset(nodeSearchables);
+            //}
 
-            else
-            {         
-                currentDestinationTile.GetComponent<Tile>().occupier = ETileOccupier.None;
+            //else
+            //{         
+            //    currentDestinationTile.GetComponent<Tile>().occupier = ETileOccupier.None;
 
-                selectedPlayer.transform.position = new Vector3(currentDestinationTile.transform.position.x, selectedPlayer.transform.position.y, currentDestinationTile.transform.position.z);
-                currentDestinationTile = pathToDestination.Pop() as Tile;
-                directionToDestination = currentDestinationTile.gameObject.transform.position - selectedPlayer.transform.position;
-                directionToDestination.y = 0;
+            //    selectedPlayer.transform.position = new Vector3(currentDestinationTile.transform.position.x, selectedPlayer.transform.position.y, currentDestinationTile.transform.position.z);
+            //    currentDestinationTile = pathToDestination.Pop() as Tile;
+            //    directionToDestination = currentDestinationTile.gameObject.transform.position - selectedPlayer.transform.position;
+            //    directionToDestination.y = 0;
 
-                currentDestinationTile.GetComponent<Tile>().occupier = ETileOccupier.PlayerCharacter;
-                selectedPlayer.GetComponent<CharacterBase>().occupiedTile = currentDestinationTile;
-            }
+            //    currentDestinationTile.GetComponent<Tile>().occupier = ETileOccupier.PlayerCharacter;
+            //    selectedPlayer.GetComponent<CharacterBase>().occupiedTile = currentDestinationTile;
+            //}
+            selectedPlayer.GetComponent<CharacterBase>().MoveCharacterAlongTilePath();
+            SetupCameraPosition();
         }
 
         if (gsmScript.gameState == EGameState.playerTurn)
@@ -78,7 +80,7 @@ public class PlayerManager : MonoBehaviour
                 {
                     print("Moving " + selectedPlayer + " to " + destinationTile.name);
 
-                    nodeSearchables = gsmScript.pathfindingAgent.FindMovementRange(selectedPlayer.GetComponent<CharacterBase>().occupiedTile, selectedPlayer.GetComponent<CharacterBase>().getMovementRange);  //IDGAF
+                    nodeSearchables = gsmScript.pathfindingAgent.FindMovementRange(selectedPlayer.GetComponent<CharacterBase>().occupiedTile, selectedPlayer.GetComponent<CharacterBase>().MovementRange);  //IDGAF
                     
                     if(!nodeSearchables.Contains(destinationTile))
                     {
@@ -87,11 +89,12 @@ public class PlayerManager : MonoBehaviour
                     }
 
                     pathToDestination = gsmScript.pathfindingAgent.CreatePath(destinationTile.GetComponent<Tile>());
+                    selectedPlayer.GetComponent<CharacterBase>().SetMovementStack(pathToDestination, nodeSearchables);
                   
-                    currentDestinationTile = pathToDestination.Pop() as Tile;                                  
+                    //currentDestinationTile = pathToDestination.Pop() as Tile;                                  
                         
-                    directionToDestination = currentDestinationTile.gameObject.transform.position - selectedPlayer.transform.position;
-                    directionToDestination.y = 0;
+                    //directionToDestination = currentDestinationTile.gameObject.transform.position - selectedPlayer.transform.position;
+                    //directionToDestination.y = 0;
 
                     gsmScript.gameState = EGameState.movement;
                 }

@@ -64,7 +64,7 @@ public class MoveConsideration : SingleEnemyActionConsideration
 {
     public override void ConsiderAction(CharacterBase self, CharacterBase enemy, ECoverValue agentLevelOfCoverFromEnemy, ECoverValue enemyLevelOfCoverFromAgent)
     {
-        _actionValue += self.remainingPips > 1 ? 1 : 0;
+        _actionValue += self.actionPips > 1 ? 1 : 0;
         int inCoverFromEnemiesValue = 0;
         foreach (CharacterBase c in self.enemiesInSight)
         {
@@ -430,18 +430,18 @@ public class ReloadConsideration : NoEnemyActionConsideration
         // 
         // if numshots == 0 && pips remaining == 1 then guarantee
         //
-        // tileValue = 1 - (numshots / maxShots)
+        // tileValue = 1 - (numshots / MaximumAmmunition)
 
         //adjustments based on number of shots left;
-        if (self.remainingShots > (self.maxShots / 2))
+        if (self.ammunition > (self.MaximumAmmunition / 2))
         {
             _actionValue -= (int)Weighting.High;
         }
-        else if (self.remainingShots > (self.maxShots / 4) && self.remainingShots != 0)
+        else if (self.ammunition > (self.MaximumAmmunition / 4) && self.ammunition != 0)
         {
             _actionValue += (int)Weighting.High;
         }
-        else if (self.remainingShots == self.maxShots)
+        else if (self.ammunition == self.MaximumAmmunition)
         {
             _actionValue = -(int)Weighting.guarantee;
         }
@@ -450,7 +450,7 @@ public class ReloadConsideration : NoEnemyActionConsideration
             _actionValue += (int)Weighting.guarantee;
         }
         //adjustments based on pip value;
-        if(self.remainingPips < self.maximumActionPips)
+        if(self.actionPips < self.MaximumActionPips)
         {
             _actionValue += (int)Weighting.Medium;
         }

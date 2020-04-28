@@ -1,49 +1,49 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 
 public class EnemyCharacter : CharacterBase
 {
     public string _characterName;
-    public PathfindingAgent pathfinder;
-    public string characterName
-    {
-        get { return _characterName; }
-    }
+    public string characterName { get => _characterName; }
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        onPlayerTeam = false;
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
+    private PathfindingAgent pathfindingAgent;
     public int actionVariance = 1;
-
+    public EnemyCharacter()
+    {
+        pathfindingAgent = null;
+    }
+    public EnemyCharacter(PathfindingAgent inPathfindingAgent)
+    {
+        pathfindingAgent = inPathfindingAgent;
+    }
     void MakeDecision()
     {
-        //ConsiderationLists.ConsiderActions(this);
         ConsiderationLists.MakeDecision(this);
     }
-        
-        
 
     public void moveDecision()
     {
         Debug.Log("Doing A Move Decision");
-        if(pathfinder != null)
+        if(pathfindingAgent != null)
         {
-            pathfinder.FindMovementRange(occupiedTile, 100, ConsiderationLists.ConsiderSingleTileForMovement, this);
-            this.MoveCharacterTo(ConsiderationLists.GetTileToMoveTo());
+            List<INodeSearchable> allPossibleTiles = pathfindingAgent.FindMovementRange(occupiedTile, 100, ConsiderationLists.ConsiderSingleTileForMovement, this);
+            Tile tileToMoveToHolder = ConsiderationLists.GetTileToMoveTo();
+            if (!allPossibleTiles.Contains(tileToMoveToHolder as INodeSearchable))
+            {
+                Debug.LogError("Tile chosen to move to: " + tileToMoveToHolder + " not contained within the allPossibleTiles from FindMovementRangeFunction");
+                return;
+            }
+            else
+            {
+                SetMovementStack(pathfindingAgent.CreatePath(tileToMoveToHolder), allPossibleTiles);
+                //TODO: set turnorder to movement;
+            }
         }
         else
         {
-            Debug.LogWarning("pathfinder variable on enemy character is not set");
+            Debug.LogWarning("pathfinder variable on enemy character: " + name + " is not set");
         }
     }
 }
