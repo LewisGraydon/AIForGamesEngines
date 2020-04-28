@@ -55,8 +55,8 @@ public class PlayerManager : MonoBehaviour
                 if (destinationTile != null)
                 {
                     print("Moving " + selectedPlayer + " to " + destinationTile.name);
+                    //nodeSearchables = gsmScript.pathfindingAgent.FindMovementRange(selectedPlayer.GetComponent<CharacterBase>().occupiedTile, selectedPlayer.GetComponent<CharacterBase>().getMovementRange);  //IDGAF
 
-                    //nodeSearchables = gsmScript.pathfindingAgent.FindMovementRange(selectedPlayer.GetComponent<CharacterBase>().occupiedTile, selectedPlayer.GetComponent<CharacterBase>().MovementRange);  //IDGAF
                     
                     if(!nodeSearchables.Contains(destinationTile))
                     {
