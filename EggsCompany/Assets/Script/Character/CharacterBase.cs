@@ -239,13 +239,14 @@ public class CharacterBase : MonoBehaviour
         {
             gsmScript.gameState = (this is PlayerCharacter) ? EGameState.playerTurn : EGameState.enemyTurn;
             gsmScript.pathfindingAgent.NodeReset(allPossibleMovementNodes);
+            actionPips--;
+            gsmScript.ProcessGameState();
         }
         else
         {
             currentDestinationTile.GetComponent<Tile>().occupier = ETileOccupier.None;
             transform.position = new Vector3(currentDestinationTile.transform.position.x, this.transform.position.y, currentDestinationTile.transform.position.z);
             currentDestinationTile = tilePathToDestination.Pop() as Tile;
-            actionPips--;
         }
     }
 

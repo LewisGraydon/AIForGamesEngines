@@ -55,7 +55,7 @@ public class GameState : MonoBehaviour
                     {
                         GameObject obj = playerContainer.transform.GetChild(i).gameObject;
                         PlayerCharacter pc = obj.GetComponent<PlayerCharacter>();
-                        pc.SetRemainingPips(0);
+                        pc.actionPips = 0;
                         ProcessGameState();
                     }
                 }
@@ -69,7 +69,7 @@ public class GameState : MonoBehaviour
                     {
                         GameObject obj = enemyContainer.transform.GetChild(i).gameObject;
                         EnemyCharacter ec = obj.GetComponent<EnemyCharacter>();
-                        ec.SetRemainingPips(0);
+                        ec.actionPips = 0;
                         ProcessGameState();
                     }
                 }
