@@ -37,7 +37,7 @@ public class PlayerManager : MonoBehaviour
     private Vector3 movementAmount = Vector3.zero;
     private Tile currentDestinationTile = null;
     private Stack<INodeSearchable> pathToDestination = null;
-    private List<INodeSearchable> nodeSearchables = null;
+    public List<INodeSearchable> nodeSearchables = null;
 
     // Update is called once per frame
     void Update()
@@ -78,7 +78,7 @@ public class PlayerManager : MonoBehaviour
                 {
                     print("Moving " + selectedPlayer + " to " + destinationTile.name);
 
-                    nodeSearchables = gsmScript.pathfindingAgent.FindMovementRange(selectedPlayer.GetComponent<CharacterBase>().occupiedTile, selectedPlayer.GetComponent<CharacterBase>().getMovementRange);  //IDGAF
+                    //nodeSearchables = gsmScript.pathfindingAgent.FindMovementRange(selectedPlayer.GetComponent<CharacterBase>().occupiedTile, selectedPlayer.GetComponent<CharacterBase>().getMovementRange);  //IDGAF
                     
                     if(!nodeSearchables.Contains(destinationTile))
                     {

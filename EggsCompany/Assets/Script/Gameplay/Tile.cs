@@ -43,37 +43,43 @@ public class Tile : MonoBehaviour, INodeSearchable
     }
 
     private Color startcolor;
-    
+    private GameState gsmScript = null;
+    private PlayerManager pmScript = null;
+
     void OnMouseEnter()
     {
-        startcolor = gameObjectRenderer.material.color;
-        gameObjectRenderer.material.color = Color.cyan;
-        GameObject.Find("Players").GetComponent<PlayerManager>().destinationTile = this;
+        startcolor = gameObjectRenderer.material.color;       
+        pmScript.destinationTile = this;
 
-        //nodeSearchables = gsmScript.pathfindingAgent.FindMovementRange(selectedPlayer.GetComponent<CharacterBase>().occupiedTile, selectedPlayer.GetComponent<CharacterBase>().getMovementRange);  //IDGAF
-        //if (!nodeSearchables.Contains(destinationTile))
-        //{
-        //MAGENTA
-        //}
-        //else
-        //{
-        //CYAN
-        //}
+        pmScript.nodeSearchables = gsmScript.pathfindingAgent.FindMovementRange(pmScript.selectedPlayer.GetComponent<CharacterBase>().occupiedTile, pmScript.selectedPlayer.GetComponent<CharacterBase>().getMovementRange);
+
+        if (!pmScript.nodeSearchables.Contains(pmScript.destinationTile))
+        {
+            gameObjectRenderer.material.color = Color.magenta;
+        }
+        else
+        {
+            gameObjectRenderer.material.color = Color.cyan;
+        }
 
         //Probably text showing pip for movement to said tile (or something)
     }
+
     void OnMouseExit()
     {
         gameObjectRenderer.material.color = startcolor;
         GameObject.Find("Players").GetComponent<PlayerManager>().destinationTile = null;
 
-        //gsmScript.pathfindingAgent.NodeReset(nodeSearchables);
+        gsmScript.pathfindingAgent.NodeReset(pmScript.nodeSearchables);
     }
 
 
     void Start()
     {
-        gameObjectRenderer = GetComponent<Renderer>();
+        gameObjectRenderer = GetComponent<Renderer>();        
+        gsmScript = GameObject.Find("GameStateManager").GetComponent<GameState>();
+        pmScript = GameObject.Find("Players").GetComponent<PlayerManager>();
+
         NeighborListFill();
         GenerateWalls();
 
