@@ -53,6 +53,11 @@ public class LGFlockingAgent : MonoBehaviour
         agentFlock = flock;
     }
 
+    public void SetObjectToFollow(GameObject obj)
+    {
+        objectToFollow = obj;
+    }
+
     private void OnCollisionEnter(Collision collision)
     {
         // On detecting a collision, we will calculate the vector from the position of the object we have collided with and the current position of this object.

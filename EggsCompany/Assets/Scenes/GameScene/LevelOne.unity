@@ -38638,6 +38638,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1806559636}
   - component: {fileID: 1806559637}
+  - component: {fileID: 1806559638}
   m_Layer: 0
   m_Name: Enemies
   m_TagString: Untagged
@@ -38683,6 +38684,26 @@ MonoBehaviour:
   enemyCharacterPrefab: {fileID: 2385923724340538729, guid: 494f0273dbde6dc4fb9c10e6ba797f92,
     type: 3}
   numberOfEnemies: 7
+--- !u!114 &1806559638
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1806559635}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a3e78d91c83c936409195b32b62bd3a2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  allEnemies:
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
+  - {fileID: 0}
 --- !u!1001 &1810069513
 PrefabInstance:
   m_ObjectHideFlags: 0

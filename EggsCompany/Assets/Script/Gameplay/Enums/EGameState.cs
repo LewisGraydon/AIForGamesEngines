@@ -8,6 +8,7 @@ public enum EGameState
     playerTurn,
     enemyTurn,
     movement,
+    beeAttack, // Maybe rename this eventually
     victoryScreen,
     failureScreen
 }
