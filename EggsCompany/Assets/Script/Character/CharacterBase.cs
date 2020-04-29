@@ -236,7 +236,7 @@ public class CharacterBase : MonoBehaviour
     public virtual void MoveCharacterAlongTilePath()
     {
         //Debug.Log("moving Character to: Some Tile I have no way to identify I think: " + tileToMoveTo != null ? tileToMoveTo.name : "tile is null");
-        if (Mathf.Abs(this.transform.position.x - currentDestinationTile.transform.position.x) > 0.01f || Mathf.Abs(this.transform.position.z - currentDestinationTile.transform.position.z) > 0.01f)
+        if (Mathf.Abs(this.transform.position.x - currentDestinationTile.transform.position.x) > 0.05f || Mathf.Abs(this.transform.position.z - currentDestinationTile.transform.position.z) > 0.05f)
         {
             this.transform.position += directionToDestination * Time.deltaTime;
             Debug.Log("Moving " + name + ", by: " + directionToDestination);
