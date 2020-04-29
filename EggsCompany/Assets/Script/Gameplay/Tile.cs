@@ -48,6 +48,11 @@ public class Tile : MonoBehaviour, INodeSearchable
 
     void OnMouseEnter()
     {
+        if(gsmScript.gameState != EGameState.playerTurn)
+        {
+            return;
+        }
+
         startcolor = gameObjectRenderer.material.color;       
         pmScript.destinationTile = this;
 
@@ -68,10 +73,15 @@ public class Tile : MonoBehaviour, INodeSearchable
 
     void OnMouseExit()
     {
+        if(gsmScript.gameState != EGameState.playerTurn)
+        {
+            return;
+        }
+
         gameObjectRenderer.material.color = startcolor;
         GameObject.Find("Players").GetComponent<PlayerManager>().destinationTile = null;
 
-        pmScript.selectedPlayer.GetComponent<CharacterBase>().SetRemainingPips(pmScript.selectedPlayer.GetComponent<CharacterBase>().actionPips);
+        pmScript.selectedPlayer.GetComponent<CharacterBase>().actionPips = pmScript.selectedPlayer.GetComponent<CharacterBase>().actionPips;
 
         gsmScript.pathfindingAgent.NodeReset(pmScript.nodeSearchables);
     }

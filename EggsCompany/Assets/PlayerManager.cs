@@ -49,10 +49,13 @@ public class PlayerManager : MonoBehaviour
         {
             if(Input.GetMouseButtonUp(0))
             {
-                if (destinationTile != null)
+                if (selectedPlayer.GetComponent<CharacterBase>().actionPips == 0)
                 {
-                    print("Moving " + selectedPlayer + " to " + destinationTile.name);
-                   
+                    return;
+                }
+
+                if (destinationTile != null)
+                {                  
                     if(!nodeSearchables.Contains(destinationTile))
                     {
                         gsmScript.pathfindingAgent.NodeReset(nodeSearchables);
