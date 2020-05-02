@@ -33,7 +33,6 @@ public class PathfindingAgent : MonoBehaviour
         nodeQueue.Enqueue(startNode);
 
         INodeSearchable currentNode;
-
         while(nodeQueue.Count > 0)
         {
             currentNode = nodeQueue.Dequeue();
@@ -61,16 +60,16 @@ public class PathfindingAgent : MonoBehaviour
     //Finds the current depth of the given node during or after a recent search.
     int SearchDepth(INodeSearchable node)
     {
+        INodeSearchable givenNode = node;
         int depth = 0;
-        while(node.parent != null)
+        while(givenNode.parent != null)
         {
             depth += 1;
-            node = node.parent;
+            givenNode = givenNode.parent;
         }
-
         return depth;
     }
-
+    
     //A generic implementation of a breadth first search algorithm.
     //Anything that inherits from INodeSearchable should be able to use this.
     //example: Tile inherits from INodeSearchable. If you were to replace the word "node" with "tile"

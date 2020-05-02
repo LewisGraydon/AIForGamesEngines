@@ -10,6 +10,25 @@ public class VectorChecker : MonoBehaviour
     public float coverThreshhold = 0.44f;
 
     public Dictionary<ActionID, int> testBob = new Dictionary<ActionID, int>();
+
+    int peter = 0;
+
+    int _graham = 0;
+    int graham
+    {
+        get => _graham;
+        set
+        {
+            _graham = Mathf.Clamp(value, 0, 2);
+            peter = _graham * 10;
+        }
+    }
+
+    int richard
+    {
+        get => 6;
+    }
+
     // Start is called before the first frame update
     void Start()
     {
@@ -28,38 +47,62 @@ public class VectorChecker : MonoBehaviour
         //{
         //    Debug.Log("Key: " + kp.Key.ToString() + ", Value: " + kp.Value);
         //}
-
+        graham += 12;
+        Debug.Log("Graham: " + graham + " , peter: " + peter);
     }
 
     // Update is called once per frame
     void Update()
     {
-        //Vector3 normalDirection = (otherFuckingCube.transform.position - this.transform.position).normalized;
-        
-        //if(normalDirection.x >= coverThreshhold)
-        //{
-        //    print("observing cover from positive x");
-        //}
-        //else if (normalDirection.x <= -coverThreshhold)
-        //{
-        //    print("observing cover from negative x");
-        //}
-        //else
-        //{
-        //    print("normalDirection.x = " + normalDirection.x);
-        //}
-        //if (normalDirection.z >= coverThreshhold)
-        //{
-        //    print("observing cover from positive z");
-        //}
-        //else if (normalDirection.z <= -coverThreshhold)
-        //{
-        //    print("observing cover from negative z");
-        //}
-        //else
-        //{
-        //    print("normalDirection.z = " + normalDirection.z);
-        //}
+        if(Input.GetKeyDown(KeyCode.Return))
+        {
+            Vector3 normaldirection = (otherFuckingCube.transform.position - this.transform.position).normalized;
+
+            if (normaldirection.x >= coverThreshhold)
+            {
+                print("Should count cover from x (East?) as normalDirection.x: " + normaldirection.x);
+            }
+            else if (normaldirection.x <= -coverThreshhold)
+            {
+                print("Should count cover from -x (West?) as normalDirection.x: " + normaldirection.x);
+            }
+            else
+            {
+                print("Should Ignore cover from East or West as normalDirection.x: " + normaldirection.x);
+            }
+            if (normaldirection.z >= coverThreshhold)
+            {
+                print("Should count cover from -z (South?) as normalDirection.z: " + normaldirection.z);
+            }
+            else if (normaldirection.z <= -coverThreshhold)
+            {
+                print("Should count cover from z (North?) as normalDirection.z: " + normaldirection.z);
+            }
+            else
+            {
+                print("Should Ignore cover from North or South as normalDirection.z: " + normaldirection.z);
+            }
+
+        }
+
+        if(Input.GetKeyUp(KeyCode.LeftArrow))
+        {
+
+            this.transform.position += Vector3.left;
+        }
+        if (Input.GetKeyUp(KeyCode.RightArrow))
+        {
+            this.transform.position += Vector3.right;
+
+        }
+        if (Input.GetKeyUp(KeyCode.UpArrow))
+        {
+            this.transform.position += Vector3.forward;
+        }
+        if (Input.GetKeyUp(KeyCode.DownArrow))
+        {
+            this.transform.position += Vector3.back;
+        }
     }
 
 
