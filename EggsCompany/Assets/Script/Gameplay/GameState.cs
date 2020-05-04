@@ -22,6 +22,8 @@ public class GameState : MonoBehaviour
     private int enemyPipsRemaining = -1;
 
     public Text turnText;
+    public GameObject badEggPrefab;
+    public GameObject badEggsSpottedUI;
 
     // End Of Mission
     private bool transitioningToMM = false;
@@ -308,5 +310,32 @@ public class GameState : MonoBehaviour
                 playerCharacter.FindSightline();
             }
         }
+    }
+
+    public void clearBadEggsSpottedContainer()
+    {
+        for (int i = 0; i < badEggsSpottedUI.transform.childCount; i++)
+        {
+            Destroy(badEggsSpottedUI.transform.GetChild(i).gameObject);
+        }
+    }
+
+    public void addToBadEggsSpottedUI(List<KeyValuePair<CharacterBase, int>> badEggsSpotted)
+    {
+        foreach(KeyValuePair<CharacterBase,int> pair in badEggsSpotted)
+        {
+            GameObject go = Instantiate(badEggPrefab, new Vector3(badEggsSpottedUI.transform.position.x, badEggsSpottedUI.transform.position.y, badEggsSpottedUI.transform.position.z), Quaternion.identity);
+            go.transform.SetParent(badEggsSpottedUI.transform, false);
+            go.GetComponent<BadEggInfo>().badEgg = pair.Key.gameObject;
+        }
+    }
+
+    public bool isAnyBadEggSpotted()
+    {
+        if(badEggsSpottedUI.transform.childCount > 0)
+        {
+            return true;
+        }
+        return false;
     }
 }

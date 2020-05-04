@@ -4,10 +4,65 @@ using UnityEngine;
 
 public class BeeCharacter : EnemyCharacter
 {
+    private List<LGFlockingAgent> flockAgents = null;
+    private bool attackCalculatedOnce = false;
+
+    CharacterBase target = null;
+
     // Start is called before the first frame update
     public override void AttackCharacter(CharacterBase otherCharacter) 
     {
-        
-        
+        target = otherCharacter;
+        flockAgents = gameObject.GetComponent<LGFlock>().FlockAgents;
+        gsmScript.gameState = EGameState.beeAttack;
+        attackCalculatedOnce = false;
+
+        foreach (LGFlockingAgent fa in flockAgents)
+        {
+            fa.SetObjectToFollow(target.gameObject);
+        }
+
+    }
+    void Update()
+    {
+        if (target != null)
+        {
+            if (gsmScript.gameState == EGameState.beeAttack)
+            {
+                // Move to target
+                if (AllFlockAgentsAtTarget(target.gameObject) /*|| Time > 5*/)
+                {
+                    if (!attackCalculatedOnce)
+                    {
+                        base.AttackCharacter(target);
+                        attackCalculatedOnce = true;
+                    }
+
+                    foreach (LGFlockingAgent fa in flockAgents)
+                    {
+                        fa.SetObjectToFollow(gameObject);
+                    }
+
+                    if (AllFlockAgentsAtTarget(gameObject))
+                    {
+                        target = null;
+                        gsmScript.gameState = EGameState.enemyTurn;
+                        gsmScript.ProcessGameState();
+                    }
+                }
+            }
+        }
+    }
+
+    public bool AllFlockAgentsAtTarget(GameObject tar)
+    {
+        foreach (LGFlockingAgent fa in flockAgents)
+        {
+            if (Mathf.Abs(fa.transform.position.x - tar.transform.position.x) > 0.5f || Mathf.Abs(fa.transform.position.z - tar.transform.position.z) > 0.5f)
+            {
+                return false;
+            }
+        }
+        return true;
     }
 }
