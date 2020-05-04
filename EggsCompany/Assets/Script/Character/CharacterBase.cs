@@ -103,6 +103,10 @@ public class CharacterBase : MonoBehaviour
     public int Accuracy { get => 65; }
 
     private const float angleForFlanking = 0.44f;
+
+    public float closeDistanceCap { get => 2; }
+    public float middleDistanceCap { get => 4; }
+    public float longDistanceCap { get => 6; }
     #endregion
 
     //Awake instead of Start() as it is not called when instantiating an object.
@@ -146,8 +150,24 @@ public class CharacterBase : MonoBehaviour
 
     public void AttackCharacter(CharacterBase otherCharacter)
     {
-        Debug.Log("Doing An Attack");
+        Debug.Log("Doing An ");
         actionPips = 0;
+        int chanceToHit = enemiesInSight.Find((KeyValuePair<CharacterBase, int> characterHitChance) => characterHitChance.Key == otherCharacter).Value;
+        if(UnityEngine.Random.Range(0, 100) <= chanceToHit)
+        {
+            otherCharacter.health -= 2; //TODO: replace 1 with damage;
+        }
+    }
+
+    public void OverwatchAttackCharacter(CharacterBase otherCharacter)
+    {
+        Debug.Log("Doing An ");
+        actionPips = 0;
+        int chanceToHit = enemiesInSight.Find((KeyValuePair<CharacterBase, int> characterHitChance) => characterHitChance.Key == otherCharacter).Value;
+        if (UnityEngine.Random.Range(0, 120) <= chanceToHit)
+        {
+            otherCharacter.health -= 2; //TODO: replace 1 with damage;
+        }
     }
 
     public void Reload()
@@ -341,9 +361,7 @@ public class CharacterBase : MonoBehaviour
         #region handle distance effects;
         // assuming that a tile is 1*1;
         // within 2 = + to hit chance, 2 to 4 is nothing, >= 4 is -10, >= 6 is -20;
-        float closeDistanceCap = 2;
-        float middleDistanceCap = 4;
-        float longDistanceCap = 6;
+
         float distance = Vector3.Distance(this.gameObject.transform.position, other.gameObject.transform.position);
         if (distance < closeDistanceCap)
         {
