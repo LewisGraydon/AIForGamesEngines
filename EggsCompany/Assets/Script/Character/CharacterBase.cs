@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using NUnit.Framework;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
@@ -94,6 +95,8 @@ public class CharacterBase : MonoBehaviour
     private bool _isDefending = false;
     public bool isDefending { get => _isDefending; }
 
+    private bool _isOverwatching = false;
+    public bool isOverwatching { get => _isOverwatching; }
 
     protected List<KeyValuePair<CharacterBase, int>> _enemiesInSight = new List<KeyValuePair<CharacterBase, int>>();
     public List<KeyValuePair<CharacterBase, int>> enemiesInSight { get => _enemiesInSight; }
@@ -135,10 +138,11 @@ public class CharacterBase : MonoBehaviour
         ammunition = MaximumAmmunition;
     }
 
-    public void EnterOverwatchStance()
+    public virtual void EnterOverwatchStance()
     {
         //probably have a ref to gamestate and add to an overwatch list. then have it looped over during other movements etc.
         Debug.Log("Doing An Overwatch Stance");
+        _isOverwatching = true;
         actionPips = 0;
     }
 
@@ -150,7 +154,7 @@ public class CharacterBase : MonoBehaviour
 
     public virtual void AttackCharacter(CharacterBase otherCharacter)
     {
-        Debug.Log("Doing An ");
+        Debug.Log("Doing An attack for 2 damage ");
         actionPips = 0;
         int chanceToHit = enemiesInSight.Find((KeyValuePair<CharacterBase, int> characterHitChance) => characterHitChance.Key == otherCharacter).Value;
         if(UnityEngine.Random.Range(0, 100) <= chanceToHit)
@@ -319,6 +323,10 @@ public class CharacterBase : MonoBehaviour
             currentDestinationTile.GetComponent<Tile>().occupier = null;
             transform.position = new Vector3(currentDestinationTile.transform.position.x, this.transform.position.y, currentDestinationTile.transform.position.z);
             currentDestinationTile = tilePathToDestination.Pop() as Tile;
+
+            //check if this destination is in overwatching sightlines
+
+
             FindSightline();
             gsmScript.updateOtherTeamSightLines(this);
         }

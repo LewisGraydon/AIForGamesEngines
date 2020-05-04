@@ -6,6 +6,7 @@ using System.Linq;
 public class PlayerManager : MonoBehaviour
 {
     public GameObject[] selectablePlayers = new GameObject[4];
+    public List<PlayerCharacter> overwatchingPlayers = new List<PlayerCharacter>();
     public int selectedIndex = 0;
     public GameObject cameraObject;
 

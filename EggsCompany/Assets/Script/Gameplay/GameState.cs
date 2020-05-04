@@ -299,6 +299,7 @@ public class GameState : MonoBehaviour
             {
                 enemyCharacter.FindSightline();
             }
+           
         }
         else
         {
@@ -306,6 +307,10 @@ public class GameState : MonoBehaviour
             foreach (PlayerCharacter playerCharacter in playerCharacters)
             {
                 playerCharacter.FindSightline();
+            }
+            foreach(PlayerCharacter player in playerContainer.GetComponent<PlayerManager>().overwatchingPlayers)
+            {
+
             }
         }
     }
