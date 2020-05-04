@@ -161,6 +161,7 @@ public class CharacterBase : MonoBehaviour
         {
             otherCharacter.health -= 2; //TODO: replace 1 with damage;
         }
+        gsmScript.ProcessGameState();
     }
 
     public virtual void OverwatchAttackCharacter(CharacterBase otherCharacter)
@@ -172,6 +173,7 @@ public class CharacterBase : MonoBehaviour
         {
             otherCharacter.health -= 2; //TODO: replace 1 with damage;
         }
+        gsmScript.ProcessGameState();
     }
 
     public void Reload()
@@ -186,11 +188,26 @@ public class CharacterBase : MonoBehaviour
         Tile[] g = GameObject.FindObjectsOfType<Tile>();
 
         gsmScript.pathfindingAgent.NodeReset(g.ToList<INodeSearchable>());
-        if(tilePathToDestination != null)
+
+        if (tilePathToDestination != null)
+        {
             gsmScript.pathfindingAgent.NodeReset(tilePathToDestination.ToList());
+        }
+
         enemiesInSight.Clear();
+
         List<INodeSearchable> possibleSeenTiles = gsmScript.pathfindingAgent.FindNodeSightRange(occupiedTile, visionRange);
         List<INodeSearchable> seenTiles = new List<INodeSearchable>();
+
+        if (this is PlayerCharacter)
+        {
+            gsmScript.clearBadEggsSpottedContainer();        
+        }
+
+        if (!gsmScript.isAnyBadEggSpotted())
+        {
+            gsmScript.badEggsSpottedUI.SetActive(false);
+        }
 
         //Math from pawn to target tile
         //center to center
@@ -288,10 +305,11 @@ public class CharacterBase : MonoBehaviour
                     }
                     if (workingTile.occupier != null && (this is PlayerCharacter && workingTile.occupier is EnemyCharacter) || (this is EnemyCharacter && workingTile.occupier is PlayerCharacter))
                     {
-                        enemiesInSight.Add(new KeyValuePair<CharacterBase, int>(workingTile.occupier, CalculateHitChance(workingTile.occupier, coverValue == 1, coverValue == 2)));
+                        enemiesInSight.Add(new KeyValuePair<CharacterBase, int>(workingTile.occupier, CalculateHitChance(workingTile.occupier, coverValue == 1, coverValue == 2)));                       
                     }
+                    
                     seenTiles.Add(tile);
-                }
+                }           
             }
         }
         foreach (var enemyHitChancePair in enemiesInSight)
@@ -299,6 +317,13 @@ public class CharacterBase : MonoBehaviour
             Debug.Log("Can See: " + enemyHitChancePair.Key.name + " with a: " + enemyHitChancePair.Value + "% chance to hit");
         }
         gsmScript.pathfindingAgent.NodeReset(possibleSeenTiles);
+
+        if (this is PlayerCharacter)
+        {
+            gsmScript.badEggsSpottedUI.SetActive(true);
+            gsmScript.addToBadEggsSpottedUI(enemiesInSight);
+        }
+
         return seenTiles;
     }
 
