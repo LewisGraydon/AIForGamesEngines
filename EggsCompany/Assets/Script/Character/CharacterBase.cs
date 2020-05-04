@@ -148,7 +148,7 @@ public class CharacterBase : MonoBehaviour
         actionPips = 0;
     }
 
-    public void AttackCharacter(CharacterBase otherCharacter)
+    public virtual void AttackCharacter(CharacterBase otherCharacter)
     {
         Debug.Log("Doing An ");
         actionPips = 0;

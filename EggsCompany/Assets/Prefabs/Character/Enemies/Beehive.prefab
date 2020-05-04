@@ -14,6 +14,7 @@ GameObject:
   - component: {fileID: 2385923724340538730}
   - component: {fileID: 2385923724340538646}
   - component: {fileID: -8451032906783452994}
+  - component: {fileID: 4337613594605887740}
   m_Layer: 0
   m_Name: Beehive
   m_TagString: Untagged
@@ -127,13 +128,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2f8a934b2a3ae2b4a8ee36d250b2969c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  actionPipsText: {fileID: 0}
   sightDistance: 0
-  occupiedTile: {fileID: 0}
-  remainingShots: 0
-  maxShots: 0
   _characterName: 
-  pathfinder: {fileID: 0}
   actionVariance: 2
+--- !u!114 &4337613594605887740
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2385923724340538729}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7ac426d0cd79a7d41860d800e4bd0ad2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &7289102608850456270
 GameObject:
   m_ObjectHideFlags: 0

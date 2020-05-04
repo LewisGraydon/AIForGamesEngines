@@ -43,18 +43,19 @@ public class Tile : MonoBehaviour, INodeSearchable
         //parent = GetComponentInParent<Transform>();
     }
 
-    private Color startcolor;
+    private Color startcolor = new Color(1,1,1);
     private GameState gsmScript = null;
     private PlayerManager pmScript = null;
 
     void OnMouseEnter()
     {
-        if(gsmScript.gameState != EGameState.playerTurn)
+        startcolor = gameObjectRenderer.material.color;
+
+        if (gsmScript.gameState != EGameState.playerTurn)
         {
             return;
         }
 
-        startcolor = gameObjectRenderer.material.color;       
         pmScript.destinationTile = this;
 
         pmScript.nodeSearchables = gsmScript.pathfindingAgent.FindMovementRange(pmScript.selectedPlayer.GetComponent<CharacterBase>().occupiedTile, pmScript.selectedPlayer.GetComponent<CharacterBase>().MovementRange);
@@ -73,17 +74,17 @@ public class Tile : MonoBehaviour, INodeSearchable
     }
 
     void OnMouseExit()
-    {
-        if(gsmScript.gameState != EGameState.playerTurn)
+    {    
+        gameObjectRenderer.material.color = startcolor;
+
+        if (gsmScript.gameState != EGameState.playerTurn)
         {
             return;
         }
 
-        gameObjectRenderer.material.color = startcolor;
         GameObject.Find("Players").GetComponent<PlayerManager>().destinationTile = null;
         Text actionPipsText = pmScript.selectedPlayer.GetComponent<CharacterBase>().actionPipsText;
         actionPipsText.text = actionPipsText.text.Replace(" (-1)", "");
-        //pmScript.selectedPlayer.GetComponent<CharacterBase>().actionPips = pmScript.selectedPlayer.GetComponent<CharacterBase>().actionPips;
 
         gsmScript.pathfindingAgent.NodeReset(pmScript.nodeSearchables);
     }
