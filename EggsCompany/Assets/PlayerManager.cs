@@ -36,15 +36,8 @@ public class PlayerManager : MonoBehaviour
     private Stack<INodeSearchable> pathToDestination = null;
     public List<INodeSearchable> nodeSearchables = null;
 
-    // Update is called once per frame
     void Update()
     {
-        if (gsmScript.gameState == EGameState.movement)
-        {
-            selectedPlayer.GetComponent<CharacterBase>().MoveCharacterAlongTilePath();
-            SetupCameraPosition();
-        }
-
         if (gsmScript.gameState == EGameState.playerTurn)
         {
             if(Input.GetMouseButtonUp(0))
@@ -229,7 +222,7 @@ public class PlayerManager : MonoBehaviour
         }
     }
 
-    void SetupCameraPosition()
+    public void SetupCameraPosition()
     {
         selectedPlayer = selectablePlayers[selectedIndex];
 

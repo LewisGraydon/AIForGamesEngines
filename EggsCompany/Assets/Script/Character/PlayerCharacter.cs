@@ -4,15 +4,13 @@ using UnityEngine;
 
 public class PlayerCharacter : CharacterBase
 {
-    public string _characterName;
-
+    private string _characterName;
     public string characterName
     {
         get { return _characterName; }
-    }
-
-    // Start is called before the first frame update
-    void Start()
-    {
+        set 
+        {
+            _characterName = value;
+        }
     }
 }

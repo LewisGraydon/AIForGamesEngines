@@ -5,20 +5,21 @@ using UnityEngine;
 
 public class EnemyCharacter : CharacterBase
 {
+    #region Variables
     public string _characterName;
     public string characterName { get => _characterName; }
 
     private PathfindingAgent pathfindingAgent;
     public int actionVariance = 1;
-    public EnemyCharacter()
+    #endregion
+
+    protected new void Awake()
     {
-        pathfindingAgent = null;
+        base.Awake();
+        pathfindingAgent = gsmScript.pathfindingAgent;
     }
-    public EnemyCharacter(PathfindingAgent inPathfindingAgent)
-    {
-        pathfindingAgent = inPathfindingAgent;
-    }
-    void MakeDecision()
+
+    public void MakeDecision()
     {
         ConsiderationLists.MakeDecision(this);
     }
@@ -28,7 +29,8 @@ public class EnemyCharacter : CharacterBase
         Debug.Log("Doing A Move Decision");
         if(pathfindingAgent != null)
         {
-            List<INodeSearchable> allPossibleTiles = pathfindingAgent.FindMovementRange(occupiedTile, 100, ConsiderationLists.ConsiderSingleTileForMovement, this);
+
+            List<INodeSearchable> allPossibleTiles = pathfindingAgent.FindMovementRange(occupiedTile, this.MovementRange, ConsiderationLists.ConsiderSingleTileForMovement, this);
             Tile tileToMoveToHolder = ConsiderationLists.GetTileToMoveTo();
             if (!allPossibleTiles.Contains(tileToMoveToHolder as INodeSearchable))
             {
@@ -37,8 +39,10 @@ public class EnemyCharacter : CharacterBase
             }
             else
             {
-                SetMovementStack(pathfindingAgent.CreatePath(tileToMoveToHolder), allPossibleTiles);
-                //TODO: set turnorder to movement;
+                gsmScript.gameState = EGameState.movement;
+                Stack<INodeSearchable> pathToTake = pathfindingAgent.CreatePath(tileToMoveToHolder);
+                pathfindingAgent.NodeReset(allPossibleTiles);
+                SetMovementStack(pathToTake, allPossibleTiles);
             }
         }
         else

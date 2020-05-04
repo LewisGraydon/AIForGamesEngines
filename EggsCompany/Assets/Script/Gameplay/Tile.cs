@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Tile : MonoBehaviour, INodeSearchable
 {
@@ -80,8 +81,9 @@ public class Tile : MonoBehaviour, INodeSearchable
 
         gameObjectRenderer.material.color = startcolor;
         GameObject.Find("Players").GetComponent<PlayerManager>().destinationTile = null;
-
-        pmScript.selectedPlayer.GetComponent<CharacterBase>().actionPips = pmScript.selectedPlayer.GetComponent<CharacterBase>().actionPips;
+        Text actionPipsText = pmScript.selectedPlayer.GetComponent<CharacterBase>().actionPipsText;
+        actionPipsText.text = actionPipsText.text.Replace(" (-1)", "");
+        //pmScript.selectedPlayer.GetComponent<CharacterBase>().actionPips = pmScript.selectedPlayer.GetComponent<CharacterBase>().actionPips;
 
         gsmScript.pathfindingAgent.NodeReset(pmScript.nodeSearchables);
     }
@@ -229,11 +231,11 @@ public class Tile : MonoBehaviour, INodeSearchable
         //TODO: CHECK IF THERE IS A WALL IN THE DIRECTION GIVEN.
         if(direction.x >= activeCoverDirectionThreshold)
         {
-            return (ECoverValue)walls[(int)EDirection.West].coverValue;
+            return (ECoverValue)walls[(int)EWallDirection.West].coverValue;
         }
         else if(direction.x <= -activeCoverDirectionThreshold)
         {
-            return (ECoverValue)walls[(int)EDirection.East].coverValue;
+            return (ECoverValue)walls[(int)EWallDirection.East].coverValue;
         }
         else
         {
@@ -241,11 +243,11 @@ public class Tile : MonoBehaviour, INodeSearchable
         }
         if (direction.x >= activeCoverDirectionThreshold)
         {
-            return (ECoverValue)walls[(int)EDirection.North].coverValue;
+            return (ECoverValue)walls[(int)EWallDirection.North].coverValue;
         }
         else if (direction.x <= -activeCoverDirectionThreshold)
         {
-            return (ECoverValue)walls[(int)EDirection.South].coverValue;
+            return (ECoverValue)walls[(int)EWallDirection.South].coverValue;
         }
         else
         {

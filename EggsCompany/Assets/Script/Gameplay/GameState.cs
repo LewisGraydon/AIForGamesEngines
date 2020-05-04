@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Analytics;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -16,6 +17,7 @@ public class GameState : MonoBehaviour
     private EnemySpawn esScript;
     public PathfindingAgent pathfindingAgent;
 
+    public CharacterBase activeCharacter;
     private int playerPipsRemaining = -1;
     private int enemyPipsRemaining = -1;
 
@@ -26,6 +28,13 @@ public class GameState : MonoBehaviour
 
     // Start is called before the first frame update
     void Start()
+    {
+        psScript = playerContainer.GetComponent<PlayerSpawn>();
+        esScript = enemyContainer.GetComponent<EnemySpawn>();
+        turnText.gameObject.SetActive(true);
+        ProcessGameState();
+    }
+    private void Awake()
     {
         psScript = playerContainer.GetComponent<PlayerSpawn>();
         esScript = enemyContainer.GetComponent<EnemySpawn>();
@@ -77,6 +86,18 @@ public class GameState : MonoBehaviour
 
             PlayerDeathCheck();
             EnemyDeathCheck();
+        }
+        if (gameState == EGameState.movement)
+        {
+            EnemyManager enemyManager = GameObject.FindObjectOfType<EnemyManager>();
+            PlayerManager playerManager = GameObject.FindObjectOfType<PlayerManager>();
+            activeCharacter = enemyManager.activeCharacter != null ? (CharacterBase)enemyManager.activeCharacter : playerManager.selectedPlayer.GetComponent<CharacterBase>();
+            if(activeCharacter is EnemyCharacter)
+            {
+                Debug.Log("into enemy movement motherfucker");
+            }
+            activeCharacter.MoveCharacterAlongTilePath();
+            playerManager.SetupCameraPosition();
         }
     }
 
@@ -172,14 +193,16 @@ public class GameState : MonoBehaviour
 
                 InitialisePlayerPips();
                 gameState = EGameState.playerTurn;
-                ProcessGameState();
-
+                //ProcessGameState();
+                turnText.text = "Player Turn";
+                PlayerManager playerManager = playerContainer.GetComponent<PlayerManager>();
+                PlayerCharacter playerCharacter = GameObject.FindObjectOfType<PlayerCharacter>();
+                if (playerManager != null && playerCharacter != null)
+                    playerManager.selectedPlayer = playerCharacter.gameObject;
                 break;
 
             case EGameState.playerTurn:
-
-                turnText.text = "Player Turn";
-
+                enemyContainer.GetComponent<EnemyManager>().activeCharacter = null;
                 for (int i = 0; i < playerContainer.transform.childCount; i++)
                 {
                     GameObject obj = playerContainer.transform.GetChild(i).gameObject;
@@ -191,30 +214,42 @@ public class GameState : MonoBehaviour
                 if(playerPipsRemaining <= 0)
                 {
                     InitialiseEnemyPips();
-                    gameState = EGameState.enemyTurn;
+                    gameState = EGameState.enemySetup;
                     ProcessGameState();
+                    PlayerManager playerManager2 = playerContainer.GetComponent<PlayerManager>();
+                    playerManager2.selectedPlayer = null;
                 }
 
                 break;
 
             case EGameState.enemyTurn:
-
+                PlayerManager playerManager3 = playerContainer.GetComponent<PlayerManager>();
+                playerManager3.selectedPlayer = null;
                 turnText.text = "Enemy Turn";
-
                 for (int i = 0; i < enemyContainer.transform.childCount; i++)
                 {
                     GameObject obj = enemyContainer.transform.GetChild(i).gameObject;
                     pipCount += obj.GetComponent<EnemyCharacter>().actionPips;
                 }
-
                 enemyPipsRemaining = pipCount;
-
                 if (enemyPipsRemaining <= 0)
                 {
                     gameState = EGameState.setupState;
                     ProcessGameState();
                 }
 
+                break;
+
+            case EGameState.enemySetup:
+                playerContainer.GetComponent<PlayerManager>().selectedPlayer = null;
+                for (int i = 0; i < enemyContainer.transform.childCount; i++)
+                {
+                    EnemyCharacter enemyCharacter = enemyContainer.transform.GetChild(i).gameObject.GetComponent<EnemyCharacter>();
+                    enemyCharacter.actionPips = enemyCharacter.MaximumActionPips;
+                }
+                gameState = EGameState.enemyTurn;
+                enemyContainer.GetComponent<EnemyManager>().SetUpEnemyTurn();
+                ProcessGameState();
                 break;
 
             default:
@@ -227,11 +262,20 @@ public class GameState : MonoBehaviour
     void InitialisePlayerPips()
     {
         playerPipsRemaining = (psScript.numberOfOperators - playerDeathCount) * 2;
+        PlayerCharacter[] playerCharacters = GameObject.FindObjectsOfType<PlayerCharacter>();
+        foreach (PlayerCharacter player in playerCharacters)
+        {
+            player.actionPips = player.MaximumActionPips;
+        }
     }
 
     void InitialiseEnemyPips()
     {
         enemyPipsRemaining = (esScript.numberOfEnemies - enemyDeathCount) * 2;
+        foreach (CharacterBase enemy in enemyContainer.GetComponentsInChildren<CharacterBase>())
+        {
+            enemy.actionPips = enemy.MaximumActionPips;
+        }
     }
 
     public void updateCanvasRotations()
@@ -243,6 +287,26 @@ public class GameState : MonoBehaviour
         foreach(CharacterBase enemy in enemyContainer.GetComponentsInChildren<CharacterBase>())
         {
             enemy.faceCanvasToCamera();
+        }
+    }
+
+    public void updateOtherTeamSightLines(CharacterBase caller)
+    {
+        if (caller is PlayerCharacter)
+        {
+            EnemyCharacter[] enemyCharacters = GameObject.FindObjectsOfType<EnemyCharacter>();
+            foreach (EnemyCharacter enemyCharacter in enemyCharacters)
+            {
+                enemyCharacter.FindSightline();
+            }
+        }
+        else
+        {
+            PlayerCharacter[] playerCharacters = GameObject.FindObjectsOfType<PlayerCharacter>();
+            foreach (PlayerCharacter playerCharacter in playerCharacters)
+            {
+                playerCharacter.FindSightline();
+            }
         }
     }
 }

@@ -9,7 +9,6 @@ public class EnemySpawn : MonoBehaviour
     public GameObject enemyCharacterPrefab;
     public int numberOfEnemies = 7;
 
-    // Start is called before the first frame update
     void Awake()
     {
         for(int i = 0; i < spawnPoints.Length; i++)

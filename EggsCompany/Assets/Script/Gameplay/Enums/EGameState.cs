@@ -10,5 +10,6 @@ public enum EGameState
     movement,
     beeAttack, // Maybe rename this eventually
     victoryScreen,
-    failureScreen
+    failureScreen,
+    enemySetup
 }

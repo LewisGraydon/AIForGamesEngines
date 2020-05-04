@@ -13,8 +13,11 @@ public class EnemyManager : MonoBehaviour
     private bool damageDealt = false;
     private GameObject attackingEnemy = null;
 
+    private Stack<EnemyCharacter> EvilDoerStack = new Stack<EnemyCharacter>();
+    public EnemyCharacter activeCharacter;
+
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         for (int i = 0; i < this.transform.childCount; i++)
         {
@@ -54,6 +57,31 @@ public class EnemyManager : MonoBehaviour
                 }
             }
         }
+        
+        if(gsmScript.gameState == EGameState.enemyTurn)
+        {
+            if (activeCharacter != null)
+            {
+                if (activeCharacter.actionPips != 0)
+                {
+                    activeCharacter.FindSightline();
+                    activeCharacter.MakeDecision();
+                }
+                else
+                {
+                    if (EvilDoerStack.Count > 0)
+                        activeCharacter = EvilDoerStack.Pop();
+                    else
+                        activeCharacter = null;
+                }
+            }
+            else
+            {
+                gsmScript.gameState = EGameState.setupState;
+                gsmScript.ProcessGameState();
+            }
+        }
+
         if (Input.GetKeyUp(KeyCode.Keypad5))
         {
             Attack();
@@ -83,5 +111,16 @@ public class EnemyManager : MonoBehaviour
             }
         }
         return true;
+    }
+
+    public void SetUpEnemyTurn()
+    {
+        EnemyCharacter[] e = GameObject.FindObjectsOfType<EnemyCharacter>();
+        foreach (EnemyCharacter eC in e)
+        {
+            EvilDoerStack.Push(eC);
+        }
+        if(EvilDoerStack.Count > 0)
+            activeCharacter = EvilDoerStack.Pop();
     }
 }

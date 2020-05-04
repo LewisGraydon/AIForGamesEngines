@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using TMPro;
 using UnityEngine;
 
 //TODO: Ensure that nodes are cleaned once the pathfinding has finished for that turn.
@@ -154,14 +156,19 @@ public class PathfindingAgent : MonoBehaviour
         return moveRange;
     }
 
-    //@Desc: A function that finds all tiles a unit can move to with the next move action and optionally calling a function with the relevant tiles.
+    //@Desc: A function that finds all tiles a unit can move to with the next move action.
     //@Param - moveRange : The maximum tile distance the given unit can move with a single movement pip.
     //@Param - startNode : The current node that unit occupies.
-    //@Param - mappingFunction : function to apply to all of the t nodes before being added to the moveRange.
     //@Return: A list of all nodes that the unit can move to from its current node.
     //Notes: Might be able to change param to egg/unit object for ease of use. IE object could pass self.
     public List<INodeSearchable> FindMovementRange(INodeSearchable startNode, float moveValue, Action<CharacterBase, Tile> mappingFunction = null, CharacterBase characterToCheckFor = null)
     {
+        Tile[] ts = GameObject.FindObjectsOfType<Tile>();
+        foreach (Tile t in ts)
+        {
+            if (t.parent != null)
+                Debug.LogError(t + " Already has a parent");
+        }
         INodeSearchable currentNode;
         List<INodeSearchable> moveRange = new List<INodeSearchable>();
         Stack<INodeSearchable> nodeStack = new Stack<INodeSearchable>();
@@ -171,30 +178,30 @@ public class PathfindingAgent : MonoBehaviour
         while (nodeStack.Count > 0)
         {
             currentNode = nodeStack.Pop();
-
             foreach (var child in currentNode.children)
             {
                 if (child != null)
                 {
-                    CalculateDijkstra(currentNode, child, ECostType.Movement);
+                    bool reassigned = CalculateDijkstra(currentNode, child, ECostType.Movement);
                     if (child.DijkstraCost <= moveValue)
                     {
-                        if (!nodeStack.Contains(child))
+                        if (!nodeStack.Contains(child) && reassigned)
                         {
                             nodeStack.Push(child);
                         }
                         if (!moveRange.Contains(child))
                         {
+                            //TODO: copy? add as function pass? Whatever, add the cost calculation for the tile.
+                            moveRange.Add(child);
                             if (characterToCheckFor != null && mappingFunction != null)
                             {
                                 mappingFunction?.Invoke(characterToCheckFor, (Tile)child);
                                 //Works for the decision making as the function to calculate the new value holds the top x tiles to move to and then decides from there;
                             }
-                            moveRange.Add(child);
                         }
                     }
-                }
 
+                }
 
             }
         }
@@ -409,10 +416,14 @@ public class PathfindingAgent : MonoBehaviour
                 break;
         }
 
-        if (calculatedCost < child.DijkstraCost || child.DijkstraCost == null)
+        if ((calculatedCost < child.DijkstraCost || child.DijkstraCost == null) && currentNode.parent != child)
         {
             child.DijkstraCost = calculatedCost;
             child.parent = currentNode;
+            if(child.parent.parent == child)
+            {
+                Debug.LogError("TimeTravelling");
+            }
             return true;
         }
         return false;
@@ -674,10 +685,15 @@ public class PathfindingAgent : MonoBehaviour
 
         while(currentNode.parent != null)
         {
+            if(currentNode.parent.parent == currentNode)
+            {
+                Debug.LogError("Fuck; Time Travelling again");
+                break;
+            }
             nodePath.Push(currentNode.parent);
+            Debug.Log("nodePath size: " + nodePath.Count);
             currentNode = currentNode.parent;
         }
-
         return nodePath;
     }
 

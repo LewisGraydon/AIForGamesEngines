@@ -2,41 +2,19 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum ActionID
-{
-    Move,
-    Overwatch,
-    Defend,
-    Shoot,
-    Reload
-};
+#region parent classes
 
 public abstract class ActionConsideration : IComparable<ActionConsideration>
 {
-    //protected ActionID _actionID;
-    //public ActionID actionID { get => _actionID; }
-
     protected int _actionValue;
     public int actionValue
     {
         get { return _actionValue; }
     }
-    
-    // TO BE REMOVED:
-    public void DANGEROUSDEBUGSETACTIONVALUE(int newActionValue)
-    {
-        _actionValue = newActionValue;
-    }
 
     public void ResetValue()
     {
         _actionValue = 0;
-    }
-
-    //public abstract void SetActionID();
-    protected ActionConsideration()
-    {
-        //SetActionID();
     }
 
     public abstract void Enact(CharacterBase self);
@@ -50,13 +28,19 @@ public abstract class ActionConsideration : IComparable<ActionConsideration>
 public abstract class SingleEnemyActionConsideration : ActionConsideration
 {
     public abstract void ConsiderAction(CharacterBase self, CharacterBase enemy, ECoverValue agentLevelOfCoverFromEnemy, ECoverValue enemyLevelOfCoverFromAgent);
-    //public abstract void CompareValue(int newValue);
+
+    /// <summary>
+    /// Attribute score value to the action based solely on the character usually using solely the occupied tile or nothing.
+    /// </summary>
+    /// <param name="self">the character to be evaluating the decision</param>
+    public abstract void ConsiderActionWithNoEnemyInSight(CharacterBase self);
 }
 
 public abstract class NoEnemyActionConsideration : ActionConsideration
 {
     public abstract void ConsiderAction(CharacterBase self);
 }
+#endregion
 
 #region ActionConsideration classes
 
@@ -64,93 +48,37 @@ public class MoveConsideration : SingleEnemyActionConsideration
 {
     public override void ConsiderAction(CharacterBase self, CharacterBase enemy, ECoverValue agentLevelOfCoverFromEnemy, ECoverValue enemyLevelOfCoverFromAgent)
     {
-        _actionValue += self.actionPips > 1 ? 1 : 0;
-        int inCoverFromEnemiesValue = 0;
+        _actionValue += self.actionPips > 1 ? (int)Weighting.High : 0;
+
         foreach (KeyValuePair<CharacterBase, int> c in self.enemiesInSight)
         {
             //inCoverFromEnemiesValue += (Weighting)self.occupiedTile.ProvidesCoverInDirection(self.transform.position - tileToConsider.transform.position);
-            _actionValue += self.isInCover(c.Key) ? 0 : (1 / self.enemiesInSight.Count);
+            //_actionValue += self.isInCover(c.Key) ? 0 : (1 / self.enemiesInSight.Count);
+            Debug.Log("Chris has forgetting to fix the moveConsideration which is still using isInCover, I mean for fuck sake it is not even named correctly.");
         }
-        _actionValue += inCoverFromEnemiesValue;
-        _actionValue += self.enemiesInSight.Count < 1 ? 1 : 0;
-
         //if the enemy is < 1/2 range
+        Debug.Log("Chris has forgotten to add the range calculation to the MoveConsideration.");
+        _actionValue += self.enemiesInSight.Count < 2 ? (int)Weighting.Medium : -(int)Weighting.Low;
+
+    }
+
+    public override void ConsiderActionWithNoEnemyInSight(CharacterBase self)
+    {
+        _actionValue += self.actionPips > 1 ? (int)Weighting.High : 0;
+        _actionValue += (int)Weighting.guarantee;
     }
 
     public override void Enact(CharacterBase self)
     {
-        // SELF.MOVE BAAAYYYYBBBBAAYYYY.
+        Debug.Log("Character: " + self.name + " is moving");
         (self as EnemyCharacter).moveDecision();
     }
-
-    //public override void SetActionID()
-    //{
-    //    _actionID = ActionID.Move;
-    //}
 }
-
-//public class OverwatchConsideration : SingleEnemyActionConsideration
-//{ 
-
-//    public override int ConsiderAction(CharacterBase self, CharacterBase enemy, ECoverValue agentLevelOfCoverFromEnemy, ECoverValue enemyLevelOfCoverFromAgent)
-//    {
-//        // if distance to enemy is around 1/2 sight range then for this action
-//        if (Vector3.Distance(self.transform.position, tileToConsider.transform.position) < (self.sightDistance / 2))
-//        {
-//            tileValue += (int)Weighting.Medium;
-//        }
-
-//        int AgentInCoverTotalValue = 0.0f;
-//        int enemiesInCoverTotalValue = 0.0f;
-//        foreach (CharacterBase enemy in self.enemiesInSight)
-//        {
-//            //TODO: calculate direction from enemy to self.
-//            // if the agent is in good cover from the enemies then + for this action
-//            switch (tileToConsider.ProvidesCoverInDirection(Vector3.forward)) //switch on amount of cover self is in from enemies;
-//            {
-//                case ECoverValue.None:
-//                    AgentInCoverTotalValue -= (int)Weighting.High / self.enemiesInSight.Count;
-//                    break;
-//                case ECoverValue.Half:
-//                    AgentInCoverTotalValue += (int)Weighting.Medium / self.enemiesInSight.Count;
-//                    break;
-//                case ECoverValue.Full:
-//                    AgentInCoverTotalValue += (int)Weighting.Low / self.enemiesInSight.Count;
-//                    break;
-//                default:
-//                    Debug.LogError("issue with cover Value returned");
-//                    break;
-//            }
-
-//            // if the enemies are not in full cover then + for this action as expect them to move
-//            switch (enemy.occupiedTile.ProvidesCoverInDirection(Vector3.back))
-//            {
-//                case ECoverValue.None:
-//                    enemiesInCoverTotalValue += (int)Weighting.High / self.enemiesInSight.Count;
-//                    break;
-//                case ECoverValue.Half:
-//                    enemiesInCoverTotalValue += (int)Weighting.Medium / self.enemiesInSight.Count;
-//                    break;
-//                case ECoverValue.Full:
-//                    enemiesInCoverTotalValue -= (int)Weighting.Low / self.enemiesInSight.Count;
-//                    break;
-//                default:
-//                    break;
-//            }
-//        }
-//        tileValue += AgentInCoverTotalValue;
-//        tileValue += enemiesInCoverTotalValue;
-
-
-//        return tileValue;
-//    }
-//}
 
 public class OverwatchConsideration : SingleEnemyActionConsideration
 {
     public override void ConsiderAction(CharacterBase self, CharacterBase enemy, ECoverValue agentLevelOfCoverFromEnemy, ECoverValue enemyLevelOfCoverFromAgent)
     {
-
         switch (agentLevelOfCoverFromEnemy)
         {
             case ECoverValue.None:
@@ -182,75 +110,30 @@ public class OverwatchConsideration : SingleEnemyActionConsideration
         }
     }
 
+    public override void ConsiderActionWithNoEnemyInSight(CharacterBase self)
+    {
+        for(int i = 0; i < (int)EWallDirection.Error; i++)
+        {
+            if (self.occupiedTile.walls[i].coverValue == 0)
+            {
+                _actionValue -= (int)Weighting.Medium;
+            }
+            else if (self.occupiedTile.walls[i].coverValue == (int)ECoverValue.Half)
+            {
+                _actionValue += (int)Weighting.Medium;
+            }
+            else if (self.occupiedTile.walls[i].coverValue == (int)ECoverValue.Full)
+            {
+                _actionValue += (int)Weighting.High;
+            }
+        }
+    }
+
     public override void Enact(CharacterBase self)
     {
         self.EnterOverwatchStance();
     }
-
-    //public override void SetActionID()
-    //{
-    //    _actionID = ActionID.Overwatch;
-    //}
 }
-
-
-
-//public class DefendConsideration : SingleEnemyActionConsideration
-//{
-//    public override int ConsiderAction(CharacterBase self, CharacterBase enemy, ECoverValue agentLevelOfCoverFromEnemy, ECoverValue enemyLevelOfCoverFromAgent)
-//    {
-//        // if distance is > 3/4 sight range then + 
-//        if (Vector3.Distance(self.transform.position, tileToConsider.transform.position) > (0.75 * self.sightDistance))
-//        {
-//            tileValue += (int)Weighting.Medium;
-//        }
-
-//        // if agent's level of cover is full then +
-//        // if the enemys cover is full then +
-//        int AgentInCoverTotalValue = 0.0f;
-//        int enemiesInCoverTotalValue = 0.0f;
-//        foreach (CharacterBase enemy in self.enemiesInSight)
-//        {
-//            //TODO: calculate direction from enemy to self.
-//            // if the agent is in good cover from the enemies then + for this action
-//            switch (tileToConsider.ProvidesCoverInDirection(Vector3.forward)) //switch on amount of cover self is in from enemies;
-//            {
-//                case ECoverValue.None:
-//                    AgentInCoverTotalValue -= (int)Weighting.High / self.enemiesInSight.Count;
-//                    break;
-//                case ECoverValue.Half:
-//                    AgentInCoverTotalValue -= (int)Weighting.Medium / self.enemiesInSight.Count;
-//                    break;
-//                case ECoverValue.Full:
-//                    AgentInCoverTotalValue += (int)Weighting.Low / self.enemiesInSight.Count;
-//                    break;
-//                default:
-//                    Debug.LogError("issue with cover Value returned");
-//                    break;
-//            }
-
-//            // if the enemies are not in full cover then + for this action as expect them to move
-//            switch (enemy.occupiedTile.ProvidesCoverInDirection(Vector3.back))
-//            {
-//                case ECoverValue.None:
-//                    enemiesInCoverTotalValue += (int)Weighting.High / self.enemiesInSight.Count;
-//                    break;
-//                case ECoverValue.Half:
-//                    enemiesInCoverTotalValue += (int)Weighting.Medium / self.enemiesInSight.Count;
-//                    break;
-//                case ECoverValue.Full:
-//                    enemiesInCoverTotalValue -= (int)Weighting.Low / self.enemiesInSight.Count;
-//                    break;
-//                default:
-//                    break;
-//            }
-//        }
-//        tileValue += AgentInCoverTotalValue;
-//        tileValue += enemiesInCoverTotalValue;
-
-//        return tileValue;
-//    }
-//}
 
 public class DefendConsideration : SingleEnemyActionConsideration
 {
@@ -287,84 +170,30 @@ public class DefendConsideration : SingleEnemyActionConsideration
         }
     }
 
+    public override void ConsiderActionWithNoEnemyInSight(CharacterBase self)
+    {
+        for (int i = 0; i < (int)EWallDirection.Error; i++)
+        {
+            if (self.occupiedTile.walls[i].coverValue == 0)
+            {
+                _actionValue -= (int)Weighting.Medium;
+            }
+            else if (self.occupiedTile.walls[i].coverValue == (int)ECoverValue.Half)
+            {
+                _actionValue += (int)Weighting.Medium;
+            }
+            else if (self.occupiedTile.walls[i].coverValue == (int)ECoverValue.Full)
+            {
+                _actionValue += (int)Weighting.High;
+            }
+        }
+    }
+
     public override void Enact(CharacterBase self)
     {
         self.EnterDefenseStance();
     }
-
-    //public override void SetActionID()
-    //{
-    //    _actionID = ActionID.Defend;
-    //}
 }
-
-
-//public class ShootConsideration : SingleEnemyActionConsideration
-//{
-//    public override int ConsiderAction(CharacterBase self, CharacterBase enemy, ECoverValue agentLevelOfCoverFromEnemy, ECoverValue enemyLevelOfCoverFromAgent)
-//    {
-//        /* if shot chance > 60% then +
-//         * 
-//         * if agent is behind cover then +
-//         * 
-//         * if pips remaining == 1 then +
-//         * 
-//         * if the enemy is not in full cover then +
-//         * 
-//         * 
-//         */
-//        if (self.occupiedTile.chanceToHit(tileToConsider) >= 60)
-//        {
-//            tileValue += (int)Weighting.High;
-//        }
-//        if (self.remainingPips == 1)
-//        {
-//            tileValue += (int)Weighting.Medium;
-//        }
-//        int AgentInCoverTotalValue = 0.0f;
-//        int enemiesInCoverTotalValue = 0.0f;
-//        foreach (CharacterBase enemy in self.enemiesInSight)
-//        {
-//            //TODO: calculate direction from enemy to self.
-//            // if the agent is in good cover from the enemies then + for this action
-//            switch (tileToConsider.ProvidesCoverInDirection(Vector3.forward)) //switch on amount of cover self is in from enemies;
-//            {
-//                case ECoverValue.None:
-//                    AgentInCoverTotalValue -= (int)Weighting.High / self.enemiesInSight.Count;
-//                    break;
-//                case ECoverValue.Half:
-//                    AgentInCoverTotalValue += (int)Weighting.Medium / self.enemiesInSight.Count;
-//                    break;
-//                case ECoverValue.Full:
-//                    AgentInCoverTotalValue += (int)Weighting.Low / self.enemiesInSight.Count;
-//                    break;
-//                default:
-//                    Debug.LogError("issue with cover Value returned");
-//                    break;
-//            }
-
-//            // if the enemies are not in full cover then + for this action as expect them to move
-//            switch (enemy.occupiedTile.ProvidesCoverInDirection(Vector3.back))
-//            {
-//                case ECoverValue.None:
-//                    enemiesInCoverTotalValue += (int)Weighting.High / self.enemiesInSight.Count;
-//                    break;
-//                case ECoverValue.Half:
-//                    enemiesInCoverTotalValue += (int)Weighting.Medium / self.enemiesInSight.Count;
-//                    break;
-//                case ECoverValue.Full:
-//                    enemiesInCoverTotalValue -= (int)Weighting.Low / self.enemiesInSight.Count;
-//                    break;
-//                default:
-//                    break;
-//            }
-//        }
-//        tileValue += AgentInCoverTotalValue;
-//        tileValue += enemiesInCoverTotalValue;
-
-//        return tileValue;
-//    }
-//}
 
 public class ShootConsideration : SingleEnemyActionConsideration
 {
@@ -411,28 +240,24 @@ public class ShootConsideration : SingleEnemyActionConsideration
         //why is there no chanceToHitCalculation in here?
     }
 
-    public override void Enact(CharacterBase self)
+    public override void ConsiderActionWithNoEnemyInSight(CharacterBase self)
     {
-        self.AttackCharacter(enemyToAttack);
+        _actionValue -= (int)Weighting.guarantee;
     }
 
-    //public override void SetActionID()
-    //{
-    //    _actionID = ActionID.Shoot;
-    //}
+    public override void Enact(CharacterBase self)
+    {
+        if (enemyToAttack != null)
+            self.AttackCharacter(enemyToAttack);
+        else
+            (self as EnemyCharacter).moveDecision();
+    }
 }
 
 public class ReloadConsideration : NoEnemyActionConsideration
 {
     public override void ConsiderAction(CharacterBase self)
     {
-        // if numshots == 0 then +
-        // 
-        // if numshots == 0 && pips remaining == 1 then guarantee
-        //
-        // tileValue = 1 - (numshots / MaximumAmmunition)
-
-        //adjustments based on number of shots left;
         if (self.ammunition > (self.MaximumAmmunition / 2))
         {
             _actionValue -= (int)Weighting.High;
@@ -464,11 +289,6 @@ public class ReloadConsideration : NoEnemyActionConsideration
     {
         self.Reload();
     }
-
-    //public override void SetActionID()
-    //{
-    //    _actionID = ActionID.Reload;
-    //}
 }
 #endregion
 

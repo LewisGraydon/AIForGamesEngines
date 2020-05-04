@@ -1,27 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
-using System.Runtime.CompilerServices;
-using System.Xml;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.Assertions.Must;
 using UnityEngine.UI;
 using Vector3 = UnityEngine.Vector3;
-
-enum EDirectionOfCoverToUse
-{
-    NorthOnly,
-    EastOnly,
-    SouthOnly,
-    WestOnly,
-    NorthEast,
-    SouthEast,
-    SouthWest,
-    NorthWest,
-    None
-}
 
 public class CharacterBase : MonoBehaviour
 {
@@ -125,7 +106,7 @@ public class CharacterBase : MonoBehaviour
     #endregion
 
     //Awake instead of Start() as it is not called when instantiating an object.
-    private void Awake()
+    protected void Awake()
     {
         gsm = GameObject.Find("GameStateManager");
         gsmScript = gsm.GetComponent<GameState>();
@@ -150,20 +131,11 @@ public class CharacterBase : MonoBehaviour
         ammunition = MaximumAmmunition;
     }
 
-    private void Update()
-    {
-        //Debug.DrawRay(this.transform.position, Vector3.forward * 10, Color.magenta, 1000);
-    }
-
-    public bool isInCover(CharacterBase fromEnemy)
-    {
-        return false;
-    }
-
     public void EnterOverwatchStance()
     {
         //probably have a ref to gamestate and add to an overwatch list. then have it looped over during other movements etc.
         Debug.Log("Doing An Overwatch Stance");
+        actionPips = 0;
     }
 
     public void EnterDefenseStance()
@@ -175,6 +147,7 @@ public class CharacterBase : MonoBehaviour
     public void AttackCharacter(CharacterBase otherCharacter)
     {
         Debug.Log("Doing An Attack");
+        actionPips = 0;
     }
 
     public void Reload()
@@ -186,17 +159,11 @@ public class CharacterBase : MonoBehaviour
 
     public List<INodeSearchable> FindSightline(int visionRange = 2)
     {
-        //foreach (INodeSearchable inode in tilePathToDestination)
-        //{
-        //    if ((inode as Tile).parent != null)
-        //    {
-        //        Debug.Log((inode as Tile).name + " has a parent of: " + (inode as Tile).parent);
-        //    }
-        //}
         Tile[] g = GameObject.FindObjectsOfType<Tile>();
 
         gsmScript.pathfindingAgent.NodeReset(g.ToList<INodeSearchable>());
-        gsmScript.pathfindingAgent.NodeReset(tilePathToDestination.ToList());
+        if(tilePathToDestination != null)
+            gsmScript.pathfindingAgent.NodeReset(tilePathToDestination.ToList());
         enemiesInSight.Clear();
         List<INodeSearchable> possibleSeenTiles = gsmScript.pathfindingAgent.FindNodeSightRange(occupiedTile, visionRange);
         List<INodeSearchable> seenTiles = new List<INodeSearchable>();
@@ -229,16 +196,6 @@ public class CharacterBase : MonoBehaviour
             Vector3 direction = Vector3.Normalize(difference);
             //find layer mask, assuming wall layer is 8
             int wallLayer = 1 << 8;
-
-            //if (workingTile.occupier != null)
-            //{
-            //                //    RaycastHit[] rHits = Physics.RaycastAll(new Ray(startingcentre, direction), distance, wallLayer);
-            //    foreach(RaycastHit r in rHits)
-            //    {
-            //        Debug.Log(r.collider.name);
-            //        Debug.Log("Therefore Raycast = " + Physics.Raycast(startingcentre, direction, distance, wallLayer));
-            //    }
-            //}
             //If the raycast hits nothing, add this tile to seen
             if (!Physics.Raycast(startingcentre, direction, distance, wallLayer))
             {
@@ -261,18 +218,6 @@ public class CharacterBase : MonoBehaviour
                 Vector3 differenceS = new Vector3((targetcentre.x + tiledirectionSoffset.x) - (startingcentre.x + tiledirectionSoffset.x), (targetcentre.y + tiledirectionSoffset.y) - (startingcentre.y + tiledirectionSoffset.y), (targetcentre.z + tiledirectionSoffset.z) - (startingcentre.z + tiledirectionSoffset.z));
                 Vector3 differenceW = new Vector3((targetcentre.x + tiledirectionWoffset.x) - (startingcentre.x + tiledirectionWoffset.x), (targetcentre.y + tiledirectionWoffset.y) - (startingcentre.y + tiledirectionWoffset.y), (targetcentre.z + tiledirectionWoffset.z) - (startingcentre.z + tiledirectionWoffset.z));
 
-                //if (workingTile.occupier != null)
-                //{
-                //    Debug.Log("workingTile " + workingTile.name + "pos: " + "X: " + workingTile.transform.position.x +  ", Y: " + workingTile.transform.position.y + "Z: " + workingTile.transform.position.z);
-                //    Debug.DrawRay(new Vector3(tiledirectionNoffset.x + targetcentre.x, tiledirectionNoffset.y + targetcentre.y, tiledirectionNoffset.z + targetcentre.z),
-                //        Vector3.up * 10, Color.cyan, 100);
-                //    Debug.DrawRay(new Vector3(tiledirectionEoffset.x + targetcentre.x, tiledirectionEoffset.y + targetcentre.y, tiledirectionEoffset.z + targetcentre.z),
-                //        Vector3.up * 10, Color.cyan, 100);
-                //    Debug.DrawRay(new Vector3(tiledirectionSoffset.x + targetcentre.x, tiledirectionSoffset.y + targetcentre.y, tiledirectionSoffset.z + targetcentre.z),
-                //        Vector3.up * 10, Color.cyan, 100);
-                //    Debug.DrawRay(new Vector3(tiledirectionWoffset.x + targetcentre.x, tiledirectionWoffset.y + targetcentre.y, tiledirectionWoffset.z + targetcentre.z),
-                //        Vector3.up * 10, Color.cyan, 100);
-                //}
                 Vector3 modifiedStartN = new Vector3((startingcentre.x + tiledirectionNoffset.x), (startingcentre.y + tiledirectionNoffset.y), (startingcentre.z + tiledirectionNoffset.z));
                 Vector3 modifiedStartE = new Vector3((startingcentre.x + tiledirectionEoffset.x), (startingcentre.y + tiledirectionEoffset.y), (startingcentre.z + tiledirectionEoffset.z));
                 Vector3 modifiedStartS = new Vector3((startingcentre.x + tiledirectionSoffset.x), (startingcentre.y + tiledirectionSoffset.y), (startingcentre.z + tiledirectionSoffset.z));
@@ -293,18 +238,6 @@ public class CharacterBase : MonoBehaviour
                 hitE = Physics.Raycast(modifiedStartE, directionE, distanceE, wallLayer);
                 hitS = Physics.Raycast(modifiedStartS, directionS, distanceS, wallLayer);
                 hitW = Physics.Raycast(modifiedStartW, directionW, distanceW, wallLayer);
-
-                if (workingTile.occupier != null)
-                {
-                    if(!hitN)
-                        Debug.DrawRay(modifiedStartN, directionN * distanceN, Color.black, 100, true);
-                    if(!hitE)
-                        Debug.DrawRay(modifiedStartE, directionE * distanceE, Color.blue, 100, true);
-                    if(!hitS)
-                        Debug.DrawRay(modifiedStartS, directionS * distanceS, Color.red, 100, true);
-                    if(!hitW)
-                        Debug.DrawRay(modifiedStartW, directionW * distanceW, Color.yellow, 100, true);
-                }
 
                 if (!hitN || !hitE || !hitS || !hitW)
                 {
@@ -342,28 +275,22 @@ public class CharacterBase : MonoBehaviour
             Debug.Log("Can See: " + enemyHitChancePair.Key.name + " with a: " + enemyHitChancePair.Value + "% chance to hit");
         }
         gsmScript.pathfindingAgent.NodeReset(possibleSeenTiles);
-        Tile t = (Tile)seenTiles.Find((INodeSearchable i) => (i as Tile).gameObject.name.Contains("(56)"));
-        if (t != null)
-        {
-            Debug.Log("I think I am having Issues" + t.occupier);
-        }
         return seenTiles;
     }
 
     //should contian the code to actually move a character along a path in my mind.
     public virtual void MoveCharacterAlongTilePath()
     {
-        //Debug.Log("moving Character to: Some Tile I have no way to identify I think: " + tileToMoveTo != null ? tileToMoveTo.name : "tile is null");
         if (Mathf.Abs(this.transform.position.x - currentDestinationTile.transform.position.x) > 0.05f || Mathf.Abs(this.transform.position.z - currentDestinationTile.transform.position.z) > 0.05f)
         {
             this.transform.position += directionToDestination * Time.deltaTime;
-            //Debug.Log("Moving " + name + ", by: " + directionToDestination);
         }
         else if (tilePathToDestination.Count == 0)
         {
             gsmScript.gameState = (this is PlayerCharacter) ? EGameState.playerTurn : EGameState.enemyTurn;
             gsmScript.pathfindingAgent.NodeReset(allPossibleMovementNodes);
             FindSightline();
+            gsmScript.updateOtherTeamSightLines(this);
             actionPips--;
             gsmScript.ProcessGameState();
         }
@@ -373,6 +300,7 @@ public class CharacterBase : MonoBehaviour
             transform.position = new Vector3(currentDestinationTile.transform.position.x, this.transform.position.y, currentDestinationTile.transform.position.z);
             currentDestinationTile = tilePathToDestination.Pop() as Tile;
             FindSightline();
+            gsmScript.updateOtherTeamSightLines(this);
         }
     }
 
@@ -389,6 +317,7 @@ public class CharacterBase : MonoBehaviour
         tilePathToDestination = movementStack;
         allPossibleMovementNodes = allEffectedNodes;
         currentDestinationTile = movementStack.Pop() as Tile;
+        gsmScript.pathfindingAgent.NodeReset(allPossibleMovementNodes);
     }
 
     int CalculateHitChance(CharacterBase other, bool isHalfCovered, bool isFullCovered)
@@ -436,6 +365,4 @@ public class CharacterBase : MonoBehaviour
         #endregion
         return outInt;
     }
-
-
 }

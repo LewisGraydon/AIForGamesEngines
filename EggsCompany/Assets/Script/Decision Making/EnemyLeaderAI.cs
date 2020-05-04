@@ -17,9 +17,6 @@ public class EnemyLeaderAI : MonoBehaviour
     struct TestCharacter { };
 
     private TestCharacter[] testCharacters = new TestCharacter[1];
-    
-    
-
 
     void makeDecision()
     {
@@ -33,16 +30,10 @@ public class EnemyLeaderAI : MonoBehaviour
         }
     }
 
-
-
-
-
-
     TestTile[] GetPotentialMoveTiles()
     {
         return new TestTile[1];
     }
-
 
     bool CanSeePlayer()
     {

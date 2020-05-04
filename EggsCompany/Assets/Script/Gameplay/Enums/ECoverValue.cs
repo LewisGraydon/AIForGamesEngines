@@ -8,6 +8,7 @@ public enum ECoverValue
 {
     None,
     Half,
-    Full
+    Full,
+    Error
 }
 
