@@ -55,7 +55,7 @@ public class EnemyCharacter : CharacterBase
     {
         Debug.Log(this + "  has eyes out... (overwatch)");
 
-        gsmScript.playerContainer.GetComponent<EnemyManager>().overwatchingEnemies.Add(this);
+        gsmScript.enemyContainer.GetComponent<EnemyManager>().overwatchingEnemies.Add(this);
 
         base.EnterOverwatchStance();
 
