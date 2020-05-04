@@ -192,7 +192,7 @@ public class GameState : MonoBehaviour
         switch(gameState)
         {
             case EGameState.setupState:
-
+                enemyContainer.GetComponent<EnemyManager>().activeCharacter = null;
                 InitialisePlayerPips();
                 gameState = EGameState.playerTurn;
                 //ProcessGameState();
