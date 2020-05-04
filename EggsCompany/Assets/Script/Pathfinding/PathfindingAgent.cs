@@ -29,7 +29,7 @@ public class PathfindingAgent : MonoBehaviour
     }
 
     public List<INodeSearchable> FindNodeSightRange(INodeSearchable startNode, int sightRange)
-    {
+    {       
         Queue<INodeSearchable> nodeQueue = new Queue<INodeSearchable>();
         List<INodeSearchable> nodesInSightRange = new List<INodeSearchable>();
         nodeQueue.Enqueue(startNode);
@@ -46,11 +46,18 @@ public class PathfindingAgent : MonoBehaviour
                 {
                     continue;
                 }
-                if (!child.searched && !nodeQueue.Contains(child) && SearchDepth(child) <= sightRange)
+                
+                if (!child.searched && !nodeQueue.Contains(child))
                 {
                     child.parent = currentNode;
+                    int depth = SearchDepth(child);
+                    if (depth <= sightRange)
+                    {
                     nodeQueue.Enqueue(child);
                     nodesInSightRange.Add(child);
+                    }
+
+
                 }
             }
         }
