@@ -159,7 +159,7 @@ public class CharacterBase : MonoBehaviour
         }
     }
 
-    public void OverwatchAttackCharacter(CharacterBase otherCharacter)
+    public virtual void OverwatchAttackCharacter(CharacterBase otherCharacter)
     {
         Debug.Log("Doing An ");
         actionPips = 0;
