@@ -5,6 +5,8 @@ using UnityEngine;
 public class EnemyManager : MonoBehaviour
 {
     public GameObject[] allEnemies = new GameObject[7];
+    public List<EnemyCharacter> overwatchingEnemies = new List<EnemyCharacter>();
+
 
     private GameObject gsm;
     private GameState gsmScript;

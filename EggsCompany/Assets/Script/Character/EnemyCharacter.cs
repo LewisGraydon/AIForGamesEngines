@@ -50,4 +50,15 @@ public class EnemyCharacter : CharacterBase
             Debug.LogWarning("pathfinder variable on enemy character: " + name + " is not set");
         }
     }
+
+    public override void EnterOverwatchStance()
+    {
+        Debug.Log(this + "  has eyes out... (overwatch)");
+
+        gsmScript.playerContainer.GetComponent<EnemyManager>().overwatchingEnemies.Add(this);
+
+        base.EnterOverwatchStance();
+
+    }
+
 }

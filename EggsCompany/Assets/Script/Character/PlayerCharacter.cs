@@ -5,7 +5,6 @@ using UnityEngine;
 public class PlayerCharacter : CharacterBase
 {
 
-    private List<PlayerCharacter> overwatchers;
     private string _characterName;
     public string characterName
     {
@@ -15,12 +14,7 @@ public class PlayerCharacter : CharacterBase
             _characterName = value;
         }
     }
-
-    private void Start()
-    {
-        overwatchers = gsmScript.playerContainer.GetComponent<PlayerManager>().overwatchingPlayers;
-
-    }
+    
 
     public override void AttackCharacter(CharacterBase otherCharacter)
     {
@@ -30,10 +24,9 @@ public class PlayerCharacter : CharacterBase
 
     public override void EnterOverwatchStance()
     {
-        Debug.Log("Player is watching you...");
-        overwatchers.Add(this);
+        Debug.Log(this + " is on eggde... (overwatch)");
 
-
+        gsmScript.playerContainer.GetComponent<PlayerManager>().overwatchingPlayers.Add(this);
 
         base.EnterOverwatchStance();
 

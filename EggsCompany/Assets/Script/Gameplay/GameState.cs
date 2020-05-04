@@ -301,7 +301,28 @@ public class GameState : MonoBehaviour
             {
                 enemyCharacter.FindSightline();
             }
-           
+
+            bool playerHasEnteredOverwatchSightline = false;
+            var watchers = enemyContainer.GetComponent<EnemyManager>().overwatchingEnemies;
+            foreach (EnemyCharacter enemy in watchers)
+            {
+                foreach (var keyValuePair in enemy.enemiesInSight)
+                {
+                    if (keyValuePair.Key == caller)
+                    {
+                        playerHasEnteredOverwatchSightline = true;
+                    }
+                }
+                if (playerHasEnteredOverwatchSightline)
+                {
+                    enemy.OverwatchAttackCharacter(caller);
+                    watchers.Remove(enemy);
+                    enemy.isOverwatching = false;
+                }
+            }
+
+
+
         }
         else
         {
@@ -310,9 +331,23 @@ public class GameState : MonoBehaviour
             {
                 playerCharacter.FindSightline();
             }
-            foreach(PlayerCharacter player in playerContainer.GetComponent<PlayerManager>().overwatchingPlayers)
+            bool enemyHasEnteredOverwatchSightline = false;
+            var watchers = playerContainer.GetComponent<PlayerManager>().overwatchingPlayers;
+            foreach (PlayerCharacter player in watchers)
             {
-
+                foreach(var keyValuePair in player.enemiesInSight)
+                {
+                    if(keyValuePair.Key == caller)
+                    {
+                        enemyHasEnteredOverwatchSightline = true;
+                    }
+                }
+                if (enemyHasEnteredOverwatchSightline)
+                {
+                    player.OverwatchAttackCharacter(caller);
+                    watchers.Remove(player);
+                    player.isOverwatching = false;
+                }
             }
         }
     }

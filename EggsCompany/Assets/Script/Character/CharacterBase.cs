@@ -1,5 +1,4 @@
-﻿using NUnit.Framework;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
@@ -96,7 +95,7 @@ public class CharacterBase : MonoBehaviour
     public bool isDefending { get => _isDefending; }
 
     private bool _isOverwatching = false;
-    public bool isOverwatching { get => _isOverwatching; }
+    public bool isOverwatching { get => _isOverwatching; set => _isOverwatching = value; }
 
     protected List<KeyValuePair<CharacterBase, int>> _enemiesInSight = new List<KeyValuePair<CharacterBase, int>>();
     public List<KeyValuePair<CharacterBase, int>> enemiesInSight { get => _enemiesInSight; }
