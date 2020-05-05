@@ -35,26 +35,6 @@ public abstract class SingleEnemyActionConsideration : ActionConsideration
     /// </summary>
     /// <param name="self">the character to be evaluating the decision</param>
     public abstract void ConsiderActionWithNoEnemyInSight(CharacterBase self);
-
-    public virtual ECoverValue GetGenericCoverValue(CharacterBase self)
-    {
-        ECoverValue maxCoverValue = ECoverValue.None, maxCoverValue1 = ECoverValue.None;
-
-        for (int i = 0; i < (int)EWallDirection.Error; i++)
-        {
-            if(i % 2 == 0)
-            {
-                maxCoverValue = (ECoverValue)self.occupiedTile.walls[i].coverValue;
-            }
-            else
-            {
-                maxCoverValue1 = (ECoverValue)self.occupiedTile.walls[i].coverValue;
-            }
-        }
-        if (maxCoverValue == maxCoverValue1)
-            return maxCoverValue;
-        return maxCoverValue < maxCoverValue1 ? maxCoverValue : maxCoverValue;
-    }
 }
 
 public abstract class NoEnemyActionConsideration : ActionConsideration
@@ -123,7 +103,7 @@ public class MoveConsideration : SingleEnemyActionConsideration
         #endregion
 
         #region Agent Generic Cover Check
-        switch (GetGenericCoverValue(self))
+        switch (self.occupiedTile.GetGenericCoverValue())
         {
             case ECoverValue.None:
                 _actionValue += (int)Weighting.High;
@@ -303,7 +283,7 @@ public class DefendConsideration : SingleEnemyActionConsideration
     public override void ConsiderActionWithNoEnemyInSight(CharacterBase self)
     {
         #region Agent Generic Cover Check
-        switch (GetGenericCoverValue(self))
+        switch (self.occupiedTile.GetGenericCoverValue())
         {
             case ECoverValue.None:
                 _actionValue += (int)Weighting.Medium;

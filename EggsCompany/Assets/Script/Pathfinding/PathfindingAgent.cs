@@ -173,11 +173,6 @@ public class PathfindingAgent : MonoBehaviour
         INodeSearchable[] tsa = GameObject.FindObjectsOfType<Tile>();
         List<INodeSearchable> ts = tsa.ToList<INodeSearchable>();
         NodeReset(ts);
-        foreach (Tile t in ts)
-        {
-            if (t.parent != null)
-                Debug.LogError(t + " Already has a parent");
-        }
         INodeSearchable currentNode;
         List<INodeSearchable> moveRange = new List<INodeSearchable>();
         Stack<INodeSearchable> nodeStack = new Stack<INodeSearchable>();
@@ -431,10 +426,6 @@ public class PathfindingAgent : MonoBehaviour
         {
             child.DijkstraCost = calculatedCost;
             child.parent = currentNode;
-            if(child.parent.parent == child)
-            {
-                Debug.LogError("TimeTravelling");
-            }
             return true;
         }
         return false;
@@ -527,8 +518,6 @@ public class PathfindingAgent : MonoBehaviour
         for (int i = 0; i < (int)EDirection.Error; i++)
         {
 
-            //Debug.Log(tileParent);
-            //Debug.Log(tileChild);
             if (tileChild.neighbors[i] != null)
             {
                 if (tileChild.neighbors[i] == tileParent)
@@ -696,13 +685,7 @@ public class PathfindingAgent : MonoBehaviour
 
         while(currentNode.parent != null)
         {
-            if(currentNode.parent.parent == currentNode)
-            {
-                Debug.LogError("Fuck; Time Travelling again");
-                break;
-            }
             nodePath.Push(currentNode.parent);
-            Debug.Log("nodePath size: " + nodePath.Count);
             currentNode = currentNode.parent;
         }
         return nodePath;

@@ -94,10 +94,6 @@ public class GameState : MonoBehaviour
             EnemyManager enemyManager = GameObject.FindObjectOfType<EnemyManager>();
             PlayerManager playerManager = GameObject.FindObjectOfType<PlayerManager>();
             activeCharacter = enemyManager.activeCharacter != null ? (CharacterBase)enemyManager.activeCharacter : playerManager.selectedPlayer.GetComponent<CharacterBase>();
-            if(activeCharacter is EnemyCharacter)
-            {
-                Debug.Log("into enemy movement motherfucker");
-            }
             activeCharacter.MoveCharacterAlongTilePath();
             playerManager.SetupCameraPosition();
         }

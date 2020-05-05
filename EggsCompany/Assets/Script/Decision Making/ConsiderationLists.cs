@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Random = UnityEngine.Random;
 public enum Weighting
@@ -103,10 +104,17 @@ public static class ConsiderationLists
         {
             if(movementConsiderationList[i] is SingleEnemyMovementConsideration)
             {
-                foreach(KeyValuePair<CharacterBase, int> enemyHitChancePair in self.enemiesInSight)
+                if(self.enemiesInSight.Count > 0)
                 {
-                    (movementConsiderationList[i] as SingleEnemyMovementConsideration).ConsiderTile(ref self, enemyHitChancePair.Key, ref tileToConsider);
-                } //calculates for all seen enemies per consideration as some considerations replace?
+                    foreach(KeyValuePair<CharacterBase, int> enemyHitChancePair in self.enemiesInSight)
+                    {
+                        (movementConsiderationList[i] as SingleEnemyMovementConsideration).ConsiderTile(ref self, enemyHitChancePair.Key, ref tileToConsider);
+                    } //calculates for all seen enemies per consideration as some considerations replace?
+                }
+                else
+                {
+                    (movementConsiderationList[i] as SingleEnemyMovementConsideration).ConsiderTileWithNoEnemy(ref self, tileToConsider);
+                }
             }
             else if(movementConsiderationList[i] is TileOnlyMovementConsideration)
             {

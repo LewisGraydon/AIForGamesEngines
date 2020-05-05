@@ -140,7 +140,7 @@ public class CharacterBase : MonoBehaviour
     public virtual void EnterOverwatchStance()
     {
         //probably have a ref to gamestate and add to an overwatch list. then have it looped over during other movements etc.
-        Debug.Log("Doing An Overwatch Stance");
+        Debug.Log(name + ": is Doing An Overwatch Stance");
         _isOverwatching = true;
         actionPips = 0;
     }
@@ -153,7 +153,7 @@ public class CharacterBase : MonoBehaviour
 
     public virtual void AttackCharacter(CharacterBase otherCharacter)
     {
-        Debug.Log("Doing An attack for 2 damage ");
+        Debug.Log(name + ": is Doing An attack for 2 damage ");
         actionPips = 0;
         int chanceToHit = enemiesInSight.Find((KeyValuePair<CharacterBase, int> characterHitChance) => characterHitChance.Key == otherCharacter).Value;
         if(UnityEngine.Random.Range(0, 100) <= chanceToHit)
@@ -165,7 +165,7 @@ public class CharacterBase : MonoBehaviour
 
     public virtual void OverwatchAttackCharacter(CharacterBase otherCharacter)
     {
-        Debug.Log("Doing An ");
+        Debug.Log(name + ": is Doing An ");
         actionPips = 0;
         int chanceToHit = enemiesInSight.Find((KeyValuePair<CharacterBase, int> characterHitChance) => characterHitChance.Key == otherCharacter).Value;
         if (UnityEngine.Random.Range(0, 120) <= chanceToHit)
@@ -177,7 +177,7 @@ public class CharacterBase : MonoBehaviour
 
     public void Reload()
     {
-        Debug.Log("Doing A Reload");
+        Debug.Log(name + ": is Doing A Reload");
         ammunition = MaximumAmmunition;
         actionPips = 0;
     }
@@ -311,10 +311,6 @@ public class CharacterBase : MonoBehaviour
                 }           
             }
         }
-        foreach (var enemyHitChancePair in enemiesInSight)
-        {
-            Debug.Log("Can See: " + enemyHitChancePair.Key.name + " with a: " + enemyHitChancePair.Value + "% chance to hit");
-        }
         gsmScript.pathfindingAgent.NodeReset(possibleSeenTiles);
 
         if (this is PlayerCharacter)
@@ -324,6 +320,99 @@ public class CharacterBase : MonoBehaviour
         }
 
         return seenTiles;
+    }
+
+    public KeyValuePair<bool, int> FudgedSightHitchance(Tile shooterTile, Tile targetTile)
+    {
+        KeyValuePair<bool, int> canBeSeenHitChancePair = new KeyValuePair<bool, int>(false, -8888);
+        Vector3 pawnYoffset = new Vector3(0, .5f, 0);
+        Vector3 tiledirectionEoffset = new Vector3(.4f, 0, 0);
+        Vector3 tiledirectionWoffset = new Vector3(-.4f, 0, 0);
+        Vector3 tiledirectionNoffset = new Vector3(0, 0, .4f);
+        Vector3 tiledirectionSoffset = new Vector3(0, 0, -.4f);
+        Vector3 targetcentre = targetTile.transform.position + pawnYoffset;
+        Vector3 startingcentre = shooterTile.transform.position + pawnYoffset;
+        Vector3 difference = targetcentre - startingcentre;
+
+        //calc distance
+        float distance = Vector3.Magnitude(difference);
+        //calc direction
+        Vector3 direction = Vector3.Normalize(difference);
+        //find layer mask, assuming wall layer is 8
+        int wallLayer = 1 << 8;
+        //If the raycast hits nothing, add this tile to seen
+        if (!Physics.Raycast(startingcentre, direction, distance, wallLayer))
+        {
+            Debug.DrawRay(startingcentre, direction * distance, Color.magenta, 5, true);
+            if (targetTile.occupier != null && (this is PlayerCharacter && targetTile.occupier is EnemyCharacter) || (this is EnemyCharacter && targetTile.occupier is PlayerCharacter))
+            {
+                canBeSeenHitChancePair = new KeyValuePair<bool, int>(true, CalculateHitChance(targetTile.occupier, false, false));
+            }
+        }
+        else
+        {
+            bool hitN;
+            bool hitE;
+            bool hitS;
+            bool hitW;
+
+            Vector3 differenceN = new Vector3((targetcentre.x + tiledirectionNoffset.x) - (startingcentre.x + tiledirectionNoffset.x), (targetcentre.y + tiledirectionNoffset.y) - (startingcentre.y + tiledirectionNoffset.y), (targetcentre.z + tiledirectionNoffset.z) - (startingcentre.z + tiledirectionNoffset.z));
+            Vector3 differenceE = new Vector3((targetcentre.x + tiledirectionEoffset.x) - (startingcentre.x + tiledirectionEoffset.x), (targetcentre.y + tiledirectionEoffset.y) - (startingcentre.y + tiledirectionEoffset.y), (targetcentre.z + tiledirectionEoffset.z) - (startingcentre.z + tiledirectionEoffset.z));
+            Vector3 differenceS = new Vector3((targetcentre.x + tiledirectionSoffset.x) - (startingcentre.x + tiledirectionSoffset.x), (targetcentre.y + tiledirectionSoffset.y) - (startingcentre.y + tiledirectionSoffset.y), (targetcentre.z + tiledirectionSoffset.z) - (startingcentre.z + tiledirectionSoffset.z));
+            Vector3 differenceW = new Vector3((targetcentre.x + tiledirectionWoffset.x) - (startingcentre.x + tiledirectionWoffset.x), (targetcentre.y + tiledirectionWoffset.y) - (startingcentre.y + tiledirectionWoffset.y), (targetcentre.z + tiledirectionWoffset.z) - (startingcentre.z + tiledirectionWoffset.z));
+
+            Vector3 modifiedStartN = new Vector3((startingcentre.x + tiledirectionNoffset.x), (startingcentre.y + tiledirectionNoffset.y), (startingcentre.z + tiledirectionNoffset.z));
+            Vector3 modifiedStartE = new Vector3((startingcentre.x + tiledirectionEoffset.x), (startingcentre.y + tiledirectionEoffset.y), (startingcentre.z + tiledirectionEoffset.z));
+            Vector3 modifiedStartS = new Vector3((startingcentre.x + tiledirectionSoffset.x), (startingcentre.y + tiledirectionSoffset.y), (startingcentre.z + tiledirectionSoffset.z));
+            Vector3 modifiedStartW = new Vector3((startingcentre.x + tiledirectionWoffset.x), (startingcentre.y + tiledirectionWoffset.y), (startingcentre.z + tiledirectionWoffset.z));
+
+
+            float distanceN = Vector3.Magnitude(differenceN);
+            float distanceE = Vector3.Magnitude(differenceE);
+            float distanceS = Vector3.Magnitude(differenceS);
+            float distanceW = Vector3.Magnitude(differenceW);
+
+            Vector3 directionN = Vector3.Normalize(differenceN);
+            Vector3 directionE = Vector3.Normalize(differenceE);
+            Vector3 directionS = Vector3.Normalize(differenceS);
+            Vector3 directionW = Vector3.Normalize(differenceW);
+
+            hitN = Physics.Raycast(modifiedStartN, directionN, distanceN, wallLayer);
+            hitE = Physics.Raycast(modifiedStartE, directionE, distanceE, wallLayer);
+            hitS = Physics.Raycast(modifiedStartS, directionS, distanceS, wallLayer);
+            hitW = Physics.Raycast(modifiedStartW, directionW, distanceW, wallLayer);
+
+            if (!hitN || !hitE || !hitS || !hitW)
+            {
+                int coverValue = 0;
+                if (direction.x >= angleForFlanking)
+                {
+                    coverValue = targetTile.walls[(int)EWallDirection.East].coverValue;
+                }
+                else if (direction.x <= -angleForFlanking)
+                {
+                    coverValue = targetTile.walls[(int)EWallDirection.West].coverValue;
+                }
+                if (direction.z >= angleForFlanking)
+                {
+                    coverValue = coverValue == 0 ?
+                    targetTile.walls[(int)EWallDirection.South].coverValue : targetTile.walls[(int)EWallDirection.South].coverValue < coverValue ?
+                                                                                    targetTile.walls[(int)EWallDirection.South].coverValue : coverValue;
+                }
+                else if (direction.z <= -angleForFlanking)
+                {
+                    coverValue = coverValue == 0 ?
+                    targetTile.walls[(int)EWallDirection.South].coverValue : targetTile.walls[(int)EWallDirection.North].coverValue < coverValue ?
+                                                                                targetTile.walls[(int)EWallDirection.North].coverValue : coverValue;
+                }
+                if (targetTile.occupier != null && (this is PlayerCharacter && targetTile.occupier is EnemyCharacter) || (this is EnemyCharacter && targetTile.occupier is PlayerCharacter))
+                {
+                    canBeSeenHitChancePair = new KeyValuePair<bool, int>(true, CalculateHitChance(targetTile.occupier, coverValue == 1, coverValue == 2));
+                }
+            }
+        }
+        return canBeSeenHitChancePair;
+    
     }
 
     //should contian the code to actually move a character along a path in my mind.

@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Runtime.InteropServices.WindowsRuntime;
+using System.Runtime.Serialization;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -16,6 +19,8 @@ public abstract class MovementConsideration: IComparable<MovementConsideration>
 public abstract class SingleEnemyMovementConsideration : MovementConsideration
 {
     public abstract void ConsiderTile(ref CharacterBase self, CharacterBase enemy, ref Tile tileToConsider);
+
+    public abstract void ConsiderTileWithNoEnemy(ref CharacterBase self, Tile tileToConsider);
 }
 
 public abstract class TileOnlyMovementConsideration : MovementConsideration
@@ -31,11 +36,22 @@ public class HitChanceDifferenceConsideration : SingleEnemyMovementConsideration
     {
 
         bool isPredictonAccurate = Random.Range(0, 1) == 1;
-        int estimatedHitChance = isPredictonAccurate ? tileToConsider.chanceToHit(enemy.occupiedTile) : Random.Range(0, 100);
+        int currentHitChance = self.enemiesInSight.Find((pair) => pair.Key == enemy).Value;
+        KeyValuePair<bool, int> seenAndHitChanceFromTile = self.FudgedSightHitchance(tileToConsider, enemy.occupiedTile);
+        int estimatedHitChance = isPredictonAccurate ? seenAndHitChanceFromTile.Value : Random.Range(0, 100);
+        if(seenAndHitChanceFromTile.Key == false || estimatedHitChance < currentHitChance)
+        {
+            _movementValue -= (int)Weighting.High / self.enemiesInSight.Count;
+        }
+        else if(estimatedHitChance > currentHitChance)
+        {
+            _movementValue += (int)Weighting.High / self.enemiesInSight.Count;
+        }
+    }
 
-        _movementValue += estimatedHitChance == 100 ? (int)Weighting.guarantee : 
-                                                    estimatedHitChance > self.occupiedTile.chanceToHit(enemy.occupiedTile) ? (int)Weighting.High :
-                                                    -(int)Weighting.High;
+    public override void ConsiderTileWithNoEnemy(ref CharacterBase self, Tile tileToConsider)
+    {//could cheat and give if is in direction of players?
+        return;
     }
 }
 
@@ -43,8 +59,17 @@ public class FlankingConsideration : SingleEnemyMovementConsideration
 {
     public override void ConsiderTile(ref CharacterBase self, CharacterBase enemy, ref Tile tileToConsider)
     {
-        _movementValue += self.occupiedTile.transform.position.x == enemy.transform.position.x || self.occupiedTile.transform.position.y == enemy.transform.position.y ?
-               (int)Weighting.guarantee : 0;
+        if (Mathf.Approximately(tileToConsider.transform.position.x, enemy.transform.position.x) || Mathf.Approximately(tileToConsider.transform.position.y, enemy.transform.position.y)
+            && !(Mathf.Approximately(self.transform.position.x, enemy.transform.position.x) || Mathf.Approximately(self.transform.position.y, enemy.transform.position.y)))
+        {
+            _movementValue += (int)Weighting.High / self.enemiesInSight.Count;
+        }
+    }
+
+    public override void ConsiderTileWithNoEnemy(ref CharacterBase self, Tile tileToConsider)
+    {
+        //again, could fudge a direction check here?
+        return;
     }
 }
 
@@ -54,7 +79,9 @@ public class SelfCoverConsideration : SingleEnemyMovementConsideration
     {
         ECoverValue tileCoverFromEnemy = tileToConsider.ProvidesCoverInDirection(enemy.transform.position - self.transform.position);
         ECoverValue enemyCoverFromTile = enemy.occupiedTile.ProvidesCoverInDirection(self.transform.position - enemy.transform.position);
+        #region Agent Cover Level Check
 
+        #endregion
         switch (tileCoverFromEnemy)
         {
             case ECoverValue.None:
@@ -70,7 +97,7 @@ public class SelfCoverConsideration : SingleEnemyMovementConsideration
                 Debug.LogError("issue with cover Value returned");
                 break;
         }
-
+        #region PlayerCharacter Cover Level Check
         switch (enemyCoverFromTile)
         {
             case ECoverValue.None:
@@ -85,7 +112,20 @@ public class SelfCoverConsideration : SingleEnemyMovementConsideration
             default:
                 break;
         }
+        #endregion
 
+    }
+
+    public override void ConsiderTileWithNoEnemy(ref CharacterBase self, Tile tileToConsider)
+    {
+        if(tileToConsider.GetGenericCoverValue() > self.occupiedTile.GetGenericCoverValue())
+        {
+            _movementValue += (int)Weighting.High / self.enemiesInSight.Count;
+        }
+        else
+        {
+            _movementValue -= (int)Weighting.High / self.enemiesInSight.Count;
+        }
     }
 }
 
@@ -94,8 +134,15 @@ public class SelfVisibilityConsideration : SingleEnemyMovementConsideration
     public override void ConsiderTile(ref CharacterBase self, CharacterBase enemy, ref Tile tileToConsider)
     {
         bool isPredictonAccurate = Random.Range(0, 1) == 1;
-        bool willEnemyBeVisisbleFromTile = isPredictonAccurate ? tileToConsider.isVisibleFromTile(enemy.occupiedTile) : Random.Range(0, 1) == 0;
+        KeyValuePair<bool, int> visibleHitChancePair = self.FudgedSightHitchance(enemy.occupiedTile, tileToConsider);
+        bool willEnemyBeVisisbleFromTile = isPredictonAccurate ? visibleHitChancePair.Key : Random.Range(0, 1) == 0;
         _movementValue += willEnemyBeVisisbleFromTile ? -((int)Weighting.Medium / self.enemiesInSight.Count) : ((int)Weighting.Medium / self.enemiesInSight.Count);
+    }
+
+    public override void ConsiderTileWithNoEnemy(ref CharacterBase self, Tile tileToConsider)
+    {
+        //again could be fudging something;
+        return;
     }
 }
 
