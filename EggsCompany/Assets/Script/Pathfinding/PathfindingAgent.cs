@@ -126,42 +126,42 @@ public class PathfindingAgent : MonoBehaviour
     //@Param - startNode : The current node that unit occupies.
     //@Return: A list of all nodes that the unit can move to from its current node.
     //Notes: Might be able to change param to egg/unit object for ease of use. IE object could pass self.
-    public List<INodeSearchable> FindMovementRange(INodeSearchable startNode, float moveValue)
-    {
-        INodeSearchable currentNode;
-        List<INodeSearchable> moveRange = new List<INodeSearchable>(); 
-        Stack<INodeSearchable> nodeStack = new Stack<INodeSearchable>();
-        startNode.DijkstraCost = 0;
-        nodeStack.Push(startNode);
+    //public List<INodeSearchable> FindMovementRange(INodeSearchable startNode, float moveValue)
+    //{
+    //    INodeSearchable currentNode;
+    //    List<INodeSearchable> moveRange = new List<INodeSearchable>(); 
+    //    Stack<INodeSearchable> nodeStack = new Stack<INodeSearchable>();
+    //    startNode.DijkstraCost = 0;
+    //    nodeStack.Push(startNode);
 
-        while(nodeStack.Count > 0)
-        {
-            currentNode = nodeStack.Pop();
-            foreach(var child in currentNode.children)
-            {
-                if (child != null)
-                {
-                    bool reassigned = CalculateDijkstra(currentNode, child, ECostType.Movement);
-                    if(child.DijkstraCost <= moveValue)
-                    {
-                        if (!nodeStack.Contains(child) && reassigned)
-                        {
-                            nodeStack.Push(child);
-                        }
-                        if (!moveRange.Contains(child))
-                        {
-                            //TODO: copy? add as function pass? Whatever, add the cost calculation for the tile.
-                            moveRange.Add(child);
-                        }
-                    }
+    //    while(nodeStack.Count > 0)
+    //    {
+    //        currentNode = nodeStack.Pop();
+    //        foreach(var child in currentNode.children)
+    //        {
+    //            if (child != null)
+    //            {
+    //                bool reassigned = CalculateDijkstra(currentNode, child, ECostType.Movement);
+    //                if(child.DijkstraCost <= moveValue)
+    //                {
+    //                    if (!nodeStack.Contains(child) && reassigned)
+    //                    {
+    //                        nodeStack.Push(child);
+    //                    }
+    //                    if (!moveRange.Contains(child))
+    //                    {
+    //                        //TODO: copy? add as function pass? Whatever, add the cost calculation for the tile.
+    //                        moveRange.Add(child);
+    //                    }
+    //                }
 
-                }
+    //            }
 
-            }
-        }
+    //        }
+    //    }
 
-        return moveRange;
-    }
+    //    return moveRange;
+    //}
 
     //@Desc: A function that finds all tiles a unit can move to with the next move action.
     //@Param - moveRange : The maximum tile distance the given unit can move with a single movement pip.
@@ -170,9 +170,9 @@ public class PathfindingAgent : MonoBehaviour
     //Notes: Might be able to change param to egg/unit object for ease of use. IE object could pass self.
     public List<INodeSearchable> FindMovementRange(INodeSearchable startNode, float moveValue, Action<CharacterBase, Tile> mappingFunction = null, CharacterBase characterToCheckFor = null)
     {
-        INodeSearchable[] tsa = GameObject.FindObjectsOfType<Tile>();
-        List<INodeSearchable> ts = tsa.ToList<INodeSearchable>();
-        NodeReset(ts);
+        //INodeSearchable[] tsa = GameObject.FindObjectsOfType<Tile>();
+        //List<INodeSearchable> ts = tsa.ToList<INodeSearchable>();
+        //NodeReset(ts);
         INodeSearchable currentNode;
         List<INodeSearchable> moveRange = new List<INodeSearchable>();
         Stack<INodeSearchable> nodeStack = new Stack<INodeSearchable>();
@@ -186,6 +186,7 @@ public class PathfindingAgent : MonoBehaviour
             {
                 if (child != null)
                 {
+                    
                     bool reassigned = CalculateDijkstra(currentNode, child, ECostType.Movement);
                     if (child.DijkstraCost <= moveValue)
                     {
@@ -211,6 +212,25 @@ public class PathfindingAgent : MonoBehaviour
         }
 
         return moveRange;
+    }
+
+    public CharacterBase CheckIfTileOccupied(INodeSearchable node)
+    {
+        Tile tile = node as Tile;
+        if(tile.occupier != null)
+        {
+            return tile.occupier;
+        }
+        return null;
+    }
+
+    public CharacterBase CheckIfTileOccupied(Tile tile)
+    {
+        if (tile.occupier != null)
+        {
+            return tile.occupier;
+        }
+        return null;
     }
 
     public static int BreadthFirstAllySearch(INodeSearchable startNode)

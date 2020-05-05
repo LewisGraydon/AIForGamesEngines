@@ -64,8 +64,9 @@ public class PlayerManager : MonoBehaviour
                 }
 
                 if (destinationTile != null)
-                {                  
-                    if(!nodeSearchables.Contains(destinationTile))
+                {
+                    CharacterBase tempChar = gsmScript.pathfindingAgent.CheckIfTileOccupied(destinationTile);
+                    if (!nodeSearchables.Contains(destinationTile) || tempChar != null)
                     {
                         gsmScript.pathfindingAgent.NodeReset(nodeSearchables);
                         return;
