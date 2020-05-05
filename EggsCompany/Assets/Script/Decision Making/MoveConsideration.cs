@@ -154,4 +154,12 @@ public class ProximityToAllyConsideration : TileOnlyMovementConsideration
     }
 }
 
+public class TileOccupiedConsideration : TileOnlyMovementConsideration
+{
+    public override void ConsiderTile(ref Tile tileToConsider)
+    {
+        _movementValue += tileToConsider.occupier != null ? -(int)Weighting.guarantee : 0; 
+    }
+}
+
 #endregion

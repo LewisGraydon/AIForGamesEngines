@@ -21,7 +21,8 @@ public static class ConsiderationLists
         new FlankingConsideration(),
         new SelfCoverConsideration(),
         new SelfVisibilityConsideration(),
-        new ProximityToAllyConsideration()
+        new ProximityToAllyConsideration(),
+        new TileOccupiedConsideration()
     };
     #endregion
 
