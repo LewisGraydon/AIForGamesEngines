@@ -6,6 +6,8 @@ public class BeeCharacter : EnemyCharacter
 {
     private List<LGFlockingAgent> flockAgents = null;
     private bool attackCalculatedOnce = false;
+    private float timeElapsedToAttack = 0.0f;
+    private float timeElapsedToReturnToHive = 0.0f;
 
     CharacterBase target = null;
 
@@ -29,8 +31,9 @@ public class BeeCharacter : EnemyCharacter
         {
             if (gsmScript.gameState == EGameState.beeAttack)
             {
+                timeElapsedToAttack += Time.deltaTime;
                 // Move to target
-                if (AllFlockAgentsAtTarget(target.gameObject) /*|| Time > 5*/)
+                if (AllFlockAgentsAtTarget(target.gameObject) || timeElapsedToAttack > 2.0f)
                 {
                     if (!attackCalculatedOnce)
                     {
@@ -43,8 +46,12 @@ public class BeeCharacter : EnemyCharacter
                         fa.SetObjectToFollow(gameObject);
                     }
 
-                    if (AllFlockAgentsAtTarget(gameObject))
+                    timeElapsedToReturnToHive += Time.deltaTime;
+
+                    if (AllFlockAgentsAtTarget(gameObject) || timeElapsedToReturnToHive > 2.0f)
                     {
+                        timeElapsedToAttack = 0.0f;
+                        timeElapsedToReturnToHive = 0.0f;
                         target = null;
                         gsmScript.gameState = EGameState.enemyTurn;
                         gsmScript.ProcessGameState();
