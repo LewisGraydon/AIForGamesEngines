@@ -143,36 +143,42 @@ public class CharacterBase : MonoBehaviour
         Debug.Log(name + ": is Doing An Overwatch Stance");
         _isOverwatching = true;
         actionPips = 0;
+        gsmScript.ProcessGameState();
     }
 
     public void EnterDefenseStance()
     {
         _isDefending = true;
         actionPips = 0;
+        gsmScript.ProcessGameState();
     }
 
     public virtual void AttackCharacter(CharacterBase otherCharacter)
     {
         Debug.Log(name + ": is Doing An attack for 2 damage ");
         actionPips = 0;
+        ammunition -= 1;
         int chanceToHit = enemiesInSight.Find((KeyValuePair<CharacterBase, int> characterHitChance) => characterHitChance.Key == otherCharacter).Value;
         if(UnityEngine.Random.Range(0, 100) <= chanceToHit)
         {
             otherCharacter.health -= 2; //TODO: replace 1 with damage;
         }
         gsmScript.ProcessGameState();
+        gsmScript.playerAmmoCountText.text = "Ammo: " + ammunition.ToString();
     }
 
     public virtual void OverwatchAttackCharacter(CharacterBase otherCharacter)
     {
         Debug.Log(name + ": is Doing An ");
         actionPips = 0;
+        ammunition -= 1;
         int chanceToHit = enemiesInSight.Find((KeyValuePair<CharacterBase, int> characterHitChance) => characterHitChance.Key == otherCharacter).Value;
         if (UnityEngine.Random.Range(0, 120) <= chanceToHit)
         {
             otherCharacter.health -= 2; //TODO: replace 1 with damage;
         }
         gsmScript.ProcessGameState();
+        gsmScript.playerAmmoCountText.text = "Ammo: " + ammunition.ToString();
     }
 
     public void Reload()
@@ -180,6 +186,8 @@ public class CharacterBase : MonoBehaviour
         Debug.Log(name + ": is Doing A Reload");
         ammunition = MaximumAmmunition;
         actionPips = 0;
+        gsmScript.ProcessGameState();
+        gsmScript.playerAmmoCountText.text = "Ammo: " + ammunition.ToString();
     }
 
     public List<INodeSearchable> FindSightline(int visionRange = 2)
