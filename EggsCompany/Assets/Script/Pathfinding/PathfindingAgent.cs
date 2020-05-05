@@ -170,7 +170,9 @@ public class PathfindingAgent : MonoBehaviour
     //Notes: Might be able to change param to egg/unit object for ease of use. IE object could pass self.
     public List<INodeSearchable> FindMovementRange(INodeSearchable startNode, float moveValue, Action<CharacterBase, Tile> mappingFunction = null, CharacterBase characterToCheckFor = null)
     {
-        Tile[] ts = GameObject.FindObjectsOfType<Tile>();
+        INodeSearchable[] tsa = GameObject.FindObjectsOfType<Tile>();
+        List<INodeSearchable> ts = tsa.ToList<INodeSearchable>();
+        NodeReset(ts);
         foreach (Tile t in ts)
         {
             if (t.parent != null)
@@ -228,14 +230,16 @@ public class PathfindingAgent : MonoBehaviour
         {
             currentNode = nodeQueue.Dequeue();
 
+            currentNode.searched = true;
+            
             if ((currentNode as Tile).occupier is EnemyCharacter)
             {
                 numberOfAllys++;
+                
             }
             else
             {
-                currentNode.searched = true;
-                if(currentNode.parent == startNode || currentNode == startNode)
+                if(currentNode.children.Contains(startNode) || currentNode == startNode)
                 {
                     foreach (var child in currentNode.children)
                     {
@@ -245,7 +249,7 @@ public class PathfindingAgent : MonoBehaviour
                         }
                         if (!child.searched && !nodeQueue.Contains(child))
                         {
-                            child.parent = currentNode;
+                            //child.parent = currentNode;
                             nodeQueue.Enqueue(child);
                         }
                     }
