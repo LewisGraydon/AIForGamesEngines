@@ -120,11 +120,11 @@ public class SelfCoverConsideration : SingleEnemyMovementConsideration
     {
         if(tileToConsider.GetGenericCoverValue() > self.occupiedTile.GetGenericCoverValue())
         {
-            _movementValue += (int)Weighting.High / self.enemiesInSight.Count;
+            _movementValue += (int)Weighting.High;
         }
         else
         {
-            _movementValue -= (int)Weighting.High / self.enemiesInSight.Count;
+            _movementValue -= (int)Weighting.High;
         }
     }
 }

@@ -232,11 +232,11 @@ public class Tile : MonoBehaviour, INodeSearchable
         //TODO: CHECK IF THERE IS A WALL IN THE DIRECTION GIVEN.
         if(direction.x >= activeCoverDirectionThreshold)
         {
-            return (ECoverValue)walls[(int)EWallDirection.West].coverValue;
+            return (ECoverValue)walls[(int)EWallDirection.North].coverValue;
         }
         else if(direction.x <= -activeCoverDirectionThreshold)
         {
-            return (ECoverValue)walls[(int)EWallDirection.East].coverValue;
+            return (ECoverValue)walls[(int)EWallDirection.South].coverValue;
         }
         else
         {
@@ -244,11 +244,11 @@ public class Tile : MonoBehaviour, INodeSearchable
         }
         if (direction.x >= activeCoverDirectionThreshold)
         {
-            return (ECoverValue)walls[(int)EWallDirection.North].coverValue;
+            return (ECoverValue)walls[(int)EWallDirection.East].coverValue;
         }
         else if (direction.x <= -activeCoverDirectionThreshold)
         {
-            return (ECoverValue)walls[(int)EWallDirection.South].coverValue;
+            return (ECoverValue)walls[(int)EWallDirection.West].coverValue;
         }
         else
         {
