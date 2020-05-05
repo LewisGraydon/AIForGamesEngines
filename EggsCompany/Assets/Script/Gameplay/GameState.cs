@@ -24,6 +24,10 @@ public class GameState : MonoBehaviour
     public Text turnText;
     public GameObject badEggPrefab;
     public GameObject badEggsSpottedUI;
+    public EnemyCharacter badEggTargetted = null;
+    public GameObject attackPromptUI;
+    public Text attackPromptText;
+    public Text playerAmmoCountText;
 
     // End Of Mission
     private bool transitioningToMM = false;
@@ -209,8 +213,11 @@ public class GameState : MonoBehaviour
 
                 playerPipsRemaining = pipCount;
 
-                if(playerPipsRemaining <= 0)
+                if (playerPipsRemaining <= 0)
                 {
+                    clearBadEggsSpottedContainer();
+                    badEggsSpottedUI.gameObject.SetActive(false);
+
                     InitialiseEnemyPips();
                     gameState = EGameState.enemySetup;
                     ProcessGameState();
@@ -221,6 +228,7 @@ public class GameState : MonoBehaviour
                 break;
 
             case EGameState.enemyTurn:
+                
                 PlayerManager playerManager3 = playerContainer.GetComponent<PlayerManager>();
                 playerManager3.selectedPlayer = null;
                 turnText.text = "Enemy Turn";
@@ -363,6 +371,7 @@ public class GameState : MonoBehaviour
             GameObject go = Instantiate(badEggPrefab, new Vector3(badEggsSpottedUI.transform.position.x, badEggsSpottedUI.transform.position.y, badEggsSpottedUI.transform.position.z), Quaternion.identity);
             go.transform.SetParent(badEggsSpottedUI.transform, false);
             go.GetComponent<BadEggInfo>().badEgg = pair.Key.gameObject;
+            go.GetComponent<BadEggInfo>().hitChanceText.text = pair.Value + "%";
         }
     }
 
