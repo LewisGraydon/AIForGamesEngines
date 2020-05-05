@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using TMPro;
 using UnityEngine;
 
@@ -188,6 +189,29 @@ public class PathfindingAgent : MonoBehaviour
                 {
                     
                     bool reassigned = CalculateDijkstra(currentNode, child, ECostType.Movement);
+
+                    var caller = CheckIfTileOccupied(startNode);
+
+                    if (caller is PlayerCharacter)
+                    {
+                        var temp = CheckIfTileOccupied(child);
+                        if(temp is EnemyCharacter)
+                        {
+                            //Make impassible though high cost
+                            child.DijkstraCost += 999;
+                        }
+                    }
+                    else if (caller is EnemyCharacter)
+                    {
+                        var temp = CheckIfTileOccupied(child);
+                        if(temp is PlayerCharacter)
+                        {
+                            //make impassible though high cost
+                            child.DijkstraCost = +999;
+                        }
+                    }
+
+
                     if (child.DijkstraCost <= moveValue)
                     {
                         if (!nodeStack.Contains(child) && reassigned)
