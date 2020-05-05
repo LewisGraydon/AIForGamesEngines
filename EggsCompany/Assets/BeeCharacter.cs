@@ -33,7 +33,7 @@ public class BeeCharacter : EnemyCharacter
             {
                 timeElapsedToAttack += Time.deltaTime;
                 // Move to target
-                if (AllFlockAgentsAtTarget(target.gameObject) || timeElapsedToAttack > 5.0f)
+                if (AllFlockAgentsAtTarget(target.gameObject) || timeElapsedToAttack > 2.0f)
                 {
                     if (!attackCalculatedOnce)
                     {
@@ -48,7 +48,7 @@ public class BeeCharacter : EnemyCharacter
 
                     timeElapsedToReturnToHive += Time.deltaTime;
 
-                    if (AllFlockAgentsAtTarget(gameObject) || timeElapsedToReturnToHive > 5.0f)
+                    if (AllFlockAgentsAtTarget(gameObject) || timeElapsedToReturnToHive > 2.0f)
                     {
                         timeElapsedToAttack = 0.0f;
                         timeElapsedToReturnToHive = 0.0f;
