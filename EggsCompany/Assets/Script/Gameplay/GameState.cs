@@ -306,26 +306,33 @@ public class GameState : MonoBehaviour
                 enemyCharacter.FindSightline();
             }
 
-            bool playerHasEnteredOverwatchSightline = false;
+
+            //Trigger Overwatch
             var watchers = enemyContainer.GetComponent<EnemyManager>().overwatchingEnemies;
+            List<EnemyCharacter> triggeredEnemyWatchers = new List<EnemyCharacter>();
             foreach (EnemyCharacter enemy in watchers)
             {
                 foreach (var keyValuePair in enemy.enemiesInSight)
                 {
                     if (keyValuePair.Key == caller)
                     {
-                        playerHasEnteredOverwatchSightline = true;
+                        enemy.OverwatchAttackCharacter(caller);
+                        enemy.isOverwatching = false;
+                        triggeredEnemyWatchers.Add(enemy);
+                        break;
                     }
                 }
-                if (playerHasEnteredOverwatchSightline)
-                {
-                    enemy.OverwatchAttackCharacter(caller);
-                    watchers.Remove(enemy);
-                    enemy.isOverwatching = false;
-                }
+
             }
-
-
+            
+            if(triggeredEnemyWatchers.Count > 0)
+            {
+                foreach(var chara in triggeredEnemyWatchers)
+                {
+                    watchers.Remove(chara);
+                }   
+            
+            }
 
         }
         else
@@ -335,24 +342,32 @@ public class GameState : MonoBehaviour
             {
                 playerCharacter.FindSightline();
             }
-            bool enemyHasEnteredOverwatchSightline = false;
+
             var watchers = playerContainer.GetComponent<PlayerManager>().overwatchingPlayers;
+            List<PlayerCharacter> triggeredPlayerWatchers = new List<PlayerCharacter>();
             foreach (PlayerCharacter player in watchers)
             {
                 foreach(var keyValuePair in player.enemiesInSight)
                 {
                     if(keyValuePair.Key == caller)
                     {
-                        enemyHasEnteredOverwatchSightline = true;
+                        player.OverwatchAttackCharacter(caller);
+                        player.isOverwatching = false;
+                        triggeredPlayerWatchers.Add(player);
+                        break;
                     }
                 }
-                if (enemyHasEnteredOverwatchSightline)
+            }
+
+            if(triggeredPlayerWatchers.Count > 0)
+            {
+                foreach(var chara in triggeredPlayerWatchers)
                 {
-                    player.OverwatchAttackCharacter(caller);
-                    watchers.Remove(player);
-                    player.isOverwatching = false;
+                    watchers.Remove(chara);
                 }
             }
+
+
         }
     }
 
