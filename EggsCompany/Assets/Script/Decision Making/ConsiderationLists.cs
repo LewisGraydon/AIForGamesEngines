@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 using Random = UnityEngine.Random;
 public enum Weighting
 {
@@ -27,7 +24,7 @@ public static class ConsiderationLists
     };
     #endregion
 
-    #region actionList Variables
+    #region ActionList Variables
     public static List<ActionConsideration> actionConsiderationList = new List<ActionConsideration>
     {
         new  MoveConsideration(),
