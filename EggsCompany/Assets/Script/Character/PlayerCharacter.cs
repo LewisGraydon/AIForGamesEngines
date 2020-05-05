@@ -26,7 +26,7 @@ public class PlayerCharacter : CharacterBase
     {
         Debug.Log(this + " is on eggde... (overwatch)");
 
-        gsmScript.playerContainer.GetComponent<PlayerManager>().overwatchingPlayers.Add(this);
+        gsmScript.overwatchingPlayers.Add(this);
 
         base.EnterOverwatchStance();
 

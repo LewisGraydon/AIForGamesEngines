@@ -47,46 +47,79 @@ public class Tile : MonoBehaviour, INodeSearchable
     private GameState gsmScript = null;
     private PlayerManager pmScript = null;
 
+    private GameStateManager gameStateManager = null;
+
+    //void OnMouseEnter()
+    //{
+    //    startcolor = gameObjectRenderer.material.color;
+
+    //    if (gsmScript.gameState != EGameState.playerTurn)
+    //    {
+    //        return;
+    //    }
+
+    //    pmScript.destinationTile = this;
+
+    //    pmScript.nodeSearchables = gsmScript.pathfindingAgent.FindMovementRange(pmScript.selectedPlayer.GetComponent<CharacterBase>().occupiedTile, pmScript.selectedPlayer.GetComponent<CharacterBase>().MovementRange);
+
+    //    if (!pmScript.nodeSearchables.Contains(pmScript.destinationTile) || pmScript.selectedPlayer.GetComponent<CharacterBase>().actionPips == 0)
+    //    {
+    //        gameObjectRenderer.material.color = Color.magenta;
+    //    }
+    //    else
+    //    {
+    //        gameObjectRenderer.material.color = Color.cyan;
+    //        pmScript.selectedPlayer.GetComponent<CharacterBase>().actionPipsText.text += " (-1)";
+    //    }
+
+    //    //Probably text showing pip for movement to said tile (or something)
+    //}
+
     void OnMouseEnter()
     {
         startcolor = gameObjectRenderer.material.color;
 
-        if (gsmScript.gameState != EGameState.playerTurn)
+        if (gameStateManager.gameState == EGameState.playerTurn && gameStateManager.activeCharacterMovementRange.Contains(this as INodeSearchable))
         {
-            return;
-        }
-
-        pmScript.destinationTile = this;
-
-        pmScript.nodeSearchables = gsmScript.pathfindingAgent.FindMovementRange(pmScript.selectedPlayer.GetComponent<CharacterBase>().occupiedTile, pmScript.selectedPlayer.GetComponent<CharacterBase>().MovementRange);
-
-        if (!pmScript.nodeSearchables.Contains(pmScript.destinationTile) || pmScript.selectedPlayer.GetComponent<CharacterBase>().actionPips == 0)
-        {
-            gameObjectRenderer.material.color = Color.magenta;
+            if(gameStateManager.activeCharacter.actionPips != 0)
+            {
+                gameStateManager.destinationTile = this;
+                gameObjectRenderer.material.color = Color.cyan;
+                gameStateManager.activeCharacter.actionPipsText.text += " (-1)";
+            }
         }
         else
         {
-            gameObjectRenderer.material.color = Color.cyan;
-            pmScript.selectedPlayer.GetComponent<CharacterBase>().actionPipsText.text += " (-1)";
+            gameObjectRenderer.material.color = Color.magenta;
         }
-
-        //Probably text showing pip for movement to said tile (or something)
     }
+    //void OnMouseExit()
+    //{    
+    //    gameObjectRenderer.material.color = startcolor;
+
+    //    if (gsmScript.gameState != EGameState.playerTurn)
+    //    {
+    //        return;
+    //    }
+
+    //    GameObject.Find("Players").GetComponent<PlayerManager>().destinationTile = null;
+    //    Text actionPipsText = pmScript.selectedPlayer.GetComponent<CharacterBase>().actionPipsText;
+    //    actionPipsText.text = actionPipsText.text.Replace(" (-1)", "");
+
+    //    gsmScript.pathfindingAgent.NodeReset(pmScript.nodeSearchables);
+    //}
 
     void OnMouseExit()
-    {    
+    {
         gameObjectRenderer.material.color = startcolor;
 
-        if (gsmScript.gameState != EGameState.playerTurn)
+        if (gameStateManager.gameState == EGameState.playerTurn)
         {
-            return;
+            gameStateManager.destinationTile = null;
+            Text actionPipsText = gameStateManager.activeCharacter.actionPipsText;
+            actionPipsText.text = actionPipsText.text.Replace(" (-1)", "");
         }
 
-        GameObject.Find("Players").GetComponent<PlayerManager>().destinationTile = null;
-        Text actionPipsText = pmScript.selectedPlayer.GetComponent<CharacterBase>().actionPipsText;
-        actionPipsText.text = actionPipsText.text.Replace(" (-1)", "");
-
-        gsmScript.pathfindingAgent.NodeReset(pmScript.nodeSearchables);
     }
 
 
@@ -116,6 +149,8 @@ public class Tile : MonoBehaviour, INodeSearchable
             default:
                 break;
         }
+
+        gameStateManager = FindObjectOfType<GameStateManager>();
     }
 
     void GenerateWalls()
@@ -177,12 +212,6 @@ public class Tile : MonoBehaviour, INodeSearchable
                 }
             }
         }
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 
     public void AssignNeighbor(EDirection direction, Tile neighborTile)

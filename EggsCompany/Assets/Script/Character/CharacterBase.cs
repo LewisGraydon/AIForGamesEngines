@@ -8,7 +8,7 @@ public class CharacterBase : MonoBehaviour
 {
     #region external object references
     protected GameObject gsm;
-    protected GameState gsmScript;
+    protected GameStateManager gsmScript;
 
     protected Text healthText;
     public Text actionPipsText;
@@ -27,7 +27,6 @@ public class CharacterBase : MonoBehaviour
 
     #region pathfinding variables
     private Stack<INodeSearchable> tilePathToDestination = null;
-    private List<INodeSearchable> allPossibleMovementNodes = null;
     private Vector3 directionToDestination;
     private Tile _currentDestinationTile;
     private Tile currentDestinationTile
@@ -114,8 +113,8 @@ public class CharacterBase : MonoBehaviour
     //Awake instead of Start() as it is not called when instantiating an object.
     protected void Awake()
     {
-        gsm = GameObject.Find("GameStateManager");
-        gsmScript = gsm.GetComponent<GameState>();
+        //gsm = GameObject.Find("GameStateManager");
+        gsmScript = FindObjectOfType<GameStateManager>();
         Text[] allAttachedTexts = gameObject.GetComponentsInChildren<Text>();
         foreach (Text text in allAttachedTexts)
         {
@@ -160,7 +159,7 @@ public class CharacterBase : MonoBehaviour
         {
             otherCharacter.health -= 2; //TODO: replace 1 with damage;
         }
-        gsmScript.ProcessGameState();
+        //gsmScript.ProcessGameState();
     }
 
     public virtual void OverwatchAttackCharacter(CharacterBase otherCharacter)
@@ -172,7 +171,7 @@ public class CharacterBase : MonoBehaviour
         {
             otherCharacter.health -= 2; //TODO: replace 1 with damage;
         }
-        gsmScript.ProcessGameState();
+        //gsmScript.ProcessGameState();
     }
 
     public void Reload()
@@ -184,18 +183,9 @@ public class CharacterBase : MonoBehaviour
 
     public List<INodeSearchable> FindSightline(int visionRange = 2)
     {
-        Tile[] g = GameObject.FindObjectsOfType<Tile>();
-
-        gsmScript.pathfindingAgent.NodeReset(g.ToList<INodeSearchable>());
-
-        if (tilePathToDestination != null)
-        {
-            gsmScript.pathfindingAgent.NodeReset(tilePathToDestination.ToList());
-        }
-
         enemiesInSight.Clear();
-
-        List<INodeSearchable> possibleSeenTiles = gsmScript.pathfindingAgent.FindNodeSightRange(occupiedTile, visionRange);
+        List<INodeSearchable> possibleSeenTiles = gsmScript.PathfindingAgent.FindNodeSightRange(occupiedTile, visionRange);
+        gsmScript.PathfindingAgent.NodeReset(possibleSeenTiles);
         List<INodeSearchable> seenTiles = new List<INodeSearchable>();
 
         if (this is PlayerCharacter)
@@ -205,7 +195,7 @@ public class CharacterBase : MonoBehaviour
 
         if (!gsmScript.isAnyBadEggSpotted())
         {
-            gsmScript.badEggsSpottedUI.SetActive(false);
+            gsmScript.badEggSeenUI.SetActive(false);
         }
 
         //Math from pawn to target tile
@@ -315,11 +305,10 @@ public class CharacterBase : MonoBehaviour
         {
             Debug.Log("Can See: " + enemyHitChancePair.Key.name + " with a: " + enemyHitChancePair.Value + "% chance to hit");
         }
-        gsmScript.pathfindingAgent.NodeReset(possibleSeenTiles);
 
         if (this is PlayerCharacter)
         {
-            gsmScript.badEggsSpottedUI.SetActive(true);
+            gsmScript.badEggSeenUI.SetActive(true);
             gsmScript.addToBadEggsSpottedUI(enemiesInSight);
         }
 
@@ -327,32 +316,31 @@ public class CharacterBase : MonoBehaviour
     }
 
     //should contian the code to actually move a character along a path in my mind.
-    public virtual void MoveCharacterAlongTilePath()
+    public virtual bool MoveCharacterAlongTilePath()
     {
         if (Mathf.Abs(this.transform.position.x - currentDestinationTile.transform.position.x) > 0.05f || Mathf.Abs(this.transform.position.z - currentDestinationTile.transform.position.z) > 0.05f)
         {
             this.transform.position += directionToDestination * Time.deltaTime;
+            return false;
         }
         else if (tilePathToDestination.Count == 0)
         {
-            gsmScript.gameState = (this is PlayerCharacter) ? EGameState.playerTurn : EGameState.enemyTurn;
-            gsmScript.pathfindingAgent.NodeReset(allPossibleMovementNodes);
+            //gsmScript.gameState = (this is PlayerCharacter) ? EGameState.playerTurn : EGameState.enemyTurn;
             FindSightline();
             gsmScript.updateOtherTeamSightLines(this);
             actionPips--;
-            gsmScript.ProcessGameState();
+            return true;
+            //gsmScript.ProcessGameState();
         }
         else
         {
             currentDestinationTile.GetComponent<Tile>().occupier = null;
             transform.position = new Vector3(currentDestinationTile.transform.position.x, this.transform.position.y, currentDestinationTile.transform.position.z);
             currentDestinationTile = tilePathToDestination.Pop() as Tile;
-
             //check if this destination is in overwatching sightlines
-
-
             FindSightline();
             gsmScript.updateOtherTeamSightLines(this);
+            return false;
         }
     }
 
@@ -367,9 +355,7 @@ public class CharacterBase : MonoBehaviour
     public void SetMovementStack(Stack<INodeSearchable> movementStack, List<INodeSearchable> allEffectedNodes)
     {
         tilePathToDestination = movementStack;
-        allPossibleMovementNodes = allEffectedNodes;
         currentDestinationTile = movementStack.Pop() as Tile;
-        gsmScript.pathfindingAgent.NodeReset(allPossibleMovementNodes);
     }
 
     int CalculateHitChance(CharacterBase other, bool isHalfCovered, bool isFullCovered)

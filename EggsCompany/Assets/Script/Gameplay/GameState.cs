@@ -320,9 +320,6 @@ public class GameState : MonoBehaviour
                     enemy.isOverwatching = false;
                 }
             }
-
-
-
         }
         else
         {

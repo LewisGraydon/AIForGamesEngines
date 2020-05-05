@@ -47,7 +47,7 @@ public class BeeCharacter : EnemyCharacter
                     {
                         target = null;
                         gsmScript.gameState = EGameState.enemyTurn;
-                        gsmScript.ProcessGameState();
+                        //gsmScript.ProcessGameState();
                     }
                 }
             }

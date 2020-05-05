@@ -4,12 +4,14 @@ using UnityEngine;
 
 public enum EGameState 
 {
+    
     setupState,
+    playerSetup,
     playerTurn,
+    enemySetup,
     enemyTurn,
     movement,
     beeAttack, // Maybe rename this eventually
     victoryScreen,
-    failureScreen,
-    enemySetup
+    failureScreen
 }

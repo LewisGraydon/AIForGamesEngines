@@ -22,14 +22,16 @@ public class PathfindingAgent : MonoBehaviour
         _tileGrid = FindObjectOfType<TileGrid>();
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
-
     public List<INodeSearchable> FindNodeSightRange(INodeSearchable startNode, int sightRange)
-    {       
+    {
+        bool someTileDirty = false;
+        foreach (INodeSearchable i in FindObjectsOfType<Tile>().ToList<INodeSearchable>())
+        {
+            if (i.parent != null)
+                someTileDirty = true;
+        }
+        if (someTileDirty)
+            Debug.LogError("someTileDirty: " + someTileDirty);
         Queue<INodeSearchable> nodeQueue = new Queue<INodeSearchable>();
         List<INodeSearchable> nodesInSightRange = new List<INodeSearchable>();
         nodeQueue.Enqueue(startNode);
@@ -128,6 +130,14 @@ public class PathfindingAgent : MonoBehaviour
     //Notes: Might be able to change param to egg/unit object for ease of use. IE object could pass self.
     public List<INodeSearchable> FindMovementRange(INodeSearchable startNode, float moveValue)
     {
+        bool someTileDirty = false;
+        foreach (INodeSearchable i in FindObjectsOfType<Tile>().ToList<INodeSearchable>())
+        {
+            if (i.parent != null)
+                someTileDirty = true;
+        }
+        if (someTileDirty)
+            Debug.LogError("someTileDirty: " + someTileDirty);
         INodeSearchable currentNode;
         List<INodeSearchable> moveRange = new List<INodeSearchable>(); 
         Stack<INodeSearchable> nodeStack = new Stack<INodeSearchable>();
@@ -709,13 +719,16 @@ public class PathfindingAgent : MonoBehaviour
     //Notes: Only call this when done with the current function/path building, or your path will be lost.
     public void NodeReset(List<INodeSearchable> nodes)
     {
-        foreach(INodeSearchable node in nodes)
+        if(nodes != null)
         {
-            node.searched = false;
-            node.TotalCost = null;
-            node.HeuristicCost = null;
-            node.DijkstraCost = null;
-            node.parent = null;
+            foreach(INodeSearchable node in nodes)
+            {
+                node.searched = false;
+                node.TotalCost = null;
+                node.HeuristicCost = null;
+                node.DijkstraCost = null;
+                node.parent = null;
+            }
         }
     }
 

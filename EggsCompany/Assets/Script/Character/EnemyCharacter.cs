@@ -16,7 +16,7 @@ public class EnemyCharacter : CharacterBase
     protected new void Awake()
     {
         base.Awake();
-        pathfindingAgent = gsmScript.pathfindingAgent;
+        pathfindingAgent = gsmScript.PathfindingAgent;
     }
 
     public void MakeDecision()
@@ -55,7 +55,7 @@ public class EnemyCharacter : CharacterBase
     {
         Debug.Log(this + "  has eyes out... (overwatch)");
 
-        gsmScript.enemyContainer.GetComponent<EnemyManager>().overwatchingEnemies.Add(this);
+        gsmScript.overwatchingEnemies.Add(this);
 
         base.EnterOverwatchStance();
 
