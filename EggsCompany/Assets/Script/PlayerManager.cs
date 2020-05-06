@@ -71,7 +71,8 @@ public class PlayerManager : MonoBehaviour
                         gsmScript.pathfindingAgent.NodeReset(nodeSearchables);
                         return;
                     }
-
+                    gsmScript.pathfindingAgent.NodeReset(nodeSearchables);
+                    gsmScript.pathfindingAgent.AStarBasic(selectedPlayer.GetComponent<CharacterBase>().occupiedTile, destinationTile, nodeSearchables, ECostType.Movement, EHeuristic.Distance, .5f, .5f);
                     pathToDestination = gsmScript.pathfindingAgent.CreatePath(destinationTile.GetComponent<Tile>());
                     selectedPlayer.GetComponent<CharacterBase>().SetMovementStack(pathToDestination, nodeSearchables);
                  

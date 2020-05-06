@@ -190,6 +190,10 @@ public class PathfindingAgent : MonoBehaviour
                     
                     bool reassigned = CalculateDijkstra(currentNode, child, ECostType.Movement);
 
+                    if (reassigned)
+                    {
+                        child.parent = currentNode;
+                    }
                     var caller = CheckIfTileOccupied(startNode);
 
                     if (caller is PlayerCharacter)
@@ -372,9 +376,13 @@ public class PathfindingAgent : MonoBehaviour
                 Tile targetTile = targetNode as Tile;
                 Tile childTile = child as Tile;
 
-                float childMagnitude = childTile.transform.position.magnitude;
-                float targetMagnitude = targetTile.transform.position.magnitude;
-                child.HeuristicCost = targetMagnitude - childMagnitude;
+                Vector3 childPos = childTile.transform.position;
+                Vector3 targetPos = targetTile.transform.position;
+                Vector3 difference = targetPos - childPos;
+
+                float distance = Vector3.Distance(childPos, targetPos);
+
+                child.HeuristicCost = distance;
 
                 //if(distance < bestDistance || bestDistance == 0)
                 //{
@@ -435,7 +443,11 @@ public class PathfindingAgent : MonoBehaviour
                     {
                         continue;
                     }
-                    CalculateDijkstra(currentNode, child, costType);
+                    bool reassigned = CalculateDijkstra(currentNode, child, costType);
+                    if (reassigned)
+                    {
+                        child.parent = currentNode;
+                    }
                     child.TotalCost = child.DijkstraCost;
                 }
 
@@ -469,7 +481,7 @@ public class PathfindingAgent : MonoBehaviour
         if ((calculatedCost < child.DijkstraCost || child.DijkstraCost == null) && currentNode.parent != child)
         {
             child.DijkstraCost = calculatedCost;
-            child.parent = currentNode;
+            //child.parent = currentNode;
             return true;
         }
         return false;
@@ -478,7 +490,7 @@ public class PathfindingAgent : MonoBehaviour
     //@Param startNode: The INodeSearchable object the search should start from.
     //@Param targetNode: The INodeSearchable object the search should be attempting to reach.
     //@Param searchSet: A list containing all nodes to be searched/in the search range.
-    INodeSearchable AStarBasic(INodeSearchable startNode, INodeSearchable targetNode, List<INodeSearchable> searchSet, ECostType costType, EHeuristic heuristic, float dijkstraWeight, float heuristicWeight)
+    public INodeSearchable AStarBasic(INodeSearchable startNode, INodeSearchable targetNode, List<INodeSearchable> searchSet, ECostType costType, EHeuristic heuristic, float dijkstraWeight, float heuristicWeight)
     {
         //A* selects the path that minimizes:
         //f(x) = g(x) + h(x)
@@ -496,7 +508,9 @@ public class PathfindingAgent : MonoBehaviour
         //Ensures we don't check our starting node twice, and that our starting node is at the front of our "queue"
         searchSet.Remove(currentNode);
         searchSet.Insert(0, currentNode);
+
         currentNode.DijkstraCost = 0;
+        currentNode.TotalCost = 0;
 
         while (searchSet.Count > 0)
         {
@@ -528,11 +542,19 @@ public class PathfindingAgent : MonoBehaviour
                     CalculateDijkstra(currentNode, child, costType);
 
                     //Calc the total cost: f(x) = g(x) + h(x)
-                    child.TotalCost = (child.DijkstraCost * dijkstraWeight) + (child.HeuristicCost * heuristicWeight);
+                    float? total = child.DijkstraCost * dijkstraWeight + child.HeuristicCost * heuristicWeight;
 
-                    if (!searchSet.Contains(child))
+
+
+                    if(total < child.TotalCost || child.TotalCost == null)
                     {
-                        searchSet.Add(child);
+                        child.TotalCost = total;
+                        child.parent = currentNode;
+
+                        if (!searchSet.Contains(child))
+                        {
+                            searchSet.Add(child);
+                        }
                     }
 
                 }

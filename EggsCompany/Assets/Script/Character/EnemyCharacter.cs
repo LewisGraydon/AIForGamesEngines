@@ -40,6 +40,10 @@ public class EnemyCharacter : CharacterBase
             else
             {
                 gsmScript.gameState = EGameState.movement;
+
+                gsmScript.pathfindingAgent.NodeReset(allPossibleTiles);
+                gsmScript.pathfindingAgent.AStarBasic(this.occupiedTile, tileToMoveToHolder, allPossibleTiles, ECostType.Movement, EHeuristic.Distance, .5f, .5f);
+
                 Stack<INodeSearchable> pathToTake = pathfindingAgent.CreatePath(tileToMoveToHolder);
                 pathfindingAgent.NodeReset(allPossibleTiles);
                 SetMovementStack(pathToTake, allPossibleTiles);
