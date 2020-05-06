@@ -160,7 +160,7 @@ public static class ConsiderationLists
     {
         int randomTileIndex = Random.Range(0, numberTilesToRandomlySelectFrom);
         Tile outTile = topTileScoresList[randomTileIndex].Key;
-        Debug.Log("Chosen Tile is: " + outTile + " with a score of: " + topTileScoresList[randomTileIndex].Value);
+        //Debug.Log("Chosen Tile is: " + outTile + " with a score of: " + topTileScoresList[randomTileIndex].Value);
         topTileScoresList.Clear();
         return outTile;
     }
@@ -191,5 +191,5 @@ public static class ConsiderationLists
 //    public static List<NoEnemyMovementConsideration> noEnemyMovementConsiderationList = new List<NoEnemyMovementConsideration>()
 //{
 //    new ProximityToAllyConsideration()
-//};
+//}; 
 #endregion

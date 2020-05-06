@@ -194,7 +194,7 @@ public class GameState : MonoBehaviour
             case EGameState.setupState:
                 enemyContainer.GetComponent<EnemyManager>().activeCharacter = null;
                 InitialisePlayerPips();
-
+                
                 gameState = EGameState.playerTurn;
                 turnText.text = "Player Turn";
 
@@ -253,14 +253,17 @@ public class GameState : MonoBehaviour
                 break;
 
             case EGameState.enemySetup:
-                
+
+                EnemyManager enemyManager = enemyContainer.GetComponent<EnemyManager>();
                 for (int i = 0; i < enemyContainer.transform.childCount; i++)
                 {
                     EnemyCharacter enemyCharacter = enemyContainer.transform.GetChild(i).gameObject.GetComponent<EnemyCharacter>();
                     enemyCharacter.actionPips = enemyCharacter.MaximumActionPips;
+                    enemyCharacter.isOverwatching = false;
+                    enemyManager.overwatchingEnemies.Remove(enemyCharacter);
                 }
+                enemyManager.SetUpEnemyTurn();
                 gameState = EGameState.enemyTurn;
-                enemyContainer.GetComponent<EnemyManager>().SetUpEnemyTurn();
                 ProcessGameState();
                 break;
 
@@ -275,9 +278,12 @@ public class GameState : MonoBehaviour
     {
         playerPipsRemaining = (psScript.numberOfOperators - playerDeathCount) * 2;
         PlayerCharacter[] playerCharacters = GameObject.FindObjectsOfType<PlayerCharacter>();
+        PlayerManager playerManager= FindObjectOfType<PlayerManager>();
         foreach (PlayerCharacter player in playerCharacters)
         {
             player.actionPips = player.MaximumActionPips;
+            player.isOverwatching = false;
+            playerManager.overwatchingPlayers.Remove(player);
         }
     }
 
