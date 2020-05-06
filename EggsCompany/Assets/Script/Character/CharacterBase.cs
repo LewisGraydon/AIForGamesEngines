@@ -190,7 +190,7 @@ public class CharacterBase : MonoBehaviour
         gsmScript.playerAmmoCountText.text = "Ammo: " + ammunition.ToString();
     }
 
-    public List<INodeSearchable> FindSightline(int visionRange = 2)
+    public List<INodeSearchable> FindSightline(int visionRange = 5)
     {
         Tile[] g = GameObject.FindObjectsOfType<Tile>();
 

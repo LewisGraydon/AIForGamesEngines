@@ -10,7 +10,7 @@ public class EnemyCharacter : CharacterBase
     public string characterName { get => _characterName; }
 
     private PathfindingAgent pathfindingAgent;
-    public int actionVariance = 1;
+    public int actionVariance = 2;
     #endregion
 
     protected new void Awake()

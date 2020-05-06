@@ -259,25 +259,6 @@ public class Tile : MonoBehaviour, INodeSearchable
 
         return ECoverValue.Half;
     }
-    public virtual ECoverValue GetGenericCoverValue()
-    {
-        ECoverValue maxCoverValue = ECoverValue.None, maxCoverValue1 = ECoverValue.None;
-
-        for (int i = 0; i < (int)EWallDirection.Error; i++)
-        {
-            if (i % 2 == 0)
-            {
-                maxCoverValue = (ECoverValue)walls[i].coverValue;
-            }
-            else
-            {
-                maxCoverValue1 = (ECoverValue)walls[i].coverValue;
-            }
-        }
-        if (maxCoverValue == maxCoverValue1)
-            return maxCoverValue;
-        return maxCoverValue < maxCoverValue1 ? maxCoverValue : maxCoverValue;
-    }
 
     private void OnTriggerEnter(Collider other)
     {

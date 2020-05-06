@@ -7,10 +7,25 @@ using UnityEngine;
 
 public abstract class ActionConsideration : IComparable<ActionConsideration>
 {
+    private int numberOfChecksWithinConsideration = 0;
     protected int _actionValue;
     public int actionValue
     {
         get { return _actionValue; }
+        set
+        {
+            _actionValue = value;
+            numberOfChecksWithinConsideration++;
+            _finalValue = ((float)value/ ((float)numberOfChecksWithinConsideration * (float)Weighting.SuperHeavy)); 
+        }
+    }
+    protected float _finalValue;
+    public float FinalValue { 
+        get
+        {
+            numberOfChecksWithinConsideration = 0;
+            return _finalValue; 
+        }
     }
 
     public void ResetValue()
@@ -35,6 +50,28 @@ public abstract class SingleEnemyActionConsideration : ActionConsideration
     /// </summary>
     /// <param name="self">the character to be evaluating the decision</param>
     public abstract void ConsiderActionWithNoEnemyInSight(CharacterBase self);
+
+    public virtual void IncreaseActionValuePerWallCoverLevel(Tile tile, int noCoverModifier, int halfCoverModifier, int fullCoverModifier)
+    {
+        foreach(WallType wall in tile.walls)
+        {
+            switch ((ECoverValue)wall.coverValue)
+            {
+                case ECoverValue.None:
+                    actionValue += noCoverModifier;
+                    break;
+                case ECoverValue.Half:
+                    actionValue += halfCoverModifier;
+                    break;
+                case ECoverValue.Full:
+                    actionValue += fullCoverModifier;
+                    break;
+                default:
+                    Debug.LogError("Error Cover value of wall in tile: " + tile);
+                    break;
+            }
+        }
+    }
 }
 
 public abstract class NoEnemyActionConsideration : ActionConsideration
@@ -50,29 +87,29 @@ public class MoveConsideration : SingleEnemyActionConsideration
     public override void ConsiderAction(CharacterBase self, CharacterBase enemy, ECoverValue agentLevelOfCoverFromEnemy, ECoverValue enemyLevelOfCoverFromAgent)
     {
         #region Remaining Pips Check
-        _actionValue += self.actionPips > 1 ? ((int)Weighting.High / self.enemiesInSight.Count) : 0;
+        actionValue += self.actionPips > 1 ? ((int)Weighting.SuperHeavy / self.enemiesInSight.Count) : 0;
         #endregion
 
         #region Proximity To Players Check
         float distanceBetween = Vector3.Distance(self.transform.position, enemy.transform.position);
         if(distanceBetween <= self.closeDistanceCap)
         {
-            _actionValue -= ((int)Weighting.Medium / self.enemiesInSight.Count);
+            actionValue -= ((int)Weighting.Heavy / self.enemiesInSight.Count);
         }
         else if (distanceBetween <= self.middleDistanceCap)
         {
-            _actionValue += ((int)Weighting.Low / self.enemiesInSight.Count);
+            actionValue += ((int)Weighting.Light / self.enemiesInSight.Count);
         }
         else
         {
-            _actionValue += ((int)Weighting.Medium / self.enemiesInSight.Count);
+            actionValue += ((int)Weighting.Heavy / self.enemiesInSight.Count);
         }
         #endregion
 
         #region Enemy Overwatch Check
         if(enemy.isOverwatching)
         {
-            _actionValue += ((int)Weighting.Medium / self.enemiesInSight.Count);
+            actionValue -= ((int)Weighting.Heavy / self.enemiesInSight.Count);
         }
         #endregion
 
@@ -80,51 +117,35 @@ public class MoveConsideration : SingleEnemyActionConsideration
         switch (agentLevelOfCoverFromEnemy)
         {
             case ECoverValue.None:
-                _actionValue += ((int)Weighting.High / self.enemiesInSight.Count);
+                actionValue += ((int)Weighting.SuperHeavy / self.enemiesInSight.Count);
                 break;
             case ECoverValue.Half:
-                _actionValue += ((int)Weighting.Medium / self.enemiesInSight.Count);
+                actionValue += ((int)Weighting.Heavy / self.enemiesInSight.Count);
                 break;
             case ECoverValue.Full:
-                _actionValue -= ((int)Weighting.Low / self.enemiesInSight.Count);
+                actionValue -= ((int)Weighting.Light / self.enemiesInSight.Count);
                 break;
             default:
                 break;
         }
         #endregion
-        //_actionValue += self.enemiesInSight.Count < 2 ? (int)Weighting.Medium : -(int)Weighting.Low;
+        //actionValue += self.enemiesInSight.Count < 2 ? (int)Weighting.Medium : -(int)Weighting.Low;
     }
 
     public override void ConsiderActionWithNoEnemyInSight(CharacterBase self)
     {
-        _actionValue += (int)Weighting.Medium;
+        actionValue += (int)Weighting.Heavy;
         #region Remaining Pips Check
-        _actionValue += self.actionPips > 1 ? (int)Weighting.High : 0;
+        actionValue += self.actionPips > 1 ? (int)Weighting.SuperHeavy : 0;
         #endregion
 
         #region Agent Generic Cover Check
-        switch (self.occupiedTile.GetGenericCoverValue())
-        {
-            case ECoverValue.None:
-                _actionValue += (int)Weighting.High;
-                break;
-            case ECoverValue.Half:
-                _actionValue += (int)Weighting.High;
-                break;
-            case ECoverValue.Full:
-                _actionValue += (int)Weighting.Medium; 
-                break;
-            case ECoverValue.Error:
-                _actionValue += (int)Weighting.guarantee; 
-                break;
-            default:
-                break;
-        }
+        IncreaseActionValuePerWallCoverLevel(self.occupiedTile, (int)Weighting.SuperHeavy, -(int)Weighting.Light, -(int)Weighting.Heavy);
         #endregion
 
         #region Agent Ally Proximity Check
         int nearbyAllies = PathfindingAgent.BreadthFirstAllySearch(self.occupiedTile);
-        _actionValue += nearbyAllies > 2 ? -(int)Weighting.Medium : (int)Weighting.High;
+        actionValue += nearbyAllies > 2 ? -(int)Weighting.Heavy : (int)Weighting.SuperHeavy;
         #endregion
     }
 
@@ -143,13 +164,13 @@ public class OverwatchConsideration : SingleEnemyActionConsideration
         switch (agentLevelOfCoverFromEnemy)
         {
             case ECoverValue.None:
-                _actionValue -= ((int)Weighting.High / self.enemiesInSight.Count); 
+                actionValue -= ((int)Weighting.SuperHeavy / self.enemiesInSight.Count); 
                 break;
             case ECoverValue.Half:
-                _actionValue += ((int)Weighting.Low / self.enemiesInSight.Count);
+                actionValue += ((int)Weighting.Light / self.enemiesInSight.Count);
                 break;
             case ECoverValue.Full:
-                _actionValue += ((int)Weighting.High / self.enemiesInSight.Count);
+                actionValue += ((int)Weighting.SuperHeavy / self.enemiesInSight.Count);
                 break;
             default:
                 break;
@@ -160,13 +181,13 @@ public class OverwatchConsideration : SingleEnemyActionConsideration
         switch (enemyLevelOfCoverFromAgent)
         {
             case ECoverValue.None:
-                _actionValue += ((int)Weighting.High / self.enemiesInSight.Count);
+                actionValue += ((int)Weighting.SuperHeavy / self.enemiesInSight.Count);
                 break;
             case ECoverValue.Half:
-                _actionValue += ((int)Weighting.Low / self.enemiesInSight.Count);
+                actionValue += ((int)Weighting.Light / self.enemiesInSight.Count);
                 break;
             case ECoverValue.Full:
-                _actionValue -= ((int)Weighting.Medium / self.enemiesInSight.Count);
+                actionValue -= ((int)Weighting.Heavy / self.enemiesInSight.Count);
                 break;
             default:
                 break;
@@ -174,22 +195,22 @@ public class OverwatchConsideration : SingleEnemyActionConsideration
         #endregion
 
         #region Ammo Check
-        _actionValue += self.ammunition >= (self.MaximumAmmunition >> 1) ? ((int)Weighting.Medium / self.enemiesInSight.Count) : -((int)Weighting.Medium / self.enemiesInSight.Count);
+        actionValue += self.ammunition >= (self.MaximumAmmunition >> 1) ? ((int)Weighting.Heavy / self.enemiesInSight.Count) : -((int)Weighting.Heavy / self.enemiesInSight.Count);
         #endregion
 
         #region Proximity To Players Check
         float distanceBetween = Vector3.Distance(self.transform.position, enemy.transform.position);
         if (distanceBetween <= self.closeDistanceCap)
         {
-            _actionValue -= ((int)Weighting.Medium / self.enemiesInSight.Count);
+            actionValue -= ((int)Weighting.Heavy / self.enemiesInSight.Count);
         }
         else if (distanceBetween <= self.middleDistanceCap)
         {
-            _actionValue += ((int)Weighting.Medium / self.enemiesInSight.Count);
+            actionValue += ((int)Weighting.Heavy / self.enemiesInSight.Count);
         }
         else
         {
-            _actionValue += ((int)Weighting.Low / self.enemiesInSight.Count);
+            actionValue += ((int)Weighting.Light / self.enemiesInSight.Count);
         }
         #endregion
     }
@@ -197,21 +218,7 @@ public class OverwatchConsideration : SingleEnemyActionConsideration
     public override void ConsiderActionWithNoEnemyInSight(CharacterBase self)
     {
         #region Agent Generic Cover Check
-        for (int i = 0; i < (int)EWallDirection.Error; i++)
-        {
-            if (self.occupiedTile.walls[i].coverValue == 0)
-            {
-                _actionValue -= (int)Weighting.Medium;
-            }
-            else if (self.occupiedTile.walls[i].coverValue == (int)ECoverValue.Half)
-            {
-                _actionValue += (int)Weighting.Medium;
-            }
-            else if (self.occupiedTile.walls[i].coverValue == (int)ECoverValue.Full)
-            {
-                _actionValue += (int)Weighting.High;
-            }
-        }
+        IncreaseActionValuePerWallCoverLevel(self.occupiedTile, -(int)Weighting.SuperHeavy, -(int)Weighting.Light, (int)Weighting.Heavy);
         #endregion
     }
 
@@ -229,13 +236,13 @@ public class DefendConsideration : SingleEnemyActionConsideration
         switch (agentLevelOfCoverFromEnemy)
         {
             case ECoverValue.None:
-                _actionValue -= ((int)Weighting.High / self.enemiesInSight.Count);
+                actionValue -= ((int)Weighting.SuperHeavy / self.enemiesInSight.Count);
                 break;
             case ECoverValue.Half:
-                _actionValue += ((int)Weighting.High / self.enemiesInSight.Count);
+                actionValue += ((int)Weighting.SuperHeavy / self.enemiesInSight.Count);
                 break;
             case ECoverValue.Full:
-                _actionValue += ((int)Weighting.Low / self.enemiesInSight.Count);
+                actionValue += ((int)Weighting.Light / self.enemiesInSight.Count);
                 break;
             default:
                 break;
@@ -246,13 +253,13 @@ public class DefendConsideration : SingleEnemyActionConsideration
         switch (enemyLevelOfCoverFromAgent)
         {
             case ECoverValue.None:
-                _actionValue += (int)Weighting.High / self.enemiesInSight.Count;
+                actionValue += (int)Weighting.SuperHeavy / self.enemiesInSight.Count;
                 break;
             case ECoverValue.Half:
-                _actionValue += (int)Weighting.Medium / self.enemiesInSight.Count;
+                actionValue += (int)Weighting.Heavy / self.enemiesInSight.Count;
                 break;
             case ECoverValue.Full:
-                _actionValue -= (int)Weighting.Low / self.enemiesInSight.Count;
+                actionValue -= (int)Weighting.Light / self.enemiesInSight.Count;
                 break;
             default:
                 break;
@@ -263,45 +270,32 @@ public class DefendConsideration : SingleEnemyActionConsideration
         int chanceToHit = self.enemiesInSight.Find((characterHitChancePair) => { return characterHitChancePair.Key == enemy; }).Value;
         if(chanceToHit > 70)
         {
-            _actionValue -= (int)Weighting.High / self.enemiesInSight.Count;
+            actionValue -= (int)Weighting.SuperHeavy / self.enemiesInSight.Count;
         }
         else if(chanceToHit > 50)
         {
-            _actionValue += (int)Weighting.Low / self.enemiesInSight.Count;
+            actionValue += (int)Weighting.Light / self.enemiesInSight.Count;
         }
         else
         {
-            _actionValue += (int)Weighting.High / self.enemiesInSight.Count;
+            actionValue += (int)Weighting.SuperHeavy / self.enemiesInSight.Count;
         }
         #endregion
 
         #region Number of Players In Sight Check
-        _actionValue += self.enemiesInSight.Count > 2 ? ((int)Weighting.Low / self.enemiesInSight.Count) : -((int)Weighting.Medium / self.enemiesInSight.Count);
+        actionValue += self.enemiesInSight.Count > 2 ? ((int)Weighting.Light / self.enemiesInSight.Count) : -((int)Weighting.Heavy / self.enemiesInSight.Count);
         #endregion
     }
 
     public override void ConsiderActionWithNoEnemyInSight(CharacterBase self)
     {
         #region Agent Generic Cover Check
-        switch (self.occupiedTile.GetGenericCoverValue())
-        {
-            case ECoverValue.None:
-                _actionValue += (int)Weighting.Medium;
-                break;
-            case ECoverValue.Half:
-                _actionValue += (int)Weighting.High;
-                break;
-            case ECoverValue.Full:
-                _actionValue += (int)Weighting.Low;
-                break;
-            default:
-                break;
-        }
+        IncreaseActionValuePerWallCoverLevel(self.occupiedTile, (int)Weighting.Light, (int)Weighting.Heavy, (int)Weighting.Feather);
         #endregion
 
         #region Agent Ally Proximity Check
         int nearbyAllies = PathfindingAgent.BreadthFirstAllySearch(self.occupiedTile);
-        _actionValue += nearbyAllies > 2 ? -(int)Weighting.Medium : (int)Weighting.High;
+        actionValue += nearbyAllies > 2 ? -(int)Weighting.Heavy : (int)Weighting.SuperHeavy;
         #endregion
     }
 
@@ -322,13 +316,13 @@ public class ShootConsideration : SingleEnemyActionConsideration
         switch (agentLevelOfCoverFromEnemy)
         {
             case ECoverValue.None:
-                thisEnemyShootValue -= (int)Weighting.High;
+                thisEnemyShootValue -= (int)Weighting.SuperHeavy;
                 break;
             case ECoverValue.Half:
-                thisEnemyShootValue += (int)Weighting.Medium;
+                thisEnemyShootValue += (int)Weighting.Heavy;
                 break;
             case ECoverValue.Full:
-                thisEnemyShootValue += (int)Weighting.Low;
+                thisEnemyShootValue += (int)Weighting.Light;
                 break;
             default:
                 Debug.LogError("issue with cover Value returned");
@@ -340,13 +334,13 @@ public class ShootConsideration : SingleEnemyActionConsideration
         switch (enemyLevelOfCoverFromAgent)
         {
             case ECoverValue.None:
-                thisEnemyShootValue += (int)Weighting.High;
+                thisEnemyShootValue += (int)Weighting.SuperHeavy;
                 break;
             case ECoverValue.Half:
-                thisEnemyShootValue += (int)Weighting.Medium;
+                thisEnemyShootValue += (int)Weighting.Heavy;
                 break;
             case ECoverValue.Full:
-                thisEnemyShootValue -= (int)Weighting.Low;
+                thisEnemyShootValue -= (int)Weighting.Light;
                 break;
             default:
                 break;
@@ -357,23 +351,23 @@ public class ShootConsideration : SingleEnemyActionConsideration
         int chanceToHit = self.enemiesInSight.Find((characterHitChancePair) => { return characterHitChancePair.Key == enemy; }).Value;
         if (chanceToHit > 70)
         {
-            _actionValue += (int)Weighting.High;
+            actionValue += (int)Weighting.SuperHeavy;
         }
         else if (chanceToHit > 50)
         {
-            _actionValue += (int)Weighting.Medium;
+            actionValue += (int)Weighting.Heavy;
         }
         else
         {
-            _actionValue -= (int)Weighting.Low;
+            actionValue -= (int)Weighting.Light;
         }
         #endregion
 
         #region Evaluate Whether This Shot Represents the Shooting Action
-        if (thisEnemyShootValue > _actionValue)
+        if (thisEnemyShootValue > actionValue || enemyToAttack == null)
         {
             enemyToAttack = enemy;
-            _actionValue = thisEnemyShootValue;
+            actionValue = thisEnemyShootValue;
         }
         #endregion
         //why is there no chanceToHitCalculation in here?
@@ -381,7 +375,7 @@ public class ShootConsideration : SingleEnemyActionConsideration
 
     public override void ConsiderActionWithNoEnemyInSight(CharacterBase self)
     {
-        _actionValue -= (int)Weighting.guarantee;
+        actionValue -= (int)Weighting.SuperHeavy;
     }
 
     public override void Enact(CharacterBase self)
@@ -400,30 +394,30 @@ public class ReloadConsideration : NoEnemyActionConsideration
         #region Remaining Ammunition Check
         if (self.ammunition > (self.MaximumAmmunition / 2))
         {
-            _actionValue -= (int)Weighting.High;
+            actionValue -= (int)Weighting.SuperHeavy;
         }
         else if (self.ammunition > (self.MaximumAmmunition / 4) && self.ammunition != 0)
         {
-            _actionValue += (int)Weighting.High;
+            actionValue += (int)Weighting.SuperHeavy;
         }
         else if (self.ammunition == self.MaximumAmmunition)
         {
-            _actionValue = -(int)Weighting.guarantee;
+            actionValue = -(int)Weighting.SuperHeavy;
         }
         else
         {
-            _actionValue += (int)Weighting.guarantee;
+            actionValue += (int)Weighting.SuperHeavy;
         }
         #endregion
         //adjustments based on pip value;
         #region Action Pip Check
         if (self.actionPips < self.MaximumActionPips)
         {
-            _actionValue += (int)Weighting.Medium;
+            actionValue += (int)Weighting.Heavy;
         }
         else
         {
-            _actionValue -= (int)Weighting.Medium;
+            actionValue -= (int)Weighting.Heavy;
         }
         #endregion
     }
