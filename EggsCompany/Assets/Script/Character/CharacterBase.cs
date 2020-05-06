@@ -155,13 +155,17 @@ public class CharacterBase : MonoBehaviour
 
     public virtual void AttackCharacter(CharacterBase otherCharacter)
     {
-        Debug.Log(name + ": is Doing An attack for 2 damage ");
         actionPips = 0;
         ammunition -= 1;
         int chanceToHit = enemiesInSight.Find((KeyValuePair<CharacterBase, int> characterHitChance) => characterHitChance.Key == otherCharacter).Value;
         if(UnityEngine.Random.Range(0, 100) <= chanceToHit)
         {
             otherCharacter.health -= 2; //TODO: replace 1 with damage;
+            Debug.Log(name + ": has hit " + otherCharacter + " for 2 damage");
+        }
+        else
+        {
+            Debug.Log(name + " missed " + otherCharacter);
         }
         gsmScript.ProcessGameState();
         gsmScript.playerAmmoCountText.text = "Ammo: " + ammunition.ToString();

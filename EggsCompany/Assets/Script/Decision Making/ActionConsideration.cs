@@ -316,33 +316,16 @@ public class ShootConsideration : SingleEnemyActionConsideration
         switch (agentLevelOfCoverFromEnemy)
         {
             case ECoverValue.None:
-                thisEnemyShootValue -= (int)Weighting.SuperHeavy;
+                thisEnemyShootValue -= (int)Weighting.Heavy;
                 break;
             case ECoverValue.Half:
                 thisEnemyShootValue += (int)Weighting.Heavy;
                 break;
             case ECoverValue.Full:
-                thisEnemyShootValue += (int)Weighting.Light;
+                thisEnemyShootValue += (int)Weighting.SuperHeavy;
                 break;
             default:
                 Debug.LogError("issue with cover Value returned");
-                break;
-        }
-        #endregion
-
-        #region PlayerCharacter Cover Check
-        switch (enemyLevelOfCoverFromAgent)
-        {
-            case ECoverValue.None:
-                thisEnemyShootValue += (int)Weighting.SuperHeavy;
-                break;
-            case ECoverValue.Half:
-                thisEnemyShootValue += (int)Weighting.Heavy;
-                break;
-            case ECoverValue.Full:
-                thisEnemyShootValue -= (int)Weighting.Light;
-                break;
-            default:
                 break;
         }
         #endregion

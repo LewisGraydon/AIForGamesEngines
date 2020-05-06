@@ -22,7 +22,8 @@ public static class ConsiderationLists
         new SelfCoverConsideration(),
         new SelfVisibilityConsideration(),
         new ProximityToAllyConsideration(),
-        new TileOccupiedConsideration()
+        new TileOccupiedConsideration(),
+        new TileDirectionOfEnemiesConsideration()
     };
     #endregion
 
@@ -121,24 +122,28 @@ public static class ConsiderationLists
             {
                 (movementConsiderationList[i] as TileOnlyMovementConsideration).ConsiderTile(ref tileToConsider);
             }
+            else if(movementConsiderationList[i] is TileSelfMovementConsideration)
+            {
+                (movementConsiderationList[i] as TileSelfMovementConsideration).ConsiderTile(self, tileToConsider);
+            }
             tilesValue += movementConsiderationList[i].FinalValue;
         }
-        if (tileToConsider.name.Contains("(251)") ||
-            tileToConsider.name.Contains("(371)") ||
-            tileToConsider.name.Contains("(258)") ||
-            tileToConsider.name.Contains("(378)") ||
-            tileToConsider.name.Contains("(327)") ||
-            tileToConsider.name.Contains("(367)") ||
-            tileToConsider.name.Contains("(325)") ||
-            tileToConsider.name.Contains("(365)") ||
-            tileToConsider.name.Contains("(75)")  ||
-            tileToConsider.name.Contains("(75)")  ||
-            tileToConsider.name.Contains("(77)")  ||
-            tileToConsider.name.Contains("(37)")  ||
-            tileToConsider.name.Contains("(35)"))
-        {
-            Debug.Log("Tile I am Interested in: " + tileToConsider + ", tilesValue = " + (tilesValue / actionConsiderationList.Count));
-        }
+        //if (tileToConsider.name.Contains("(251)") ||
+        //    tileToConsider.name.Contains("(371)") ||
+        //    tileToConsider.name.Contains("(258)") ||
+        //    tileToConsider.name.Contains("(378)") ||
+        //    tileToConsider.name.Contains("(327)") ||
+        //    tileToConsider.name.Contains("(367)") ||
+        //    tileToConsider.name.Contains("(325)") ||
+        //    tileToConsider.name.Contains("(365)") ||
+        //    tileToConsider.name.Contains("(75)")  ||
+        //    tileToConsider.name.Contains("(75)")  ||
+        //    tileToConsider.name.Contains("(77)")  ||
+        //    tileToConsider.name.Contains("(37)")  ||
+        //    tileToConsider.name.Contains("(35)"))
+        //{
+        //    Debug.Log("Tile I am Interested in: " + tileToConsider + ", tilesValue = " + (tilesValue / actionConsiderationList.Count));
+        //}
         topTileScoresList.Add(new KeyValuePair<Tile, float>(tileToConsider, tilesValue / actionConsiderationList.Count));
 
         topTileScoresList.Sort((pair1, pair2) =>
@@ -153,7 +158,9 @@ public static class ConsiderationLists
 
     public static Tile GetTileToMoveTo()
     {
-        Tile outTile = topTileScoresList[Random.Range(0, numberTilesToRandomlySelectFrom)].Key;
+        int randomTileIndex = Random.Range(0, numberTilesToRandomlySelectFrom);
+        Tile outTile = topTileScoresList[randomTileIndex].Key;
+        Debug.Log("Chosen Tile is: " + outTile + " with a score of: " + topTileScoresList[randomTileIndex].Value);
         topTileScoresList.Clear();
         return outTile;
     }

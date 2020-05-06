@@ -32,7 +32,7 @@ public abstract class MovementConsideration: IComparable<MovementConsideration>
     }
     public int CompareTo(MovementConsideration other)
     {
-        return (this is SingleEnemyMovementConsideration) && (other is TileOnlyMovementConsideration) ? -1 : (this is TileOnlyMovementConsideration) && (other is SingleEnemyMovementConsideration) ? 1 : 0;
+        return (this is SingleEnemyMovementConsideration) && (other is TileOnlyMovementConsideration || other is TileSelfMovementConsideration) ? -1 : (this is TileOnlyMovementConsideration || this is TileSelfMovementConsideration) && (other is SingleEnemyMovementConsideration) ? 1 : 0;
     }
 
     public virtual void IncreaseMovementValuePerWallCoverLevel(Tile tile, int noCoverModifier, int halfCoverModifier, int fullCoverModifier)
@@ -56,6 +56,8 @@ public abstract class MovementConsideration: IComparable<MovementConsideration>
             }
         }
     }
+
+
 }
 
 public abstract class SingleEnemyMovementConsideration : MovementConsideration
@@ -63,15 +65,17 @@ public abstract class SingleEnemyMovementConsideration : MovementConsideration
     public abstract void ConsiderTile(ref CharacterBase self, CharacterBase enemy, ref Tile tileToConsider);
 
     public abstract void ConsiderTileWithNoEnemy(ref CharacterBase self, Tile tileToConsider);
-
-
-
 }
 
 public abstract class TileOnlyMovementConsideration : MovementConsideration
 {
     public abstract void ConsiderTile(ref Tile tileToConsider);
 }
+public abstract class TileSelfMovementConsideration : MovementConsideration
+{
+    public abstract void ConsiderTile(CharacterBase self, Tile tileToConsider);
+}
+
 #endregion
 
 #region MovementConsideration classes
@@ -96,7 +100,7 @@ public class HitChanceDifferenceConsideration : SingleEnemyMovementConsideration
 
     public override void ConsiderTileWithNoEnemy(ref CharacterBase self, Tile tileToConsider)
     {//could cheat and give if is in direction of players?
-        movementValue -= (int)Weighting.SuperHeavy;
+        //movementValue -= (int)Weighting.SuperHeavy;
         return;
     }
 }
@@ -115,7 +119,7 @@ public class FlankingConsideration : SingleEnemyMovementConsideration
     public override void ConsiderTileWithNoEnemy(ref CharacterBase self, Tile tileToConsider)
     {
         //again, could fudge a direction check here?
-        movementValue -= (int)Weighting.SuperHeavy;
+        //movementValue -= (int)Weighting.SuperHeavy;
         return;
     }
 }
@@ -124,15 +128,15 @@ public class SelfCoverConsideration : SingleEnemyMovementConsideration
 {
     public override void ConsiderTile(ref CharacterBase self, CharacterBase enemy, ref Tile tileToConsider)
     {
-        ECoverValue tileCoverFromEnemy = tileToConsider.ProvidesCoverInDirection(enemy.transform.position - self.transform.position);
-        ECoverValue enemyCoverFromTile = enemy.occupiedTile.ProvidesCoverInDirection(self.transform.position - enemy.transform.position);
+        ECoverValue tileCoverFromPlayer = tileToConsider.ProvidesCoverInDirection(enemy.transform.position - self.transform.position);
+        ECoverValue AgentCoverOnTile = enemy.occupiedTile.ProvidesCoverInDirection(self.transform.position - enemy.transform.position);
         #region Agent Cover Level Check
 
         #endregion
-        switch (tileCoverFromEnemy)
+        switch (tileCoverFromPlayer)
         {
             case ECoverValue.None:
-                movementValue -= (int)Weighting.SuperHeavy / self.enemiesInSight.Count;
+                movementValue += -(int)Weighting.SuperHeavy / self.enemiesInSight.Count;
                 break;
             case ECoverValue.Half:
                 movementValue += (int)Weighting.Heavy / self.enemiesInSight.Count;
@@ -145,16 +149,16 @@ public class SelfCoverConsideration : SingleEnemyMovementConsideration
                 break;
         }
         #region PlayerCharacter Cover Level Check
-        switch (enemyCoverFromTile)
+        switch (AgentCoverOnTile)
         {
             case ECoverValue.None:
-                movementValue += (int)Weighting.SuperHeavy / self.enemiesInSight.Count;
+                movementValue += -(int)Weighting.SuperHeavy / self.enemiesInSight.Count;
                 break;
             case ECoverValue.Half:
-                movementValue += (int)Weighting.Heavy / self.enemiesInSight.Count;
+                movementValue += (int)Weighting.Light / self.enemiesInSight.Count;
                 break;
             case ECoverValue.Full:
-                movementValue -= (int)Weighting.Light / self.enemiesInSight.Count;
+                movementValue += (int)Weighting.Heavy/ self.enemiesInSight.Count;
                 break;
             default:
                 break;
@@ -165,7 +169,7 @@ public class SelfCoverConsideration : SingleEnemyMovementConsideration
 
     public override void ConsiderTileWithNoEnemy(ref CharacterBase self, Tile tileToConsider)
     {
-        IncreaseMovementValuePerWallCoverLevel(tileToConsider, -(int)Weighting.SuperHeavy, (int)Weighting.Heavy, (int)Weighting.SuperHeavy);
+        IncreaseMovementValuePerWallCoverLevel(tileToConsider, -(int)Weighting.Light, (int)Weighting.Light, (int)Weighting.Heavy);
     }
 }
 
@@ -182,7 +186,7 @@ public class SelfVisibilityConsideration : SingleEnemyMovementConsideration
     public override void ConsiderTileWithNoEnemy(ref CharacterBase self, Tile tileToConsider)
     {
         //again could be fudging something;
-        movementValue += -(int)Weighting.SuperHeavy;
+        //movementValue += -(int)Weighting.SuperHeavy;
         return;
     }
 }
@@ -191,7 +195,7 @@ public class ProximityToAllyConsideration : TileOnlyMovementConsideration
 {
     public override void ConsiderTile(ref Tile tileToConsider)
     {
-        movementValue += -(int)Weighting.Heavy * PathfindingAgent.BreadthFirstAllySearch((INodeSearchable)tileToConsider);
+        movementValue += -(int)Weighting.Light * PathfindingAgent.BreadthFirstAllySearch((INodeSearchable)tileToConsider);
     }
 }
 
@@ -202,5 +206,32 @@ public class TileOccupiedConsideration : TileOnlyMovementConsideration
         movementValue += tileToConsider.occupier != null ? -(int)Weighting.SuperHeavy : 0; 
     }
 }
+
+public class TileDirectionOfEnemiesConsideration : TileSelfMovementConsideration
+{
+    public override void ConsiderTile(CharacterBase self, Tile tileToConsider)
+    {
+        Vector3 averagePoisition = Vector3.zero;
+        foreach (PlayerCharacter playerCharacter in GameObject.FindObjectsOfType<PlayerCharacter>())
+        {
+            averagePoisition += playerCharacter.transform.position;
+        }
+        averagePoisition *= 0.5f;
+        Vector3 directionToTileToConsiderFromAgent = (tileToConsider.transform.position - self.occupiedTile.transform.position).normalized;
+        Vector3 directionToEnemiesFromTileToConsider = (averagePoisition - tileToConsider.transform.position).normalized;
+        Vector3 directionToEnemiesFromAgent = (averagePoisition - self.occupiedTile.transform.position).normalized;
+
+        if(((directionToEnemiesFromAgent.x >= 0 && directionToEnemiesFromTileToConsider.x >= 0) || (directionToEnemiesFromAgent.x >= 0 && directionToEnemiesFromTileToConsider.x >= 0))
+            || ((directionToEnemiesFromAgent.x < 0 && directionToEnemiesFromTileToConsider.x < 0) || (directionToEnemiesFromAgent.x < 0 && directionToEnemiesFromTileToConsider.x < 0)))
+        {
+            movementValue += (int)Weighting.Heavy;
+        }
+        else
+        {
+            movementValue += -(int)Weighting.Heavy;
+        }
+    }
+}
+
 
 #endregion
