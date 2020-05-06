@@ -194,13 +194,23 @@ public class GameState : MonoBehaviour
             case EGameState.setupState:
                 enemyContainer.GetComponent<EnemyManager>().activeCharacter = null;
                 InitialisePlayerPips();
+
                 gameState = EGameState.playerTurn;
-                //ProcessGameState();
                 turnText.text = "Player Turn";
+
                 PlayerManager playerManager = playerContainer.GetComponent<PlayerManager>();
                 PlayerCharacter playerCharacter = GameObject.FindObjectOfType<PlayerCharacter>();
+
                 if (playerManager != null && playerCharacter != null)
-                    playerManager.selectedPlayer = playerCharacter.gameObject;
+                {
+                    badEggsSpottedUI.SetActive(true);
+                    addToBadEggsSpottedUI(playerManager.selectedPlayer.GetComponent<CharacterBase>().enemiesInSight);
+
+                    if (!isAnyBadEggSpotted())
+                    {
+                        badEggsSpottedUI.SetActive(false);
+                    }
+                }
                 break;
 
             case EGameState.playerTurn:
@@ -221,16 +231,12 @@ public class GameState : MonoBehaviour
                     InitialiseEnemyPips();
                     gameState = EGameState.enemySetup;
                     ProcessGameState();
-                    PlayerManager playerManager2 = playerContainer.GetComponent<PlayerManager>();
-                    playerManager2.selectedPlayer = null;
                 }
 
                 break;
 
             case EGameState.enemyTurn:
-                
-                PlayerManager playerManager3 = playerContainer.GetComponent<PlayerManager>();
-                playerManager3.selectedPlayer = null;
+
                 turnText.text = "Enemy Turn";
                 for (int i = 0; i < enemyContainer.transform.childCount; i++)
                 {
@@ -247,7 +253,7 @@ public class GameState : MonoBehaviour
                 break;
 
             case EGameState.enemySetup:
-                playerContainer.GetComponent<PlayerManager>().selectedPlayer = null;
+                
                 for (int i = 0; i < enemyContainer.transform.childCount; i++)
                 {
                     EnemyCharacter enemyCharacter = enemyContainer.transform.GetChild(i).gameObject.GetComponent<EnemyCharacter>();
