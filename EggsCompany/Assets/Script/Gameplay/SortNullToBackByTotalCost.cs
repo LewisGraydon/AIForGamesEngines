@@ -9,30 +9,39 @@ public class SortNullToBackByTotalCost : IComparer<INodeSearchable>
 {
     public int Compare(INodeSearchable x, INodeSearchable y)
     {
-        if(x.TotalCost == null && y.TotalCost == null)
+        if(!x.TotalCost.HasValue)
         {
-            return 0;
-        }
-        else if (x.TotalCost == null)
-        {
-            return 1;
-        }
-        else if (y.TotalCost == null)
-        {
-            return -1;
-        }
-
-        if(x.TotalCost > y.TotalCost)
-        {
-            return 1;
-        }
-        else if (x.TotalCost < y.TotalCost)
-        {
-            return -1;
+            if(!y.TotalCost.HasValue)
+            {
+                return 0;
+            }
+            else
+            {
+                return 1;
+            }
         }
         else
         {
-            return 0;
+            if(!y.TotalCost.HasValue)
+            {
+                return -1;
+            }
+            else
+            {
+                if (x.TotalCost > y.TotalCost)
+                {
+                    return 1;
+                }
+                else if (x.TotalCost < y.TotalCost)
+                {
+                    return -1;
+                }
+
+                else
+                {
+                    return 0;
+                }
+            }
         }
     }
 }
