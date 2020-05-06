@@ -1,20 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 using Random = UnityEngine.Random;
 public enum Weighting
 {
-    Low = 100,
-    Medium = 300,
-    High = 600,
-    guarantee = 10000
+    Feather = 100,
+    Light = 300,
+    Heavy = 600,
+    SuperHeavy = 900
 }
 
 public static class ConsiderationLists
 {
     #region MovementList Variables
     private const int numberTilesToRandomlySelectFrom = 3;
-    public static List<KeyValuePair<Tile, int>> topTileScoresList = new List<KeyValuePair<Tile, int>>(numberTilesToRandomlySelectFrom);
+    public static List<KeyValuePair<Tile, float>> topTileScoresList = new List<KeyValuePair<Tile, float>>(numberTilesToRandomlySelectFrom);
     public static List<MovementConsideration> movementConsiderationList = new List<MovementConsideration>()
     {
         new HitChanceDifferenceConsideration(),
@@ -81,7 +81,7 @@ public static class ConsiderationLists
         //actions all evaluated by this point
         actionConsiderationList.Sort((ActionConsideration consideration1, ActionConsideration consideration2) =>
         {
-            return consideration2.actionValue.CompareTo(consideration1.actionValue);
+            return consideration2.FinalValue.CompareTo(consideration1.FinalValue);
         }); //order list by value descending;
         actionConsiderationList[UnityEngine.Random.Range(0, (self as EnemyCharacter).actionVariance)].Enact(self);
         foreach(ActionConsideration ac in actionConsiderationList)
@@ -100,7 +100,7 @@ public static class ConsiderationLists
             return consideration1.CompareTo(consideration2);
         });
 
-        int tilesValue = 0;
+        float tilesValue = 0;
         for (int i = 0; i < movementConsiderationList.Count; i++)
         {
             if(movementConsiderationList[i] is SingleEnemyMovementConsideration)
@@ -121,10 +121,25 @@ public static class ConsiderationLists
             {
                 (movementConsiderationList[i] as TileOnlyMovementConsideration).ConsiderTile(ref tileToConsider);
             }
-            tilesValue += movementConsiderationList[i].movementValue;
+            tilesValue += movementConsiderationList[i].FinalValue;
         }
-
-        topTileScoresList.Add(new KeyValuePair<Tile, int>(tileToConsider, tilesValue));
+        if (tileToConsider.name.Contains("(251)") ||
+            tileToConsider.name.Contains("(371)") ||
+            tileToConsider.name.Contains("(258)") ||
+            tileToConsider.name.Contains("(378)") ||
+            tileToConsider.name.Contains("(327)") ||
+            tileToConsider.name.Contains("(367)") ||
+            tileToConsider.name.Contains("(325)") ||
+            tileToConsider.name.Contains("(365)") ||
+            tileToConsider.name.Contains("(75)")  ||
+            tileToConsider.name.Contains("(75)")  ||
+            tileToConsider.name.Contains("(77)")  ||
+            tileToConsider.name.Contains("(37)")  ||
+            tileToConsider.name.Contains("(35)"))
+        {
+            Debug.Log("Tile I am Interested in: " + tileToConsider + ", tilesValue = " + (tilesValue / actionConsiderationList.Count));
+        }
+        topTileScoresList.Add(new KeyValuePair<Tile, float>(tileToConsider, tilesValue / actionConsiderationList.Count));
 
         topTileScoresList.Sort((pair1, pair2) =>
         {

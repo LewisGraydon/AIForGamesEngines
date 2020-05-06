@@ -9,6 +9,8 @@ public class BeeCharacter : EnemyCharacter
     private float timeElapsedToAttack = 0.0f;
     private float timeElapsedToReturnToHive = 0.0f;
 
+    private float timeRequired = 7.5f;
+
     CharacterBase target = null;
 
     // Start is called before the first frame update
@@ -33,7 +35,7 @@ public class BeeCharacter : EnemyCharacter
             {
                 timeElapsedToAttack += Time.deltaTime;
                 // Move to target
-                if (AllFlockAgentsAtTarget(target.gameObject) || timeElapsedToAttack > 2.0f)
+                if (AllFlockAgentsAtTarget(target.gameObject) || timeElapsedToAttack > timeRequired)
                 {
                     if (!attackCalculatedOnce)
                     {
@@ -48,7 +50,7 @@ public class BeeCharacter : EnemyCharacter
 
                     timeElapsedToReturnToHive += Time.deltaTime;
 
-                    if (AllFlockAgentsAtTarget(gameObject) || timeElapsedToReturnToHive > 2.0f)
+                    if (AllFlockAgentsAtTarget(gameObject) || timeElapsedToReturnToHive > timeRequired)
                     {
                         timeElapsedToAttack = 0.0f;
                         timeElapsedToReturnToHive = 0.0f;

@@ -86,6 +86,11 @@ public class PlayerManager : MonoBehaviour
                 gsmScript.clearBadEggsSpottedContainer();
                 gsmScript.badEggsSpottedUI.SetActive(false);
 
+                if (gsmScript.attackPromptUI.activeSelf)
+                {
+                    gsmScript.attackPromptUI.SetActive(false);
+                }
+
                 selectedIndex -= 1;
 
                 if (selectedIndex < 0)
@@ -110,6 +115,11 @@ public class PlayerManager : MonoBehaviour
             {
                 gsmScript.clearBadEggsSpottedContainer();
                 gsmScript.badEggsSpottedUI.SetActive(false);
+
+                if (gsmScript.attackPromptUI.activeSelf)
+                {
+                    gsmScript.attackPromptUI.SetActive(false);
+                }
 
                 selectedIndex += 1;
 
@@ -315,8 +325,17 @@ public class PlayerManager : MonoBehaviour
             {
                 case 0:
 
-                    gsmScript.attackPromptUI.SetActive(true);
-                    gsmScript.attackPromptText.text = "Fire a shot at " + gsmScript.badEggTargetted.gameObject.name;
+                    if (selectedPlayer.GetComponent<CharacterBase>().enemiesInSight.Count > 0)
+                    {
+                        gsmScript.attackPromptUI.SetActive(true);
+
+                        if (gsmScript.badEggTargetted == null)
+                        {
+                            gsmScript.badEggTargetted = (EnemyCharacter)selectedPlayer.GetComponent<CharacterBase>().enemiesInSight.ElementAt(0).Key;
+                        }
+
+                        gsmScript.attackPromptText.text = "Fire a shot at " + gsmScript.badEggTargetted.gameObject.name;
+                    }
                     break;
 
                 case 1:
