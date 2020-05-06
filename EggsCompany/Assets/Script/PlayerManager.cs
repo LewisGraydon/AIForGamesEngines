@@ -85,6 +85,11 @@ public class PlayerManager : MonoBehaviour
                 gsmScript.clearBadEggsSpottedContainer();
                 gsmScript.badEggsSpottedUI.SetActive(false);
 
+                if (gsmScript.attackPromptUI.activeSelf)
+                {
+                    gsmScript.attackPromptUI.SetActive(false);
+                }
+
                 selectedIndex -= 1;
 
                 if (selectedIndex < 0)
@@ -109,6 +114,11 @@ public class PlayerManager : MonoBehaviour
             {
                 gsmScript.clearBadEggsSpottedContainer();
                 gsmScript.badEggsSpottedUI.SetActive(false);
+
+                if (gsmScript.attackPromptUI.activeSelf)
+                {
+                    gsmScript.attackPromptUI.SetActive(false);
+                }
 
                 selectedIndex += 1;
 
