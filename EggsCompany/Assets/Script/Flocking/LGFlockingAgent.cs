@@ -12,7 +12,7 @@ public class LGFlockingAgent : MonoBehaviour
     Vector3 centre = new Vector3();
 
     private bool movingToDestination = false;
-    Vector3 randomPosition = new Vector3(-1,-1,-1);
+    Vector3 randomPosition = new Vector3(-1, -1, -1);
     public int IdentificationNumber = -1;
 
     LGFlock agentFlock;
@@ -142,7 +142,7 @@ public class LGFlockingAgent : MonoBehaviour
         separationVector *= -1;
 
         // Calculate the amount we need to move the agent by to get it back within the radius specified.
-        if(separation)
+        if(stayInRadius)
             stayInRadiusVector = StayInRadius(maxAgentDistanceFromCenter);
 
         // Calculate the average amount we need to move the agent by.
